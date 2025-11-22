@@ -35,7 +35,7 @@
     "lucide-react": "^0.300.0",
     "react-datepicker": "^4.25.0",
     "react-color": "^2.19.3",
-    "fingerprintjs2": "^2.1.4"
+    "@fingerprintjs/fingerprintjs": "^3.8.2"
   },
   "devDependencies": {
     "@types/node": "^20.10.6",
