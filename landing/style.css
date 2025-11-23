@@ -426,8 +426,30 @@ section {
 .footer {
     background-color: #3C2F2F;
     color: #FFF5EC;
+    padding: 2rem 0;
     text-align: center;
-    padding: 2rem;
+    margin-top: 4rem;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.footer-links a {
+    color: #F8C8D6;
+    text-decoration: none;
+    margin: 0 1rem;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.footer-links a:hover {
+    color: #FFF5EC;
 }
 
 .footer p {
