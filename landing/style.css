@@ -74,12 +74,30 @@ section {
     padding: 6rem 0; /* Increased from 5rem */
 }
 
+/* Add animations and visual enhancements */
+
+/* Smooth fade-in animation for sections */
+section {
+    animation: fadeIn 1.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* ========================================
    HERO SECTION
    ======================================== */
 
 .hero {
-    background-color: #FFF5EC;
+    background: linear-gradient(135deg, #FFF5EC, #F8C8D6);
     text-align: center;
     padding: 10rem 2rem; /* Increased from 8rem */
     min-height: 100vh; /* Increased from 90vh */
@@ -151,6 +169,16 @@ section {
 .btn-submit:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+/* Add hover effects to buttons */
+.btn {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* ========================================
@@ -480,4 +508,15 @@ section {
     .benefit-icon {
         font-size: 1.5rem;
     }
+}
+
+/* Add decorative divider between sections */
+section + section::before {
+    content: '';
+    display: block;
+    height: 4px;
+    background: linear-gradient(90deg, #F8C8D6, #FFF5EC);
+    margin: 2rem auto;
+    width: 80%;
+    border-radius: 2px;
 }
