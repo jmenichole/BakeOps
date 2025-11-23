@@ -1,6 +1,6 @@
-# BakeBuilder Backend API
+# BOT (Baked On Time) Backend API
 
-Express.js backend API for BakeBuilder platform.
+Express.js backend API for BOT (Baked On Time) platform.
 
 ## Getting Started
 

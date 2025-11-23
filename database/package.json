@@ -1,7 +1,7 @@
 {
-  "name": "bakebuilder-database",
+  "name": "bot-database",
   "version": "1.0.0",
-  "description": "Database migrations and seed data for BakeBuilder",
+  "description": "Database migrations and seed data for BOT (Baked On Time)",
   "scripts": {
     "migrate": "node-pg-migrate up",
     "migrate:down": "node-pg-migrate down",

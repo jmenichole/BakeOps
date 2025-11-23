@@ -1,3 +1,10 @@
+/**
+ * BOT (Baked On Time) - Tailwind CSS Configuration
+ * 
+ * Copyright (c) 2025 BOT (Baked On Time)
+ * Licensed under the MIT License
+ */
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
@@ -22,19 +29,54 @@ module.exports = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        // Primary - Soft Blush Pink (Cake tone)
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-          50: '#fef1f7',
-          100: '#fee5f0',
-          200: '#feccde',
-          300: '#fea3c3',
-          400: '#fc6a9c',
-          500: '#f53d7a',
+          DEFAULT: '#ffa8ba',
+          foreground: '#2d2926',
+          50: '#fff5f7',
+          100: '#ffe3e8',
+          200: '#ffcdd6',
+          300: '#ffaab9',
+          400: '#ff7a93',
+          500: '#ff5079',
           600: '#e11d5f',
           700: '#c21149',
           800: '#a0103d',
           900: '#831036',
+        },
+        // Accent - Rose Gold & Metallic Gold
+        accent: {
+          DEFAULT: '#d4a574',
+          foreground: '#2d2926',
+          gold: '#d4a574',
+          'rose-gold': '#e8b4a0',
+          light: '#f5d5c3',
+        },
+        // Neutral - Warm Grey/Charcoal
+        neutral: {
+          DEFAULT: '#7d7976',
+          50: '#f8f6f4',
+          100: '#edeae7',
+          200: '#ddd9d6',
+          300: '#bdb9b6',
+          400: '#9d9996',
+          500: '#7d7976',
+          600: '#5d5956',
+          700: '#3d3936',
+          800: '#2d2926',
+          900: '#1d1916',
+        },
+        // Highlight - Coral for CTAs
+        coral: {
+          DEFAULT: '#ff6b6b',
+          dark: '#ee5a52',
+          light: '#ff8787',
+        },
+        // Alternative highlight - Teal
+        teal: {
+          DEFAULT: '#20c997',
+          dark: '#19a579',
+          light: '#3dd6ad',
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -47,10 +89,6 @@ module.exports = {
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",

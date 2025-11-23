@@ -2,7 +2,7 @@
 
 ## System Overview
 
-The BakeBuilder platform is a full-stack web application consisting of:
+The BOT (Baked On Time) platform is a full-stack web application consisting of:
 
 1. **Frontend Application** (Next.js)
 2. **Backend API** (Express.js)

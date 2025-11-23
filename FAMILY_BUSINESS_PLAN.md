@@ -1,8 +1,8 @@
-# BakeBuilder Family Business Plan
+# BOT (Baked On Time) Family Business Plan
 
 ## Executive Summary
 
-**Company Name**: BakeBuilder  
+**Company Name**: BOT (Baked On Time)  
 **Business Type**: B2B SaaS Platform (Software as a Service)  
 **Industry**: Food Service Technology / Small Business Software  
 **Target Market**: Professional custom cake bakers and small bakeries  
@@ -17,7 +17,7 @@ The custom cake industry is a $10+ billion market with over 50,000 professional 
 - Complex multi-day production planning with component timing
 - No centralized system for bookings and payments
 
-BakeBuilder solves all of these problems with AI-powered mockup generation, automated pricing, production planning, and integrated payments.
+BOT (Baked On Time) solves all of these problems with AI-powered mockup generation, automated pricing, production planning, and integrated payments.
 
 ### Family Team Structure
 
@@ -69,7 +69,7 @@ BakeBuilder solves all of these problems with AI-powered mockup generation, auto
 
 ### 1.1 Company Description
 
-BakeBuilder is a comprehensive web platform that helps professional cake bakers:
+BOT (Baked On Time) is a comprehensive web platform that helps professional cake bakers:
 - Generate AI mockups using their actual cake photos (realistic, not generic)
 - Automate pricing with customizable rules
 - Plan multi-day production with component timing (fondant, flowers, etc.)
@@ -106,7 +106,7 @@ BakeBuilder is a comprehensive web platform that helps professional cake bakers:
 
 ### 1.3 Solution
 
-BakeBuilder provides an all-in-one platform:
+BOT (Baked On Time) provides an all-in-one platform:
 
 **Core Features**:
 - AI mockup generation trained on baker's actual work
@@ -850,7 +850,7 @@ While building a sustainable business is the primary goal, potential exit option
 
 ## 13. Conclusion
 
-BakeBuilder represents a unique opportunity to build a meaningful business by:
+BOT (Baked On Time) represents a unique opportunity to build a meaningful business by:
 
 ✅ **Solving a Real Problem**: Mom knows the pain points intimately  
 ✅ **Leveraging Family Strengths**: Tech + Finance + Industry expertise  
@@ -902,7 +902,7 @@ BakeBuilder represents a unique opportunity to build a meaningful business by:
 
 ## Appendix B: Competitive Analysis Details
 
-| Feature | BakeBuilder | Square Appointments | GlossGenius | Acuity |
+| Feature | BOT (Baked On Time) | Square Appointments | GlossGenius | Acuity |
 |---------|-------------|-------------------|-------------|---------|
 | **Price** | $49/mo | $50/mo | $24/mo | $16/mo |
 | **AI Mockups** | ✅ Custom trained | ❌ | ❌ | ❌ |
@@ -941,7 +941,7 @@ BakeBuilder represents a unique opportunity to build a meaningful business by:
 
 ---
 
-*This business plan was created specifically for the BakeBuilder founding family team. All financial projections are conservative estimates based on industry benchmarks and should be reviewed regularly as the business develops.*
+*This business plan was created specifically for the BOT (Baked On Time) founding family team. All financial projections are conservative estimates based on industry benchmarks and should be reviewed regularly as the business develops.*
 
 **Prepared by**: CTO (Technical Founder)  
 **Date**: November 2025  

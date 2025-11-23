@@ -3,7 +3,7 @@
 ## Base URL
 
 ```
-Production: https://api.bakebuilder.com
+Production: https://api.bot.com
 Development: http://localhost:3001
 ```
 

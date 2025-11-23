@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BOT (Baked On Time) - AI-Powered Cake Design & Booking Platform for Professional Bakers">
+    <title>BOT (Baked On Time) - Coming Soon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Primary - Soft Blush Pink */
+            --primary-50: #fff5f7;
+            --primary-100: #ffe3e8;
+            --primary-200: #ffcdd6;
+            --primary-300: #ffaab9;
+            --primary-400: #ff7a93;
+            --primary-500: #ff5079;
+            --primary: #ffa8ba;
+            
+            /* Accent - Rose Gold */
+            --accent-gold: #d4a574;
+            --accent-rose-gold: #e8b4a0;
+            --accent-metallic: linear-gradient(135deg, #d4a574 0%, #e8b4a0 50%, #f5d5c3 100%);
+            
+            /* Neutral - Warm Charcoal */
+            --neutral-900: #2d2926;
+            --neutral-800: #3d3936;
+            --neutral-700: #5d5956;
+            --neutral-600: #7d7976;
+            --neutral-500: #9d9996;
+            --neutral-400: #bdb9b6;
+            --neutral-300: #ddd9d6;
+            --neutral-200: #edeae7;
+            --neutral-100: #f8f6f4;
+            
+            /* Highlight - Coral */
+            --highlight-coral: #ff6b6b;
+            --highlight-coral-dark: #ee5a52;
+            --highlight-teal: #20c997;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--primary-100) 0%, #fff 50%, var(--neutral-100) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--neutral-900);
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 4.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: var(--accent-metallic);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInDown 1s ease-out;
+            letter-spacing: -0.02em;
+        }
+        
+        .logo-icon {
+            font-size: 3.5rem;
+            margin-bottom: 0.5rem;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .tagline {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: var(--neutral-700);
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .description {
+            max-width: 680px;
+            font-size: 1.125rem;
+            line-height: 1.75;
+            margin-bottom: 2.5rem;
+            color: var(--neutral-700);
+            font-weight: 400;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 2rem 0;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .feature {
+            background: white;
+            border: 2px solid var(--neutral-200);
+            border-radius: 20px;
+            padding: 2rem 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .feature:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(212, 165, 116, 0.15);
+            border-color: var(--accent-gold);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .feature-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.375rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--neutral-900);
+        }
+        
+        .feature-description {
+            color: var(--neutral-600);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .coming-soon {
+            display: inline-block;
+            background: var(--highlight-coral);
+            color: white;
+            padding: 1.125rem 3rem;
+            border-radius: 50px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 2.5rem;
+            animation: pulse 2s ease-in-out infinite;
+            box-shadow: 0 8px 16px rgba(255, 107, 107, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .coming-soon:hover {
+            background: var(--highlight-coral-dark);
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(255, 107, 107, 0.4);
+        }
+
+        footer {
+            background: linear-gradient(to bottom, transparent, rgba(45, 41, 38, 0.03));
+            padding: 2rem 1.5rem;
+            text-align: center;
+            font-size: 0.95rem;
+            color: var(--neutral-700);
+        }
+
+        footer a {
+            color: var(--accent-gold);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: var(--accent-metallic);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        footer a:hover {
+            opacity: 0.8;
+        }
+
+        .copyright {
+            margin-top: 0.75rem;
+            color: var(--neutral-600);
+            font-size: 0.875rem;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.03);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 3rem;
+            }
+            
+            .logo-icon {
+                font-size: 2.5rem;
+            }
+
+            .tagline {
+                font-size: 1.375rem;
+            }
+
+            .description {
+                font-size: 1rem;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .coming-soon {
+                font-size: 1rem;
+                padding: 1rem 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-icon">🎂</div>
+        <h1 class="logo">BakeBuilder</h1>
+        <p class="tagline">Baked On Time</p>
+        <p class="description">
+            AI-Powered Cake Design & Booking Platform for Professional Bakers.
+            Transform your cake business with intelligent mockup generation, automated pricing,
+            and production planning — empowering you to design your dream cakes.
+        </p>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">✨</div>
+                <div class="feature-title">AI Mockups</div>
+                <p class="feature-description">Custom-trained AI on your actual cake photos for realistic, bookable designs</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💰</div>
+                <div class="feature-title">Auto Pricing</div>
+                <p class="feature-description">Dynamic quotes based on your custom rules — save hours on calculations</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📅</div>
+                <div class="feature-title">Production Planning</div>
+                <p class="feature-description">Multi-day prep scheduling & batch calculations for perfect timing</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💳</div>
+                <div class="feature-title">Seamless Booking</div>
+                <p class="feature-description">Integrated payments & customer portal for effortless transactions</p>
+            </div>
+        </div>
+
+        <div class="coming-soon">🚀 Coming Soon</div>
+    </div>
+
+    <footer>
+        <div>
+            <a href="https://github.com/jmenichole" target="_blank" rel="noopener noreferrer">
+                Made for degens by degens
+            </a>
+        </div>
+        <div class="copyright">
+            &copy; 2025 BOT (Baked On Time). All rights reserved.
+        </div>
+    </footer>
+</body>
+</html>

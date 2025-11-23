@@ -1,4 +1,4 @@
-# BakeBuilder
+# BOT (Baked On Time)
 
 A comprehensive web-based platform for custom bakers to accept orders through AI-powered cake design and automated pricing.
 

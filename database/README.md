@@ -1,6 +1,6 @@
-# BakeBuilder Database
+# BOT (Baked On Time) Database
 
-Database migrations and seed data for BakeBuilder.
+Database migrations and seed data for BOT (Baked On Time).
 
 ## Setup
 

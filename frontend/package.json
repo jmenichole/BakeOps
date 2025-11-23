@@ -1,7 +1,7 @@
 {
-  "name": "bakebuilder-frontend",
+  "name": "bot-frontend",
   "version": "1.0.0",
-  "description": "BakeBuilder - AI-powered cake design and booking platform for professional bakers",
+  "description": "BOT (Baked On Time) - AI-powered cake design and booking platform for professional bakers",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

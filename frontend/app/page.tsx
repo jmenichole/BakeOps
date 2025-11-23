@@ -1,9 +1,18 @@
+/**
+ * BOT (Baked On Time) - Home Page Component
+ * 
+ * Copyright (c) 2025 BOT (Baked On Time)
+ * Licensed under the MIT License
+ * 
+ * AI-Powered Cake Design & Booking Platform for Professional Bakers
+ */
+
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <div className="text-center">
         <h1 className="font-display text-6xl font-bold text-primary-600 mb-4">
-          BakeBuilder
+          BOT (Baked On Time)
         </h1>
         <p className="text-2xl text-gray-600 mb-8">
           AI-Powered Cake Design & Booking Platform

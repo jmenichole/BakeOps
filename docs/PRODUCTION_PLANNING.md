@@ -2,7 +2,7 @@
 
 ## Overview
 
-BakeBuilder's production planning system helps bakers efficiently manage multi-day cake preparation, track component tasks, and calculate batch ingredients across multiple orders.
+BOT (Baked On Time)'s production planning system helps bakers efficiently manage multi-day cake preparation, track component tasks, and calculate batch ingredients across multiple orders.
 
 ## Core Features
 

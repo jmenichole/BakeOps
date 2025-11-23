@@ -2,7 +2,7 @@
 
 ## Overview
 
-PostgreSQL database schema for BakeBuilder.
+PostgreSQL database schema for BOT (Baked On Time).
 
 ## Entity Relationship Diagram
 

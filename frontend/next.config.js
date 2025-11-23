@@ -1,3 +1,10 @@
+/**
+ * BOT (Baked On Time) - Next.js Configuration
+ * 
+ * Copyright (c) 2025 BOT (Baked On Time)
+ * Licensed under the MIT License
+ */
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
