@@ -19,10 +19,9 @@ export default function AdminDashboard() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement actual authentication
-    console.log('Form submitted:', { email, password, isSignUp })
-    // For now, just simulate login
-    setIsLoggedIn(true)
+    // TODO: Implement actual authentication with backend API
+    // This is a placeholder UI - authentication should be implemented before production use
+    alert('Authentication not yet implemented. This is a UI demonstration only.')
   }
 
   if (!isLoggedIn) {
@@ -49,6 +48,7 @@ export default function AdminDashboard() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition text-gray-900"
                 placeholder="moderator@bot.com"
               />
@@ -64,6 +64,7 @@ export default function AdminDashboard() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete={isSignUp ? 'new-password' : 'current-password'}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition text-gray-900"
                 placeholder="••••••••"
               />
