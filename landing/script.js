@@ -4,7 +4,7 @@
  */
 
 // Configuration - Replace with your actual Supabase Edge Function URL
-const SUPABASE_FUNCTION_URL = 'https://YOUR_SUPABASE_PROJECT.supabase.co/functions/v1/waitlist-signup';
+const SUPABASE_FUNCTION_URL = 'https://ucsmotkzafnnidnnmcba.supabase.co/functions/v1/waitlist-signup';
 
 // DOM Elements
 const form = document.getElementById('waitlist-form');
