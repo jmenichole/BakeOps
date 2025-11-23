@@ -34,14 +34,14 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    service: 'BakeBuilder API'
+    service: 'BOT (Baked On Time) API'
   });
 });
 
 // API routes (to be implemented)
 app.get('/api', (req, res) => {
   res.json({ 
-    message: 'BakeBuilder API',
+    message: 'BOT (Baked On Time) API',
     version: '1.0.0',
     endpoints: {
       health: '/health',
@@ -77,7 +77,7 @@ app.use((req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 BakeBuilder API server running on port ${PORT}`);
+  console.log(`🚀 BOT (Baked On Time) API server running on port ${PORT}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
 });

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The BakeBuilder platform operates on a **freemium subscription model** targeting professional bakers. New users receive an automatic 7-day free trial, after which they must subscribe to continue accessing premium features.
+The BOT (Baked On Time) platform operates on a **freemium subscription model** targeting professional bakers. New users receive an automatic 7-day free trial, after which they must subscribe to continue accessing premium features.
 
 ## Pricing Tiers
 
@@ -87,7 +87,7 @@ The BakeBuilder platform operates on a **freemium subscription model** targeting
 | **Email Notifications** | Basic | Full | Full |
 | **Support** | Email | Priority Email | Priority + Video |
 | **Onboarding** | Self-service | Email guide | 1-on-1 session |
-| **Branding** | "Powered by BakeBuilder" | Your branding | Your branding |
+| **Branding** | "Powered by BOT" | Your branding | Your branding |
 
 ## Trial System Design
 
@@ -265,7 +265,7 @@ const FEATURES = {
 ### Stripe Setup
 
 1. **Products**:
-   - Product: "BakeBuilder Premium"
+   - Product: "BOT Premium"
    - Price 1: $49/month recurring
    - Price 2: $470/year recurring
 

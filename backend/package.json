@@ -1,7 +1,7 @@
 {
-  "name": "bakebuilder-backend",
+  "name": "bot-backend",
   "version": "1.0.0",
-  "description": "BakeBuilder API - Backend server for cake design and booking platform",
+  "description": "BOT (Baked On Time) API - Backend server for cake design and booking platform",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",

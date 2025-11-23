@@ -1,6 +1,6 @@
-# BakeBuilder Frontend
+# BOT (Baked On Time) Frontend
 
-Next.js frontend application for BakeBuilder platform.
+Next.js frontend application for BOT (Baked On Time) platform.
 
 ## Getting Started
 

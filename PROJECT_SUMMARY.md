@@ -1,8 +1,8 @@
-# BakeBuilder - Project Summary
+# BOT (Baked On Time) - Project Summary
 
 ## Overview
 
-BakeBuilder is a comprehensive web-based platform for custom bakers that combines AI-powered cake design, automated pricing, production planning, and seamless booking with payments.
+BOT (Baked On Time) is a comprehensive web-based platform for custom bakers that combines AI-powered cake design, automated pricing, production planning, and seamless booking with payments.
 
 ## Key Differentiators
 

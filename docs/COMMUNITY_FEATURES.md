@@ -2,7 +2,7 @@
 
 ## Overview
 
-BakeBuilder's community features transform the platform from a business tool into a thriving social network for bakers, increasing engagement, retention, and organic growth through baker-to-baker connections and customer inspiration browsing.
+BOT (Baked On Time)'s community features transform the platform from a business tool into a thriving social network for bakers, increasing engagement, retention, and organic growth through baker-to-baker connections and customer inspiration browsing.
 
 ## Baker Gallery System
 
@@ -22,8 +22,8 @@ Each baker has a public gallery showcasing their work:
 
 **Gallery URL Structure**:
 ```
-bakebuilder.com/gallery/{baker-username}
-bakebuilder.com/gallery/{baker-username}/{cake-id}
+bot.com/gallery/{baker-username}
+bot.com/gallery/{baker-username}/{cake-id}
 ```
 
 #### 2. Pinned Cakes
@@ -694,7 +694,7 @@ PUT /api/messages/{messageId}/read
 - ✅ Direct messaging
 - ✅ Advanced gallery analytics
 - ✅ Priority in matching algorithm
-- ✅ Remove "Powered by BakeBuilder" branding
+- ✅ Remove "Powered by BOT" branding
 - ✅ Custom gallery URL
 
 ## Engagement Metrics
