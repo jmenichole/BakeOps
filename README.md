@@ -16,12 +16,27 @@ A comprehensive web-based platform for custom bakers to accept orders through AI
 ## Tech Stack
 
 - **Frontend**: Next.js 14 with TypeScript, React, Tailwind CSS
-- **Backend**: Node.js with Express
+- **Backend**: Node.js with Express, TypeScript
 - **Database**: PostgreSQL
 - **AI Image Generation**: Stable Diffusion API
 - **Payment Processing**: Stripe
 - **Authentication**: NextAuth.js
 - **Deployment**: Vercel
+- **Additional Tools**: Supabase for backend services, Nodemailer for email
+
+## API Endpoints
+
+### Backend API (Planned)
+- `GET /api/waitlist` - Retrieve waitlist signups
+- `POST /api/waitlist` - Add new waitlist signup
+- `GET /api/cakes` - Retrieve available cake configurations
+- `POST /api/orders` - Create new order
+- `GET /api/orders/:id` - Retrieve order details
+- `POST /api/payments/webhook` - Handle Stripe webhooks
+
+### Supabase Functions
+- `stats` - Generate traction statistics
+- `waitlist-signup` - Handle waitlist signups
 
 ## Project Structure
 
