@@ -3,9 +3,9 @@
  * Handles authentication and waitlist signup with Supabase
  */
 
-// Configuration - Replace with your actual Supabase credentials
-const SUPABASE_URL = 'https://your-project.supabase.co'; // Replace with your Supabase URL
-const SUPABASE_ANON_KEY = 'your-anon-key'; // Replace with your Supabase anon key
+// Configuration - Supabase credentials
+const SUPABASE_URL = 'https://xqshkiygkyxadksvggks.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhxc2hraXlna3l4YWRrc3ZnZ2tzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0OTA1MjAsImV4cCI6MjA4NjA2NjUyMH0.lvlvVjfOu-4oUPL_JbAOCxpxEDkwFNyhqgCC-uLapZE';
 const BACKEND_API_URL = 'https://bakebot-3hi9d6ku4-jmenicholes-projects.vercel.app/api/waitlist-signup';
 
 // Initialize Supabase
