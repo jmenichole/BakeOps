@@ -20,13 +20,6 @@ cd bake-me-a-cake-bot-
 
 ### 2. Install Dependencies
 
-#### Frontend (Next.js)
-
-```bash
-cd frontend
-npm install
-```
-
 #### Backend (Express)
 
 ```bash

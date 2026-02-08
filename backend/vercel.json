@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "/api/traction-report",
+      "dest": "src/traction-report.ts"
+    },
+    {
+      "src": "/api/waitlist-signup",
+      "dest": "src/waitlist-signup.ts"
+    }
+  ],
+  "outputDirectory": "dist"
+}

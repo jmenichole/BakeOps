@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <!-- HERO SECTION -->
@@ -100,18 +101,24 @@
         </div>
     </section>
 
-    <!-- SIGNUP SECTION -->
+    <!-- AUTH SECTION -->
     <section id="signup" class="signup">
         <div class="container">
-            <h2 class="section-title">Join the Early Access List</h2>
+            <h2 class="section-title">Get Started with BOT</h2>
             <p class="signup-subtitle">
-                Get free beta access and help us shape the future of cake design.
+                Create an account to join early access and start designing cakes with AI.
             </p>
+
+            <!-- Auth Tabs -->
+            <div class="auth-tabs">
+                <button id="login-tab" class="auth-tab active">Login</button>
+                <button id="signup-tab" class="auth-tab">Sign Up</button>
+            </div>
 
             <!-- Success Message (Hidden by default) -->
             <div id="success-message" class="message message-success" style="display: none;">
                 <span class="message-icon">✓</span>
-                <span>Success! You're on the list. Check your email for updates.</span>
+                <span id="success-text">Success! Check your email for confirmation.</span>
             </div>
 
             <!-- Error Message (Hidden by default) -->
@@ -120,14 +127,55 @@
                 <span id="error-text">Something went wrong. Please try again.</span>
             </div>
 
-            <!-- Signup Form -->
-            <form id="waitlist-form" class="waitlist-form">
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form" style="display: block;">
                 <div class="form-group">
-                    <input 
-                        type="email" 
-                        id="email"
+                    <input
+                        type="email"
+                        id="login-email"
                         name="email"
-                        placeholder="Your email address…" 
+                        placeholder="Your email address…"
+                        class="form-input"
+                        required
+                    />
+                </div>
+
+                <div class="form-group">
+                    <input
+                        type="password"
+                        id="login-password"
+                        name="password"
+                        placeholder="Your password…"
+                        class="form-input"
+                        required
+                    />
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-submit" id="login-btn">
+                    <span id="login-submit-text">Login</span>
+                    <span id="login-loading-spinner" class="spinner" style="display: none;"></span>
+                </button>
+            </form>
+
+            <!-- Signup Form -->
+            <form id="signup-form" class="auth-form" style="display: none;">
+                <div class="form-group">
+                    <input
+                        type="email"
+                        id="signup-email"
+                        name="email"
+                        placeholder="Your email address…"
+                        class="form-input"
+                        required
+                    />
+                </div>
+
+                <div class="form-group">
+                    <input
+                        type="password"
+                        id="signup-password"
+                        name="password"
+                        placeholder="Create a password…"
                         class="form-input"
                         required
                     />
@@ -144,18 +192,20 @@
                             <input type="radio" name="role" value="customer">
                             <span>Customer</span>
                         </label>
-                        <label class="radio-label">
-                            <input type="radio" name="role" value="curious">
-                            <span>Just Curious</span>
-                        </label>
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-submit" id="submit-btn">
-                    <span id="submit-text">Save My Spot</span>
-                    <span id="loading-spinner" class="spinner" style="display: none;"></span>
+                <button type="submit" class="btn btn-primary btn-submit" id="signup-btn">
+                    <span id="signup-submit-text">Create Account & Join Waitlist</span>
+                    <span id="signup-loading-spinner" class="spinner" style="display: none;"></span>
                 </button>
             </form>
+
+            <!-- User Status (when logged in) -->
+            <div id="user-status" class="user-status" style="display: none;">
+                <p>Welcome back! <span id="user-email"></span></p>
+                <button id="logout-btn" class="btn btn-secondary">Logout</button>
+            </div>
         </div>
     </section>
 

@@ -1,20 +1,34 @@
 /**
  * BOT (Baked On Time) - Landing Page JavaScript
- * Handles waitlist form submission and UI feedback
+ * Handles authentication and waitlist signup with Supabase
  */
 
-// Configuration - Replace with your actual Supabase Edge Function URL
-const SUPABASE_FUNCTION_URL = 'https://ucsmotkzafnnidnnmcba.supabase.co/functions/v1/waitlist-signup';
+// Configuration - Replace with your actual Supabase credentials
+const SUPABASE_URL = 'https://your-project.supabase.co'; // Replace with your Supabase URL
+const SUPABASE_ANON_KEY = 'your-anon-key'; // Replace with your Supabase anon key
+const BACKEND_API_URL = 'https://bakebot-3hi9d6ku4-jmenicholes-projects.vercel.app/api/waitlist-signup';
+
+// Initialize Supabase
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // DOM Elements
-const form = document.getElementById('waitlist-form');
-const submitBtn = document.getElementById('submit-btn');
-const submitText = document.getElementById('submit-text');
-const loadingSpinner = document.getElementById('loading-spinner');
+const loginTab = document.getElementById('login-tab');
+const signupTab = document.getElementById('signup-tab');
+const loginForm = document.getElementById('login-form');
+const signupForm = document.getElementById('signup-form');
+const loginBtn = document.getElementById('login-btn');
+const signupBtn = document.getElementById('signup-btn');
+const loginSubmitText = document.getElementById('login-submit-text');
+const signupSubmitText = document.getElementById('signup-submit-text');
+const loginLoadingSpinner = document.getElementById('login-loading-spinner');
+const signupLoadingSpinner = document.getElementById('signup-loading-spinner');
 const successMessage = document.getElementById('success-message');
 const errorMessage = document.getElementById('error-message');
+const successText = document.getElementById('success-text');
 const errorText = document.getElementById('error-text');
-const emailInput = document.getElementById('email');
+const userStatus = document.getElementById('user-status');
+const userEmail = document.getElementById('user-email');
+const logoutBtn = document.getElementById('logout-btn');
 
 /**
  * Validates email format
@@ -29,10 +43,12 @@ function isValidEmail(email) {
 /**
  * Shows success message and hides error message
  */
-function showSuccess() {
+function showSuccess(message = 'Success! Check your email for confirmation.') {
+    successText.textContent = message;
     successMessage.style.display = 'flex';
     errorMessage.style.display = 'none';
-    form.style.display = 'none';
+    loginForm.style.display = 'none';
+    signupForm.style.display = 'none';
 }
 
 /**
@@ -54,44 +70,94 @@ function hideMessages() {
 }
 
 /**
- * Sets loading state on the submit button
+ * Sets loading state on the login button
  * @param {boolean} isLoading - Whether form is submitting
  */
-function setLoadingState(isLoading) {
+function setLoginLoadingState(isLoading) {
     if (isLoading) {
-        submitBtn.disabled = true;
-        submitText.style.display = 'none';
-        loadingSpinner.style.display = 'inline-block';
+        loginBtn.disabled = true;
+        loginSubmitText.style.display = 'none';
+        loginLoadingSpinner.style.display = 'inline-block';
     } else {
-        submitBtn.disabled = false;
-        submitText.style.display = 'inline';
-        loadingSpinner.style.display = 'none';
+        loginBtn.disabled = false;
+        loginSubmitText.style.display = 'inline';
+        loginLoadingSpinner.style.display = 'none';
     }
 }
 
 /**
- * Handles form submission
+ * Sets loading state on the signup button
+ * @param {boolean} isLoading - Whether form is submitting
+ */
+function setSignupLoadingState(isLoading) {
+    if (isLoading) {
+        signupBtn.disabled = true;
+        signupSubmitText.style.display = 'none';
+        signupLoadingSpinner.style.display = 'inline-block';
+    } else {
+        signupBtn.disabled = false;
+        signupSubmitText.style.display = 'inline';
+        signupLoadingSpinner.style.display = 'none';
+    }
+}
+
+/**
+ * Shows the login form and hides signup form
+ */
+function showLoginForm() {
+    loginTab.classList.add('active');
+    signupTab.classList.remove('active');
+    loginForm.style.display = 'block';
+    signupForm.style.display = 'none';
+    hideMessages();
+}
+
+/**
+ * Shows the signup form and hides login form
+ */
+function showSignupForm() {
+    signupTab.classList.add('active');
+    loginTab.classList.remove('active');
+    signupForm.style.display = 'block';
+    loginForm.style.display = 'none';
+    hideMessages();
+}
+
+/**
+ * Shows user status when logged in
+ * @param {Object} user - User object from Supabase
+ */
+function showUserStatus(user) {
+    userEmail.textContent = user.email;
+    userStatus.style.display = 'block';
+    loginForm.style.display = 'none';
+    signupForm.style.display = 'none';
+    document.querySelector('.auth-tabs').style.display = 'none';
+}
+
+/**
+ * Hides user status and shows auth forms
+ */
+function hideUserStatus() {
+    userStatus.style.display = 'none';
+    document.querySelector('.auth-tabs').style.display = 'flex';
+    showLoginForm();
+}
+
+/**
+ * Handles login form submission
  * @param {Event} e - Form submit event
  */
-async function handleSubmit(e) {
+async function handleLogin(e) {
     e.preventDefault();
     hideMessages();
 
-    // Get form data
-    const email = emailInput.value.trim();
-    const roleElements = document.getElementsByName('role');
-    let role = 'curious'; // Default value
-    
-    for (const elem of roleElements) {
-        if (elem.checked) {
-            role = elem.value;
-            break;
-        }
-    }
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
 
-    // Validate email
-    if (!email) {
-        showError('Please enter your email address.');
+    // Validate inputs
+    if (!email || !password) {
+        showError('Please fill in all fields.');
         return;
     }
 
@@ -100,59 +166,181 @@ async function handleSubmit(e) {
         return;
     }
 
-    // Set loading state
-    setLoadingState(true);
+    setLoginLoadingState(true);
 
     try {
-        // Submit to Supabase Edge Function
-        const response = await fetch(SUPABASE_FUNCTION_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                email: email,
-                role: role,
-                source: 'landing-page'
-            })
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
         });
 
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-            // Success - show confirmation
-            showSuccess();
-            form.reset();
-        } else if (response.status === 409 || data.error?.includes('duplicate') || data.error?.includes('already')) {
-            // Email already exists
-            showError('This email is already on our waitlist!');
+        if (error) {
+            if (error.message.includes('Invalid login credentials')) {
+                showError('Invalid email or password.');
+            } else if (error.message.includes('Email not confirmed')) {
+                showError('Please check your email and confirm your account.');
+            } else {
+                showError(error.message);
+            }
         } else {
-            // Other error
-            showError(data.error || 'Something went wrong. Please try again.');
+            showUserStatus(data.user);
         }
     } catch (error) {
-        console.error('Form submission error:', error);
+        console.error('Login error:', error);
         showError('Unable to connect. Please check your internet connection and try again.');
     } finally {
-        setLoadingState(false);
+        setLoginLoadingState(false);
     }
 }
 
 /**
- * Initialize form event listener
+ * Handles signup form submission
+ * @param {Event} e - Form submit event
+ */
+async function handleSignup(e) {
+    e.preventDefault();
+    hideMessages();
+
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+    const roleElements = document.getElementsByName('role');
+    let role = 'baker'; // Default value
+
+    for (const elem of roleElements) {
+        if (elem.checked) {
+            role = elem.value;
+            break;
+        }
+    }
+
+    // Validate inputs
+    if (!email || !password) {
+        showError('Please fill in all fields.');
+        return;
+    }
+
+    if (!isValidEmail(email)) {
+        showError('Please enter a valid email address.');
+        return;
+    }
+
+    if (password.length < 6) {
+        showError('Password must be at least 6 characters long.');
+        return;
+    }
+
+    setSignupLoadingState(true);
+
+    try {
+        // Sign up with Supabase Auth
+        const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+                data: {
+                    role: role
+                }
+            }
+        });
+
+        if (error) {
+            if (error.message.includes('User already registered')) {
+                showError('An account with this email already exists.');
+            } else {
+                showError(error.message);
+            }
+        } else {
+            // Add to waitlist regardless of email confirmation
+            try {
+                await fetch(BACKEND_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        role: role,
+                        source: 'landing-page-signup'
+                    })
+                });
+            } catch (waitlistError) {
+                console.warn('Waitlist signup failed:', waitlistError);
+                // Don't show error for waitlist failure
+            }
+
+            if (data.user && !data.user.email_confirmed_at) {
+                showSuccess('Account created! Please check your email to confirm your account.');
+            } else {
+                showUserStatus(data.user);
+            }
+        }
+    } catch (error) {
+        console.error('Signup error:', error);
+        showError('Unable to connect. Please check your internet connection and try again.');
+    } finally {
+        setSignupLoadingState(false);
+    }
+}
+
+/**
+ * Handles logout
+ */
+async function handleLogout() {
+    try {
+        await supabase.auth.signOut();
+        hideUserStatus();
+    } catch (error) {
+        console.error('Logout error:', error);
+        showError('Error logging out. Please try again.');
+    }
+}
+
+/**
+ * Checks for existing session on page load
+ */
+async function checkSession() {
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+            showUserStatus(session.user);
+        }
+    } catch (error) {
+        console.error('Session check error:', error);
+    }
+}
+
+/**
+ * Initialize event listeners and check session
  */
 function init() {
-    form.addEventListener('submit', handleSubmit);
-    
-    // Hide messages initially
-    hideMessages();
-    
-    // Add input event listener to clear error on typing
-    emailInput.addEventListener('input', () => {
-        if (errorMessage.style.display === 'flex') {
-            hideMessages();
+    // Tab switching
+    loginTab.addEventListener('click', showLoginForm);
+    signupTab.addEventListener('click', showSignupForm);
+
+    // Form submissions
+    loginForm.addEventListener('submit', handleLogin);
+    signupForm.addEventListener('submit', handleSignup);
+
+    // Logout
+    logoutBtn.addEventListener('click', handleLogout);
+
+    // Input event listeners to clear errors
+    document.getElementById('login-email').addEventListener('input', hideMessages);
+    document.getElementById('login-password').addEventListener('input', hideMessages);
+    document.getElementById('signup-email').addEventListener('input', hideMessages);
+    document.getElementById('signup-password').addEventListener('input', hideMessages);
+
+    // Auth state changes
+    supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+            showUserStatus(session.user);
+        } else if (event === 'SIGNED_OUT') {
+            hideUserStatus();
         }
     });
+
+    // Check for existing session
+    checkSession();
 }
 
 // Initialize when DOM is ready

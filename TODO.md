@@ -1,20 +1,32 @@
-# TODO List for BakeBot Code Review, Testing, Improvements, and Onboarding
+# TODO List for BakeBot Deployment
 
-## 1. Review Code ✅
-- Analyzed `backend/src/traction-report.ts` for structure, readability, and potential issues (e.g., error handling, security, TypeScript usage).
+## 1. Deploy Landing Page ✅
+- Deploy static landing page to Netlify
+- Update script.js with production Supabase function URL
+- Configure custom domain if needed
 
-## 2. Generate Tests ✅
-- Created unit tests for the `generateTractionReport` function in `backend/src/traction-report.test.ts`, including mocks for Supabase and Nodemailer.
-- Note: Tests created but could not run due to PowerShell execution policy. Dependencies installed in package.json.
+## 2. Deploy Supabase Functions ✅
+- Install Supabase CLI
+- Deploy waitlist-signup and stats functions
+- Configure production environment variables
 
-## 3. Suggest Improvements ✅
-- Implemented enhancements to `backend/src/traction-report.ts`: added TypeScript types, environment variable validation, and better error handling.
+## 3. Deploy Backend ✅
+- Install Vercel CLI
+- Deploy Node.js backend as serverless functions
+- Configure production environment variables
 
-## 4. Generate Onboarding Materials ✅
-- Updated `README.md` with API endpoints and additional tech stack details.
-- Created `CONTRIBUTING.md` file for developer onboarding guidelines.
+## 4. Configure Production Environment ✅
+- Set up production secrets in hosting providers
+- Update environment variables for all components
+- Test database connections
 
-## Followup Steps ✅
-- Implemented code improvements and tests.
-- Updated documentation.
-- Tests ready to run once PowerShell policy allows npm execution.
+## 5. End-to-End Testing ✅
+- Test waitlist signup flow
+- Test stats endpoint
+- Test backend traction report functionality
+- Verify all components work together
+
+## 6. Monitoring & Maintenance ✅
+- Set up basic monitoring
+- Configure error tracking
+- Document production deployment process
