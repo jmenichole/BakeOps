@@ -542,3 +542,71 @@ section + section::before {
     width: 80%;
     border-radius: 2px;
 }
+
+/* ========================================
+   AUTH TABS
+   ======================================== */
+
+.auth-tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 1rem 2rem;
+    background-color: #E5D4C1;
+    color: #3C2F2F;
+    border: none;
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.auth-tab.active {
+    background-color: #F8C8D6;
+    color: #3C2F2F;
+}
+
+.auth-tab:hover {
+    background-color: #F8C8D6;
+}
+
+/* ========================================
+   AUTH FORMS
+   ======================================== */
+
+.auth-form {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* ========================================
+   USER STATUS
+   ======================================== */
+
+.user-status {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 2rem;
+    background-color: #FFFFFF;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px rgba(60, 47, 47, 0.08);
+}
+
+.user-status p {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    color: #3C2F2F;
+}

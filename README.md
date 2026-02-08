@@ -2,6 +2,11 @@
 
 A comprehensive web-based platform for custom bakers to accept orders through AI-powered cake design and automated pricing.
 
+## Live Demo
+
+- **Landing Page**: [https://bakebot-sigma.vercel.app](https://bakebot-sigma.vercel.app)
+- **Backend API**: [https://bakebot-3hi9d6ku4-jmenicholes-projects.vercel.app](https://bakebot-3hi9d6ku4-jmenicholes-projects.vercel.app)
+
 ## Features
 
 - **AI-Powered Cake Design**: Convert text descriptions into realistic cake mockups
@@ -15,7 +20,7 @@ A comprehensive web-based platform for custom bakers to accept orders through AI
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14 with TypeScript, React, Tailwind CSS
+- **Frontend**: HTML, CSS, JavaScript (static landing page)
 - **Backend**: Node.js with Express, TypeScript
 - **Database**: PostgreSQL
 - **AI Image Generation**: Stable Diffusion API
@@ -41,11 +46,10 @@ A comprehensive web-based platform for custom bakers to accept orders through AI
 ## Project Structure
 
 ```
-├── frontend/          # Next.js application
+├── landing/           # Static HTML landing page
 ├── backend/           # Express API server
-├── database/          # Database schemas and migrations
-├── docs/              # Architecture and API documentation
-└── shared/            # Shared types and utilities
+├── supabase/          # Supabase functions and migrations
+└── docs/              # Architecture and API documentation
 ```
 
 ## Getting Started
