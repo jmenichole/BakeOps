@@ -12,7 +12,7 @@
     "dev:app": "npm run dev -w app",
     "dev:backend": "npm run dev -w backend",
     "lint:app": "npm run lint -w app",
-    "test:backend": "npm test -w backend",
+    "test:backend": "npm test -w backend -- --forceExit",
     "test": "npm run test:backend",
     "lint": "npm run lint:app",
     "install:all": "npm install",
