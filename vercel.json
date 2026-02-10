@@ -1,0 +1,6 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build -w app",
+  "outputDirectory": "app/.next",
+  "framework": "nextjs"
+}

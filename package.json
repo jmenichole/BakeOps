@@ -1,14 +1,18 @@
 {
   "name": "bakebot-monorepo",
   "version": "1.0.0",
+  "workspaces": [
+    "app",
+    "backend"
+  ],
   "scripts": {
-    "build:app": "npm run build --prefix app",
-    "build:backend": "npm run build --prefix backend",
+    "build:app": "npm run build -w app",
+    "build:backend": "npm run build -w backend",
     "build": "npm run build:app && npm run build:backend",
-    "dev:app": "npm run dev --prefix app",
-    "dev:backend": "npm run dev --prefix backend",
-    "lint:app": "npm run lint --prefix app",
-    "install:all": "npm install && npm install --prefix app && npm install --prefix backend"
+    "dev:app": "npm run dev -w app",
+    "dev:backend": "npm run dev -w backend",
+    "lint:app": "npm run lint -w app",
+    "install:all": "npm install"
   },
   "dependencies": {
     "date-fns": "^4.1.0",
