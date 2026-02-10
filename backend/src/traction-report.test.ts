@@ -8,8 +8,10 @@ jest.mock('nodemailer');
 
 const mockSupabase = createClient as jest.MockedFunction<typeof createClient>;
 const mockTransporter = {
-  sendMail: jest.fn(),
+  sendMail: jest.fn().mockResolvedValue({}),
 };
+
+(nodemailer.createTransport as jest.Mock).mockReturnValue(mockTransporter);
 
 describe('generateTractionReport', () => {
   beforeEach(() => {
@@ -33,9 +35,6 @@ describe('generateTractionReport', () => {
     mockSupabase.mockReturnValue({
       from: mockFrom,
     } as any);
-
-    (nodemailer.createTransport as jest.Mock).mockReturnValue(mockTransporter);
-    mockTransporter.sendMail.mockResolvedValue({});
 
     await generateTractionReport();
 
@@ -77,8 +76,7 @@ describe('generateTractionReport', () => {
       from: mockFrom,
     } as any);
 
-    (nodemailer.createTransport as jest.Mock).mockReturnValue(mockTransporter);
-    mockTransporter.sendMail.mockRejectedValue(new Error('Email error'));
+    mockTransporter.sendMail.mockRejectedValueOnce(new Error('Email error'));
 
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
