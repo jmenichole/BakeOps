@@ -18,7 +18,7 @@
     "typescript": "^5.2.2"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.8",
+    "@types/jest": "^30.0.0",
     "@types/node": "^25.2.3",
     "@types/node-schedule": "^2.1.8",
     "@types/nodemailer": "^7.0.9",
