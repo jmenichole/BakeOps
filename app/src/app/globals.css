@@ -1,6 +1,16 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --font-serif: var(--font-playfair), serif;
+  --font-sans: var(--font-inter), sans-serif;
+  
+  --color-primary: #FF7EB3;
+  --color-primary-hover: #FF5C9D;
+  --color-secondary: #3C2F2F;
+  --color-accent: #FFD700;
+  --color-background: #FFF9F9;
+  --color-foreground: #3C2F2F;
+}
 
 :root {
   --primary: #FF7EB3;
@@ -13,28 +23,68 @@
 
 @layer base {
   body {
-    @apply bg-[var(--background)] text-[var(--foreground)];
+    background-color: var(--background);
+    color: var(--foreground);
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif;
+    font-family: var(--font-serif);
   }
 }
 
-@layer components {
-  .btn {
-    @apply inline-flex items-center justify-center px-8 py-3 rounded-full font-semibold transition-all duration-200 cursor-pointer text-base;
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  transition-property: all;
+  transition-duration: 200ms;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+@utility btn-primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+@utility btn-primary:hover {
+  background-color: var(--primary-hover);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+@utility btn-secondary {
+  background-color: transparent;
+  border-width: 2px;
+  border-color: var(--secondary);
+  color: var(--secondary);
+}
+
+@utility btn-secondary:hover {
+  background-color: var(--secondary);
+  color: white;
+}
+
+@utility container {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  @utility container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
   }
-  
-  .btn-primary {
-    @apply bg-[var(--primary)] text-white hover:bg-[var(--primary-hover)] shadow-md;
-  }
-  
-  .btn-secondary {
-    @apply bg-transparent border-2 border-[var(--secondary)] text-[var(--secondary)] hover:bg-[var(--secondary)] hover:text-white;
-  }
-  
-  .container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+@media (min-width: 1024px) {
+  @utility container {
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
 }
