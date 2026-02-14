@@ -2,5 +2,15 @@
   "version": 2,
   "buildCommand": "npm run build -w app",
   "outputDirectory": "app/.next",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "routes": [
+    {
+      "src": "/api/traction-report",
+      "dest": "backend/src/traction-report.ts"
+    },
+    {
+      "src": "/api/waitlist-signup",
+      "dest": "backend/src/waitlist-signup.ts"
+    }
+  ]
 }
