@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Sparkles, Save, Info, Palette, Send } from 'lucide-react';
+import { ArrowLeft, Sparkles, Save, Info, Palette, Send, Mail, Phone, Copy, X, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import { createBrowserClient } from '@/lib/supabase';
 
@@ -11,6 +11,10 @@ export default function NewDesignPage() {
   const supabase = createBrowserClient();
   const [step, setStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [savedDesignId, setSavedDesignId] = useState<string | null>(null);
+  const [shareLink, setShareLink] = useState('');
+  const quoteRef = useRef<HTMLDivElement>(null);
   const [config, setConfig] = useState({
     productType: 'cake', // cake, cupcakes, cookies, cakepops
     tiers: 1,
@@ -148,11 +152,108 @@ export default function NewDesignPage() {
           });
         
         if (orderError) throw orderError;
-        alert('Design sent to customer orders!');
+        
+        // Set up share modal
+        const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/quote/${design.id}`;
+        setShareLink(link);
+        setSavedDesignId(design.id);
+        setShowShareModal(true);
       } else {
-        alert('Draft saved successfully!');
+        alert('Draft saved! Screenshot this page and send to your customer.');
       }
 
+      // Don't redirect yet if we're showing share modal
+      if (!isFinal) {
+        router.push('/dashboard');
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert('Error: ' + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Handle sending via email
+  const handleSendViaEmail = () => {
+    const subject = encodeURIComponent(`Your Cake Quote - $${quote.total.toFixed(2)}`);
+    const body = encodeURIComponent(
+      `Hi! Here's your custom cake quote:\n\n` +
+      `Design: ${config.theme}\n` +
+      `Price: $${quote.total.toFixed(2)}\n\n` +
+      `View your quote here: ${shareLink}\n\n` +
+      `Would you like to create a customer account for easy scheduling and payments? ` +
+      `It's optional - you can also just message your baker directly!\n\n` +
+      `Let me know if you'd like any changes to the design!`
+    );
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  };
+
+  // Handle sending via SMS
+  const handleSendViaSMS = () => {
+    const message = encodeURIComponent(
+      `Here's your cake quote: $${quote.total.toFixed(2)} - View: ${shareLink}\n\n` +
+      `Want to create an account for easy scheduling? Optional! Just message your baker directly.`
+    );
+    window.location.href = `sms:?body=${message}`;
+  };
+
+  // Handle copying link
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      alert('Link copied to clipboard!');
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  // Handle saving as image
+  const handleSaveAsImage = async () => {
+    if (!mockupUrl) return;
+    
+    setIsSaving(true);
+    try {
+      // First save as draft
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert('Please login to save designs');
+        return;
+      }
+
+      const finalPrice = useAiPricing ? quote.total : (parseFloat(manualPrice as string) || 0);
+
+      const { data: design, error: designError } = await supabase
+        .from('cake_designs')
+        .insert({
+          baker_id: user.id,
+          title: `${config.productType.toUpperCase()}: ${config.theme.slice(0, 20)}...` || 'Custom Design',
+          description: config.theme,
+          image_url: mockupUrl,
+          configuration_data: config,
+          estimated_price: finalPrice,
+          is_public: false,
+          is_draft: true
+        })
+        .select()
+        .single();
+
+      if (designError) throw designError;
+
+      // Download the mockup image
+      const response = await fetch(mockupUrl);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `cake-quote-${design.id}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      alert('Draft saved! Image downloaded to your camera roll.');
       router.push('/dashboard');
     } catch (err: any) {
       console.error(err);
@@ -396,6 +497,63 @@ export default function NewDesignPage() {
           )}
         </div>
       </div>
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl animate-in fade-in zoom-in-95">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <Send className="w-5 h-5 text-primary" />
+                Share Quote with Customer
+              </h2>
+              <button 
+                onClick={() => setShowShareModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="mb-6">
+              <p className="text-gray-600 mb-4">Share this link with your customer to view their custom cake quote.</p>
+              
+              <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <input 
+                  type="text" 
+                  value={shareLink}
+                  readOnly
+                  className="flex-1 bg-transparent outline-none text-sm text-gray-700"
+                />
+                <button 
+                  onClick={handleCopyLink}
+                  className="p-2 hover:bg-white rounded-lg transition-colors"
+                  title="Copy link"
+                >
+                  <Copy className="w-4 h-4 text-gray-500" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button 
+                onClick={handleSendViaEmail}
+                className="flex-1 bg-primary text-white py-3 px-4 rounded-xl hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 font-bold"
+              >
+                <Mail className="w-4 h-4" />
+                Send via Email
+              </button>
+              <button 
+                onClick={handleSendViaSMS}
+                className="flex-1 bg-secondary text-white py-3 px-4 rounded-xl hover:bg-secondary/90 transition-colors flex items-center justify-center gap-2 font-bold"
+              >
+                <Phone className="w-4 h-4" />
+                Send via SMS
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
