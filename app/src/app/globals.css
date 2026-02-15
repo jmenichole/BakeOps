@@ -7,29 +7,42 @@
   --color-primary: #FF7EB3;
   --color-primary-hover: #FF5C9D;
   --color-secondary: #3C2F2F;
+  --color-secondary-soft: #5D4D4D;
   --color-accent: #FFD700;
   --color-background: #FFF9F9;
   --color-foreground: #3C2F2F;
+  --color-border-soft: #FDE2E2;
 }
 
 :root {
   --primary: #FF7EB3;
   --primary-hover: #FF5C9D;
   --secondary: #3C2F2F;
+  --secondary-soft: #5D4D4D;
   --accent: #FFD700;
   --background: #FFF9F9;
   --foreground: #3C2F2F;
+  --border-soft: #FDE2E2;
 }
 
 @layer base {
   body {
     background-color: var(--background);
     color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-serif);
+    letter-spacing: -0.02em;
   }
+}
+
+@utility glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 @utility btn {
@@ -37,53 +50,62 @@
   align-items: center;
   justify-content: center;
   padding: 0.75rem 2rem;
-  border-radius: 9999px;
-  font-weight: 600;
+  border-radius: 1rem;
+  font-weight: 700;
   transition-property: all;
-  transition-duration: 200ms;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.9375rem;
+  letter-spacing: 0.01em;
 }
 
 @utility btn-primary {
   background-color: var(--primary);
   color: white;
+  box-shadow: 0 4px 14px 0 rgba(255, 126, 179, 0.39);
 }
 
-@utility btn-primary:hover {
+.btn-primary:hover {
   background-color: var(--primary-hover);
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  box-shadow: 0 6px 20px rgba(255, 126, 179, 0.23);
+  transform: translateY(-1px);
 }
 
 @utility btn-secondary {
-  background-color: transparent;
-  border-width: 2px;
-  border-color: var(--secondary);
+  background-color: white;
+  border: 1px solid var(--border-soft);
   color: var(--secondary);
 }
 
-@utility btn-secondary:hover {
-  background-color: var(--secondary);
-  color: white;
+.btn-secondary:hover {
+  background-color: var(--background);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+@utility card-bake {
+  background: white;
+  border: 1px solid var(--border-soft);
+  border-radius: 2rem;
+  padding: 2rem;
+  box-shadow: 0 10px 30px -15px rgba(60, 47, 47, 0.05);
+  transition: all 0.3s ease;
+}
+
+.card-bake:hover {
+  border-color: var(--primary);
+  box-shadow: 0 20px 40px -20px rgba(60, 47, 47, 0.08);
 }
 
 @utility container {
   max-width: 80rem;
   margin-left: auto;
   margin-right: auto;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
 
-@media (min-width: 640px) {
-  @utility container {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  @utility container {
+  @media (min-width: 640px) {
     padding-left: 2rem;
     padding-right: 2rem;
   }

@@ -2,11 +2,12 @@ import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import * as schedule from 'node-schedule';
+import { VercelRequest, VercelResponse } from '@vercel/node';
 
 dotenv.config();
 
 interface WaitlistEntry {
-  id: number;
+  id: string;
   email: string;
   role: string;
   source: string;
@@ -181,10 +182,32 @@ export async function generateTractionReport(): Promise<void> {
 }
 
 // Schedule the report to run on the 1st of every month at midnight
-schedule.scheduleJob('0 0 1 * *', async () => {
+// Only run this if not in Vercel environment (where we use Vercel Crons)
+if (!process.env.VERCEL) {
+  schedule.scheduleJob('0 0 1 * *', async () => {
+    try {
+      await generateTractionReport();
+    } catch (error) {
+      console.error('Scheduled traction report failed:', error);
+    }
+  });
+}
+
+/**
+ * Vercel Serverless Function handler
+ */
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Add basic authentication for the cron job (e.g., check for a secret header)
+  const authHeader = req.headers.authorization;
+  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+
   try {
     await generateTractionReport();
-  } catch (error) {
-    console.error('Scheduled traction report failed:', error);
+    return res.status(200).json({ success: true, message: 'Traction report generated and sent' });
+  } catch (error: any) {
+    console.error('API traction report failed:', error);
+    return res.status(500).json({ success: false, error: error.message });
   }
-});
+}

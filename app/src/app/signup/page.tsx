@@ -56,13 +56,18 @@ export default function SignupPage() {
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-[#FFF9F9] animate-in fade-in duration-700">
-        <div className="max-w-md w-full bg-white p-10 rounded-[2.5rem] shadow-2xl border border-pink-50 text-center">
-          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-8 animate-bounce">✓</div>
-          <h1 className="text-3xl font-serif font-black mb-4">Check your email</h1>
-          <p className="text-gray-600 mb-10 leading-relaxed">
+        <div className="max-w-md w-full bg-white p-10 rounded-[2.5rem] shadow-2xl border border-pink-50 text-center relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-pink-300"></div>
+          <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-8 animate-bounce border-4 border-white shadow-sm">✓</div>
+          <h1 className="text-3xl font-serif font-black mb-4 text-secondary">BakeBot Welcome!</h1>
+          <p className="text-gray-600 mb-6 leading-relaxed">
             We've sent a confirmation link to <span className="text-secondary font-bold">{email}</span>. 
-            Please check your inbox to activate your beta tester account.
           </p>
+          <div className="bg-pink-50/50 p-6 rounded-2xl mb-10 border border-pink-100/50">
+            <p className="text-xs text-pink-800 font-medium leading-relaxed">
+              <strong>Note:</strong> The email may appear from "Supabase" or "BakeBot Support". Please check your spam folder if you don't see it in 2 minutes.
+            </p>
+          </div>
           <Link href="/login" className="btn btn-primary w-full py-4 text-lg">
             Back to login
           </Link>

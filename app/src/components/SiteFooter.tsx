@@ -17,7 +17,7 @@ export function SiteFooter() {
             <h4 className="font-bold mb-6 uppercase tracking-widest text-xs text-pink-400">Sitemap</h4>
             <ul className="space-y-4 text-sm text-gray-300">
               <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
-              <li><Link href="/how-it-works" className="hover:text-white transition-colors">How It Works</Link></li>
+              <li><Link href="/support" className="hover:text-white transition-colors">How It Works</Link></li>
               <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
               <li><Link href="/signup" className="hover:text-white transition-colors">Early Access</Link></li>
             </ul>
@@ -27,7 +27,7 @@ export function SiteFooter() {
             <h4 className="font-bold mb-6 uppercase tracking-widest text-xs text-pink-400">Dashboard</h4>
             <ul className="space-y-4 text-sm text-gray-300">
               <li><Link href="/dashboard" className="hover:text-white transition-colors">Overview</Link></li>
-              <li><Link href="/dashboard/designs" className="hover:text-white transition-colors">AI Configurator</Link></li>
+              <li><Link href="/dashboard/designs/new" className="hover:text-white transition-colors">AI Configurator</Link></li>
               <li><Link href="/dashboard/production" className="hover:text-white transition-colors">Production Planner</Link></li>
               <li><Link href="/dashboard/referrals" className="hover:text-white transition-colors">Affiliate Program</Link></li>
             </ul>
@@ -51,7 +51,7 @@ export function SiteFooter() {
           <div className="flex gap-6">
             <a href="#" className="text-gray-500 hover:text-white transition-colors text-xs">Instagram</a>
             <a href="#" className="text-gray-500 hover:text-white transition-colors text-xs">Twitter</a>
-            <a href="#" className="text-gray-500 hover:text-white transition-colors text-xs">Support</a>
+            <Link href="/support" className="text-gray-500 hover:text-white transition-colors text-xs">Support</Link>
           </div>
         </div>
       </div>

@@ -1,35 +1,165 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Sparkles, Save, Info, Palette } from 'lucide-react';
+import { ArrowLeft, Sparkles, Save, Info, Palette, Send } from 'lucide-react';
 import Link from 'next/link';
+import { createBrowserClient } from '@/lib/supabase';
 
 export default function NewDesignPage() {
+  const router = useRouter();
+  const supabase = createBrowserClient();
   const [step, setStep] = useState(1);
+  const [isSaving, setIsSaving] = useState(false);
   const [config, setConfig] = useState({
+    productType: 'cake', // cake, cupcakes, cookies, cakepops
     tiers: 1,
-    servings: 20,
+    quantity: 12, // for non-cakes
     flavor: 'Vanilla Bean',
     filling: 'Strawberry',
-    colorPalette: ['#FFFFFF', '#FFB6C1'],
+    addOns: [] as string[],
     theme: '',
     notes: ''
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [mockupUrl, setMockupUrl] = useState<string | null>(null);
+  const [useAiPricing, setUseAiPricing] = useState(true);
+  const [manualPrice, setManualPrice] = useState<number | string>('');
+  const [quote, setQuote] = useState({
+    base: 65,
+    decor: 0,
+    filling: 15,
+    addOns: 0,
+    marketAdjustment: 12,
+    total: 92
+  });
 
+  // Dynamic pricing calculation (AI Suggestion)
+  useEffect(() => {
+    let base = 0;
+    let filling = 0;
+    let decor = config.theme.length > 50 ? 80 : 40;
+    let addOnsPrice = config.addOns.length * 20;
+    // Pseudo-AI market adjustment based on complexity and "area"
+    let marketAdjustment = Math.floor((config.theme.length / 10) + (config.addOns.length * 5));
+
+    if (config.productType === 'cake') {
+      base = config.tiers * 65;
+      filling = config.filling === 'None' ? 0 : 15;
+    } else if (config.productType === 'cupcakes') {
+      base = (config.quantity / 12) * 45;
+      filling = config.filling === 'None' ? 0 : 10;
+    } else {
+      base = (config.quantity / 12) * 35;
+      filling = 0;
+    }
+
+    setQuote({
+      base,
+      decor,
+      filling,
+      addOns: addOnsPrice,
+      marketAdjustment,
+      total: base + decor + filling + addOnsPrice + marketAdjustment + 25 // + $25 service fee
+    });
+  }, [config]);
+
+  const productTypes = [
+    { id: 'cake', label: 'Custom Cake' },
+    { id: 'cupcakes', label: 'Cupcakes' },
+    { id: 'cookies', label: 'Cookies' },
+    { id: 'cakepops', label: 'Cake Pops' }
+  ];
+
+  const addOnOptions = ['Fondant Work', 'Gold Leaf', 'Hand-painted', 'Fresh Flowers', 'Acrylic Topper', 'Chocolate Drip'];
   const flavors = ['Vanilla Bean', 'Rich Chocolate', 'Red Velvet', 'Lemon Zest', 'Carrot Cake', 'Confetti'];
-  const fillings = ['Strawberry', 'Chocolate Ganache', 'Cream Cheese', 'Lemon Curd', 'Salted Caramel'];
+  const fillings = ['None', 'Strawberry', 'Chocolate Ganache', 'Cream Cheese', 'Lemon Curd', 'Salted Caramel'];
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
+    if (!config.theme) {
+      alert('Please describe your theme first!');
+      return;
+    }
     setIsGenerating(true);
-    // Simulate AI generation delay
-    setTimeout(() => {
-      setIsGenerating(false);
-      setMockupUrl('https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&q=80');
+    try {
+      const prompt = `A professional bakery photograph of ${config.productType === 'cake' ? `${config.tiers} tier cake` : `${config.quantity} ${config.productType}`}, theme: ${config.theme}. ${config.addOns.length > 0 ? `Add-ons: ${config.addOns.join(', ')}.` : ''} High quality, detailed icing, elegant presentation, soft studio lighting.`;
+      
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      setMockupUrl(data.imageUrl);
       setStep(2);
-    }, 3000);
+    } catch (err: any) {
+      console.error(err);
+      alert('AI Generation failed: ' + err.message);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleSave = async (isFinal = false) => {
+    setIsSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert('Please login to save designs');
+        return;
+      }
+
+      const finalPrice = useAiPricing ? quote.total : (parseFloat(manualPrice as string) || 0);
+
+      const { data: design, error: designError } = await supabase
+        .from('cake_designs')
+        .insert({
+          baker_id: user.id,
+          title: `${config.productType.toUpperCase()}: ${config.theme.slice(0, 20)}...` || 'Custom Design',
+          description: config.theme,
+          image_url: mockupUrl,
+          configuration_data: config,
+          estimated_price: finalPrice,
+          is_public: false
+        })
+        .select()
+        .single();
+
+      if (designError) throw designError;
+
+      if (isFinal) {
+        // Create a pending order as well
+        const { error: orderError } = await supabase
+          .from('orders')
+          .insert({
+            baker_id: user.id,
+            design_id: design.id,
+            customer_email: 'pending@example.com', // Would be from a form
+            customer_name: 'New Client',
+            status: 'pending',
+            total_price: finalPrice,
+            delivery_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // Default 1 week out
+          });
+        
+        if (orderError) throw orderError;
+        alert('Design sent to customer orders!');
+      } else {
+        alert('Draft saved successfully!');
+      }
+
+      router.push('/dashboard');
+    } catch (err: any) {
+      console.error(err);
+      alert('Error: ' + err.message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -47,28 +177,58 @@ export default function NewDesignPage() {
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
             <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
               <span className="w-6 h-6 bg-pink-100 text-primary rounded-full flex items-center justify-center text-xs">1</span>
-              Base Configuration
+              Product Type
+            </h2>
+            <div className="grid grid-cols-2 gap-3 mb-8">
+              {productTypes.map((type) => (
+                <button
+                  key={type.id}
+                  className={`py-3 rounded-xl border-2 transition-all font-bold text-sm ${config.productType === type.id ? 'border-primary bg-pink-50 text-primary shadow-sm' : 'border-gray-50 text-gray-400 hover:border-pink-100'}`}
+                  onClick={() => setConfig({...config, productType: type.id})}
+                >
+                  {type.label}
+                </button>
+              ))}
+            </div>
+
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+              <span className="w-6 h-6 bg-pink-100 text-primary rounded-full flex items-center justify-center text-xs">2</span>
+              Details
             </h2>
             
             <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Number of Tiers</label>
-                <div className="grid grid-cols-4 gap-2">
-                  {[1, 2, 3, 4].map((n) => (
-                    <button
-                      key={n}
-                      className={`py-2 rounded-lg border-2 transition-all ${config.tiers === n ? 'border-primary bg-pink-50 text-primary font-bold' : 'border-gray-50 text-gray-400'}`}
-                      onClick={() => setConfig({...config, tiers: n})}
-                    >
-                      {n}
-                    </button>
-                  ))}
+              {config.productType === 'cake' ? (
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 ml-1">Number of Tiers</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[1, 2, 3, 4].map((n) => (
+                      <button
+                        key={n}
+                        className={`py-2 rounded-lg border-2 transition-all ${config.tiers === n ? 'border-primary bg-pink-50 text-primary font-bold' : 'border-gray-50 text-gray-400'}`}
+                        onClick={() => setConfig({...config, tiers: n})}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 ml-1">Quantity (Dozens)</label>
+                  <input 
+                    type="number" 
+                    step="12"
+                    min="12"
+                    className="w-full p-3 rounded-xl border border-gray-100 bg-gray-50 outline-none focus:ring-4 focus:ring-primary/10 transition-all"
+                    value={config.quantity}
+                    onChange={(e) => setConfig({...config, quantity: parseInt(e.target.value)})}
+                  />
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="base-flavor" className="block text-sm font-medium text-gray-700 mb-2">Base Flavor</label>
+                  <label htmlFor="base-flavor" className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Flavor</label>
                   <select 
                     id="base-flavor"
                     className="w-full p-3 rounded-xl border border-gray-100 bg-gray-50 outline-none focus:ring-2 focus:ring-primary/20"
@@ -79,7 +239,7 @@ export default function NewDesignPage() {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="filling" className="block text-sm font-medium text-gray-700 mb-2">Filling</label>
+                  <label htmlFor="filling" className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Filling</label>
                   <select 
                     id="filling"
                     className="w-full p-3 rounded-xl border border-gray-100 bg-gray-50 outline-none focus:ring-2 focus:ring-primary/20"
@@ -92,11 +252,31 @@ export default function NewDesignPage() {
               </div>
 
               <div>
-                <label htmlFor="theme" className="block text-sm font-medium text-gray-700 mb-2">Theme / Inspiration</label>
+                <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 ml-1">Add-ons & Accents</label>
+                <div className="flex flex-wrap gap-2">
+                  {addOnOptions.map((opt) => (
+                    <button
+                      key={opt}
+                      onClick={() => {
+                        const newAddOns = config.addOns.includes(opt) 
+                          ? config.addOns.filter(a => a !== opt)
+                          : [...config.addOns, opt];
+                        setConfig({...config, addOns: newAddOns});
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${config.addOns.includes(opt) ? 'bg-primary border-primary text-white shadow-md' : 'bg-white border-gray-100 text-gray-400 hover:border-pink-200 hover:text-primary'}`}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="theme" className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Theme / Description</label>
                 <textarea 
                   id="theme"
-                  className="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 outline-none focus:ring-2 focus:ring-primary/20 min-h-[100px]"
-                  placeholder="e.g. Enchanted forest with gold butterflies and soft pastel flowers..."
+                  className="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 outline-none focus:ring-4 focus:ring-primary/10 min-h-[100px] transition-all"
+                  placeholder="e.g. Modern minimalist with white fondant and single gold butterfly..."
                   value={config.theme}
                   onChange={(e) => setConfig({...config, theme: e.target.value})}
                 />
@@ -148,24 +328,69 @@ export default function NewDesignPage() {
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm animate-in fade-in slide-in-from-bottom-4">
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <h3 className="font-bold text-lg">Estimated Quote</h3>
-                  <p className="text-sm text-gray-500">Based on your configuration</p>
+                  <h3 className="font-bold text-lg">Final Quote</h3>
+                  <p className="text-sm text-gray-500">Suggested by AI + Manual Override</p>
                 </div>
-                <div className="text-2xl font-black text-secondary">$185.00</div>
+                <div className="text-2xl font-black text-secondary">
+                  ${useAiPricing ? quote.total.toFixed(2) : (parseFloat(manualPrice as string) || 0).toFixed(2)}
+                </div>
               </div>
               
-              <div className="space-y-3 mb-8">
-                <QuoteDetail label="Base Price (1 Tier)" value="$65.00" />
-                <QuoteDetail label="Custom Theme Decoration" value="$80.00" />
-                <QuoteDetail label="Premium Filling" value="$15.00" />
-                <QuoteDetail label="Service Fee" value="$25.00" />
+              <div className="space-y-4 mb-8">
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                  <button 
+                    onClick={() => setUseAiPricing(true)}
+                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all ${useAiPricing ? 'bg-white shadow-sm text-primary' : 'text-gray-400'}`}
+                  >
+                    AI Suggestion
+                  </button>
+                  <button 
+                    onClick={() => setUseAiPricing(false)}
+                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all ${!useAiPricing ? 'bg-white shadow-sm text-primary' : 'text-gray-400'}`}
+                  >
+                    Manual Price
+                  </button>
+                </div>
+
+                {useAiPricing ? (
+                  <div className="space-y-2 px-1">
+                    <QuoteDetail label={`${config.productType === 'cake' ? `${config.tiers} Tier Cake` : `${config.quantity} ${config.productType}`} Base`} value={`$${quote.base.toFixed(2)}`} />
+                    <QuoteDetail label="Theme & Decoration" value={`$${quote.decor.toFixed(2)}`} />
+                    <QuoteDetail label="Fillings & Flavor" value={`$${quote.filling.toFixed(2)}`} />
+                    <QuoteDetail label="Premium Add-ons" value={`$${quote.addOns.toFixed(2)}`} />
+                    <QuoteDetail label="Market Adjustment (Area)" value={`$${quote.marketAdjustment.toFixed(2)}`} />
+                    <QuoteDetail label="Service Fee" value="$25.00" />
+                  </div>
+                ) : (
+                  <div className="space-y-2 px-1">
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Set Custom Price ($)</label>
+                    <input 
+                      type="number"
+                      className="w-full p-3 rounded-xl border border-gray-100 bg-gray-50 text-lg font-black outline-none focus:ring-4 focus:ring-primary/10"
+                      placeholder="0.00"
+                      value={manualPrice}
+                      onChange={(e) => setManualPrice(e.target.value)}
+                    />
+                    <p className="text-[10px] text-gray-400 italic mt-2">Adjusted based on your local market & supply costs.</p>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-3">
-                <button className="flex-1 btn btn-secondary py-3 flex items-center justify-center gap-2">
-                  <Save className="w-4 h-4" /> Save Draft
+                <button 
+                  disabled={isSaving}
+                  onClick={() => handleSave(false)}
+                  className="flex-1 btn btn-secondary py-3 flex items-center justify-center gap-2"
+                >
+                  <Save className="w-4 h-4" /> {isSaving ? 'Saving...' : 'Save Draft'}
                 </button>
-                <button className="flex-1 btn btn-primary py-3">Send to Customer</button>
+                <button 
+                  disabled={isSaving}
+                  onClick={() => handleSave(true)}
+                  className="flex-1 btn btn-primary py-3 flex items-center justify-center gap-2 shadow-lg shadow-pink-100"
+                >
+                  <Send className="w-4 h-4" /> {isSaving ? 'Sending...' : 'Send to Customer'}
+                </button>
               </div>
             </div>
           )}

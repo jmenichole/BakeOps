@@ -18,6 +18,7 @@ import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
 import { TrialStatusGuard } from '@/components/TrialStatusGuard';
 import { FeedbackWidget } from '@/components/FeedbackWidget';
+import { OnboardingModal } from '@/components/OnboardingModal';
 import { getTrialStatus } from '@/lib/trial';
 
 export default function DashboardLayout({
@@ -164,6 +165,7 @@ export default function DashboardLayout({
         </main>
       </div>
       <FeedbackWidget />
+      <OnboardingModal />
     </TrialStatusGuard>
   );
 }

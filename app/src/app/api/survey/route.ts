@@ -15,9 +15,9 @@ export async function POST(req: Request) {
       subject: `Daily Beta Survey: ${userEmail}`,
       html: `
         <h1>Daily Feedback from ${userEmail}</h1>
-        <p><strong>Rating:</strong> ${rating}/5</p>
-        <p><strong>Most Valuable Feature:</strong> ${valuableFeature}</p>
-        <p><strong>One Thing to Change:</strong> ${changeOneThing}</p>
+        <p><strong>Professional Quality Rating:</strong> ${rating}/5</p>
+        <p><strong>Technical Friction/Bugs:</strong> ${valuableFeature}</p>
+        <p><strong>#1 Missing Feature:</strong> ${changeOneThing}</p>
         <p><strong>Suggested Lifetime Price:</strong> $${estimatedValue}</p>
         <hr />
         <p>Sent via BakeBot Beta Program</p>

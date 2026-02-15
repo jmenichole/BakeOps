@@ -3,14 +3,10 @@
   "buildCommand": "npm run build -w app",
   "outputDirectory": "app/.next",
   "framework": "nextjs",
-  "routes": [
+  "crons": [
     {
-      "src": "/api/traction-report",
-      "dest": "backend/src/traction-report.ts"
-    },
-    {
-      "src": "/api/waitlist-signup",
-      "dest": "backend/src/waitlist-signup.ts"
+      "path": "/api/traction-report",
+      "schedule": "0 0 1 * *"
     }
   ]
 }
