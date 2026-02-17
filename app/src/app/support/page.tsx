@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { HelpCircle, Mail, MessageSquare, ChevronDown, ChevronUp, Send, CheckCircle2 } from 'lucide-react';
+import { HelpCircle, Mail, ChevronDown, ChevronUp, Send, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SupportPage() {
@@ -87,23 +87,13 @@ export default function SupportPage() {
             </div>
 
             {/* Support Channels */}
-            <div className="grid sm:grid-cols-2 gap-6">
-              <div className="card-bake p-8 flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-pink-50 text-primary rounded-2xl flex items-center justify-center mb-6 border border-pink-100 shadow-sm">
-                  <Mail className="w-8 h-8" />
-                </div>
-                <h3 className="font-bold text-secondary mb-2">Email Support</h3>
-                <p className="text-xs text-gray-400 mb-6">Response time: &lt; 24 hours</p>
-                <a href="mailto:jmenichole007@outlook.com" className="text-primary font-bold hover:underline">jmenichole007@outlook.com</a>
+            <div className="card-bake p-8 flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-pink-50 text-primary rounded-2xl flex items-center justify-center mb-6 border border-pink-100 shadow-sm">
+                <Mail className="w-8 h-8" />
               </div>
-              <div className="card-bake p-8 flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 border border-blue-100 shadow-sm">
-                  <MessageSquare className="w-8 h-8" />
-                </div>
-                <h3 className="font-bold text-secondary mb-2">Beta Community</h3>
-                <p className="text-xs text-gray-400 mb-6">Join our private Discord</p>
-                <button className="btn btn-secondary py-2 px-6 text-xs">Join Discord</button>
-              </div>
+              <h3 className="font-bold text-secondary mb-2">Email Support</h3>
+              <p className="text-xs text-gray-400 mb-6">Response time: &lt; 24 hours</p>
+              <a href="mailto:jmenichole007@outlook.com" className="text-primary font-bold hover:underline">jmenichole007@outlook.com</a>
             </div>
           </div>
 

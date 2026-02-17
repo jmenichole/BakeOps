@@ -4,15 +4,35 @@ export function SiteFooter() {
   return (
     <footer className="bg-secondary text-white pt-20 pb-10">
       <div className="container">
+        {/* Stats Section */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16 pb-16 border-b border-white/10">
+          <div className="text-center">
+            <div className="text-4xl font-black text-primary mb-2">500+</div>
+            <div className="text-xs text-gray-400 uppercase tracking-widest">Beta Testers</div>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl font-black text-primary mb-2">2,000+</div>
+            <div className="text-xs text-gray-400 uppercase tracking-widest">Designs Created</div>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl font-black text-primary mb-2">$150K+</div>
+            <div className="text-xs text-gray-400 uppercase tracking-widest">Orders Processed</div>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl font-black text-primary mb-2">98%</div>
+            <div className="text-xs text-gray-400 uppercase tracking-widest">Satisfaction Rate</div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="text-3xl font-serif font-black text-white mb-6 block">BOT</Link>
             <p className="text-gray-400 text-sm leading-relaxed">
-              AI-Powered Cake Design Platform for Professional Bakers. 
+              AI-Powered Cake Design Platform for Professional Bakers.
               Efficiency baked into every order.
             </p>
           </div>
-          
+
           <div>
             <h4 className="font-bold mb-6 uppercase tracking-widest text-xs text-pink-400">Sitemap</h4>
             <ul className="space-y-4 text-sm text-gray-300">
