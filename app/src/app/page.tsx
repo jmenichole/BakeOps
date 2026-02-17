@@ -126,6 +126,45 @@ export default function Home() {
         </div>
       </section>
 
+      {/* UPCOMING FEATURES */}
+      <section className="py-24 bg-gradient-to-br from-pink-50 via-white to-blue-50">
+        <div className="container px-4">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-pink-200 rounded-full text-primary text-xs font-bold mb-6">
+              <Sparkles className="w-3 h-3 fill-current animate-pulse" /> <span>Coming Soon</span>
+            </div>
+            <h2 className="text-4xl font-serif font-black mb-6 text-secondary">What's Next</h2>
+            <p className="text-gray-500">We're constantly evolving. Here's what we're building for you next.</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            <div className="p-6 rounded-2xl bg-white border border-gray-100 hover:border-pink-200 hover:shadow-xl transition-all">
+              <div className="text-3xl mb-4">🔍</div>
+              <h3 className="font-bold text-secondary mb-2">Find a Local Baker</h3>
+              <p className="text-sm text-gray-500">Connect with talented bakers in your area through our marketplace.</p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-white border border-gray-100 hover:border-pink-200 hover:shadow-xl transition-all">
+              <div className="text-3xl mb-4">📸</div>
+              <h3 className="font-bold text-secondary mb-2">Progress Updates</h3>
+              <p className="text-sm text-gray-500">Share photos and mini videos of your baking process with customers.</p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-white border border-gray-100 hover:border-pink-200 hover:shadow-xl transition-all">
+              <div className="text-3xl mb-4">📊</div>
+              <h3 className="font-bold text-secondary mb-2">Order Tracking</h3>
+              <p className="text-sm text-gray-500">Status bars and ready-for-pickup notifications keep everyone informed.</p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-white border border-gray-100 hover:border-pink-200 hover:shadow-xl transition-all">
+              <div className="text-3xl mb-4">💳</div>
+              <h3 className="font-bold text-secondary mb-2">Payment Options</h3>
+              <p className="text-sm text-gray-500">Multiple payment methods and flexible installment plans.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* TESTIMONIAL / BETA INVITE */}
       <section className="py-24 bg-[#FFF9F9] border-y border-pink-50">
         <div className="container px-4 text-center">

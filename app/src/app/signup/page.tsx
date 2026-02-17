@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ShieldCheck, Sparkles, ArrowRight } from 'lucide-react';
 
 export default function SignupPage() {
@@ -14,9 +14,22 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  
+
   const supabase = createBrowserClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const referralCode = searchParams.get('ref');
+
+  // Track referral click when page loads
+  useEffect(() => {
+    if (referralCode) {
+      fetch('/api/track-referral', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ referralCode }),
+      }).catch(err => console.error('Failed to track referral:', err));
+    }
+  }, [referralCode]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,17 +47,37 @@ export default function SignupPage() {
         email,
         password,
         options: {
-          data: { 
+          data: {
             role,
             is_beta_tester: true,
-            signup_date: new Date().toISOString()
+            signup_date: new Date().toISOString(),
+            referral_code: referralCode || null,
           },
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
       if (signupError) throw signupError;
-      
+
+      // If there's a referral code, create a referral record
+      if (referralCode && data.user) {
+        const { data: referrer } = await supabase
+          .from('bakers')
+          .select('id')
+          .eq('referral_code', referralCode)
+          .single();
+
+        if (referrer) {
+          await supabase.from('referrals').insert({
+            referrer_id: referrer.id,
+            referred_email: email,
+            referred_user_id: data.user.id,
+            referral_code: referralCode,
+            status: 'pending',
+          });
+        }
+      }
+
       setSuccess(true);
     } catch (err: any) {
       setError(err.message || 'An error occurred during signup');
