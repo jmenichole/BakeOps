@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
 import { X, Calendar, Mail, Phone, DollarSign, Package, Trash2, Edit2, CheckCircle2, XCircle } from 'lucide-react';
+import { toast } from '@/hooks/useToast';
 
 interface Order {
   id: string;
@@ -57,10 +58,10 @@ export function OrderManagementModal({ order, isOpen, onClose, onUpdate }: Order
 
       setIsEditing(false);
       onUpdate();
-      alert('Order updated successfully!');
+      toast.success('Order updated successfully!');
     } catch (error) {
       console.error('Error updating order:', error);
-      alert('Failed to update order');
+      toast.error('Failed to update order');
     } finally {
       setLoading(false);
     }
@@ -80,10 +81,10 @@ export function OrderManagementModal({ order, isOpen, onClose, onUpdate }: Order
 
       onUpdate();
       onClose();
-      alert('Order deleted successfully!');
+      toast.success('Order deleted successfully!');
     } catch (error) {
       console.error('Error deleting order:', error);
-      alert('Failed to delete order');
+      toast.error('Failed to delete order');
     } finally {
       setLoading(false);
     }

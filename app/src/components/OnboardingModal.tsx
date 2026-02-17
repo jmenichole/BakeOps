@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   X, 
   Sparkles, 
@@ -15,22 +15,18 @@ import {
   PlusSquare,
   MoreVertical
 } from 'lucide-react';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { STORAGE_KEYS } from '@/constants';
 
 export function OnboardingModal() {
-  const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(1);
   const totalSteps = 4;
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useLocalStorage(STORAGE_KEYS.ONBOARDING_SEEN, false);
 
-  useEffect(() => {
-    const hasSeenOnboarding = localStorage.getItem('bakebot_onboarding_seen');
-    if (!hasSeenOnboarding) {
-      setIsOpen(true);
-    }
-  }, []);
+  const isOpen = !hasSeenOnboarding;
 
   const handleDismiss = () => {
-    localStorage.setItem('bakebot_onboarding_seen', 'true');
-    setIsOpen(false);
+    setHasSeenOnboarding(true);
   };
 
   if (!isOpen) return null;
@@ -53,6 +49,7 @@ export function OnboardingModal() {
         <button 
           onClick={handleDismiss}
           className="absolute top-6 right-6 p-2 hover:bg-gray-50 rounded-full transition-colors z-10"
+          aria-label="Close onboarding"
         >
           <X className="w-5 h-5 text-gray-400" />
         </button>
@@ -70,6 +67,7 @@ export function OnboardingModal() {
               <button 
                 onClick={() => setStep(2)}
                 className="w-full btn btn-primary py-4 text-lg flex items-center justify-center gap-2 group"
+                aria-label="Get started with onboarding"
               >
                 Let's get started <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
@@ -103,8 +101,8 @@ export function OnboardingModal() {
                 </div>
               </div>
               <div className="flex gap-4 pt-4">
-                <button onClick={() => setStep(1)} className="w-1/3 btn btn-secondary py-4"><ChevronLeft className="w-5 h-5" /></button>
-                <button onClick={() => setStep(3)} className="w-2/3 btn btn-primary py-4">Next: Mobile App</button>
+                <button onClick={() => setStep(1)} className="w-1/3 btn btn-secondary py-4" aria-label="Go back to previous step"><ChevronLeft className="w-5 h-5" /></button>
+                <button onClick={() => setStep(3)} className="w-2/3 btn btn-primary py-4" aria-label="Continue to mobile app step">Next: Mobile App</button>
               </div>
             </div>
           )}
