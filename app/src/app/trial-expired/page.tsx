@@ -14,7 +14,7 @@ export default function TrialExpiredPage() {
         <h1 className="text-4xl font-serif font-black mb-4">Beta Trial Completed!</h1>
         <p className="text-xl text-gray-600 mb-10 leading-relaxed">
           Thank you for being part of our early beta! Your 14-day testing period has ended. 
-          We're currently polishing the final version of <strong>BakeBot</strong> based on your feedback.
+          We&apos;re currently polishing the final version of <strong>BakeBot</strong> based on your feedback.
         </p>
 
         <div className="grid md:grid-cols-2 gap-6 mb-10 text-left">
@@ -29,7 +29,7 @@ export default function TrialExpiredPage() {
             <h3 className="font-bold flex items-center gap-2 mb-2">
               <Rocket className="w-4 h-4 text-pink-400" /> Coming Soon
             </h3>
-            <p className="text-sm text-gray-300 mb-4">We'll notify you as soon as the full platform launches globally.</p>
+            <p className="text-sm text-gray-300 mb-4">We&apos;ll notify you as soon as the full platform launches globally.</p>
             <span className="text-xs font-bold uppercase tracking-widest text-pink-400">Join Priority List</span>
           </div>
         </div>

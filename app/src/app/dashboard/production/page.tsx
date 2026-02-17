@@ -1,4 +1,5 @@
 'use client';
+// (c) jmenichole
 
 import { useState, useEffect } from 'react';
 import { 
@@ -7,14 +8,41 @@ import {
   CheckCircle2, 
   Circle,
   Clock,
-  ClipboardList
+  ClipboardList,
+  Plus,
+  X,
+  Save,
+  Calendar,
+  AlertCircle,
+  Truck
 } from 'lucide-react';
 import { createBrowserClient } from '@/lib/supabase';
+
+// Pre-made task templates for Quick Add
+const QUICK_ADD_TASKS = [
+  { title: 'Mix Cake Batter', category: 'Baking' },
+  { title: 'Bake Cake Layers', category: 'Baking' },
+  { title: 'Make Buttercream', category: 'Decoration' },
+  { title: 'Prepare Fillings', category: 'Assembly' },
+  { title: 'Cool Cake Layers', category: 'Baking' },
+  { title: 'Level Cake Layers', category: 'Assembly' },
+  { title: 'Crumb Coat', category: 'Decoration' },
+  { title: 'Final Frosting', category: 'Decoration' },
+  { title: 'Fondant Covering', category: 'Decoration' },
+  { title: 'Decorate Cake', category: 'Decoration' },
+  { title: 'Add Fresh Flowers', category: 'Decoration' },
+  { title: 'Box Cake', category: 'Packaging' },
+  { title: 'Prepare Delivery', category: 'Delivery' },
+];
 
 export default function ProductionPage() {
   const [selectedDay, setSelectedDay] = useState(new Date());
   const [tasks, setTasks] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addingTask, setAddingTask] = useState(false);
+  const [quickAddTask, setQuickAddTask] = useState<{title: string, category: string} | null>(null);
   const supabase = createBrowserClient();
 
   const getWeekDays = (start: Date) => {
@@ -54,7 +82,27 @@ export default function ProductionPage() {
     fetchTasks();
   }, [selectedDay, supabase]);
 
-  const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
+  // Fetch orders for sidebar
+  useEffect(() => {
+    async function fetchOrders() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from('orders')
+        .select('*, cake_designs(title)')
+        .eq('baker_id', user.id)
+        .in('status', ['confirmed', 'preparing', 'ready'])
+        .gte('delivery_date', new Date().toISOString())
+        .order('delivery_date', { ascending: true })
+        .limit(10);
+
+      setOrders(data || []);
+    }
+    fetchOrders();
+  }, [supabase]);
+
+const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'completed' ? 'todo' : 'completed';
     const { error } = await supabase
       .from('prep_tasks')
@@ -63,6 +111,63 @@ export default function ProductionPage() {
 
     if (!error) {
       setTasks(tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+    }
+  };
+
+  const handleAddTask = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setAddingTask(true);
+    
+    const formData = new FormData(e.currentTarget);
+    const title = formData.get('title') as string;
+    const category = formData.get('category') as string;
+    const time = formData.get('time') as string;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert('Please login to add tasks');
+        return;
+      }
+
+      // Combine selected day with the time
+      const scheduledFor = new Date(selectedDay);
+      const [hours, minutes] = time.split(':').map(Number);
+      scheduledFor.setHours(hours, minutes, 0, 0);
+
+      const { error } = await supabase
+        .from('prep_tasks')
+        .insert({
+          baker_id: user.id,
+          title,
+          category,
+          scheduled_for: scheduledFor.toISOString(),
+          status: 'todo'
+        });
+
+      if (error) throw error;
+
+      // Refresh tasks
+      const startOfDay = new Date(selectedDay);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(selectedDay);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const { data } = await supabase
+        .from('prep_tasks')
+        .select('*')
+        .eq('baker_id', user.id)
+        .gte('scheduled_for', startOfDay.toISOString())
+        .lte('scheduled_for', endOfDay.toISOString())
+        .order('scheduled_for', { ascending: true });
+
+      setTasks(data || []);
+      setShowAddModal(false);
+    } catch (err: any) {
+      console.error('Error adding task:', err);
+      alert('Error adding task: ' + err.message);
+    } finally {
+      setAddingTask(false);
     }
   };
 
@@ -175,7 +280,12 @@ export default function ProductionPage() {
               ) : (
                 <div className="p-12 text-center border-2 border-dashed border-gray-50 m-6 rounded-3xl">
                   <p className="text-gray-400 font-medium">No tasks scheduled for this day.</p>
-                  <button className="text-primary text-sm font-bold mt-2">Add task manually +</button>
+                  <button 
+                    onClick={() => setShowAddModal(true)}
+                    className="text-primary text-sm font-bold mt-2 hover:underline"
+                  >
+                    Add task manually +
+                  </button>
                 </div>
               )}
             </div>
@@ -202,10 +312,120 @@ export default function ProductionPage() {
               <span className="text-lg">💡</span> Beta Tip
             </h4>
             <p className="text-sm text-pink-800 leading-relaxed">
-              Use the "Create Design" flow to automatically generate production tasks based on cake complexity!
+              Use the &quot;Create Design&quot; flow to automatically generate production tasks based on cake complexity!
             </p>
           </div>
         </div>
+      </div>
+
+      <AddTaskModal 
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSubmit={handleAddTask}
+        isLoading={addingTask}
+        selectedDay={selectedDay}
+      />
+    </div>
+  );
+}
+
+// Add Task Modal Component
+function AddTaskModal({ 
+  isOpen, 
+  onClose, 
+  onSubmit, 
+  isLoading,
+  selectedDay 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  isLoading: boolean;
+  selectedDay: Date;
+}) {
+  if (!isOpen) return null;
+
+  const categories = ['Baking', 'Decoration', 'Assembly', 'Packaging', 'Delivery', 'Other'];
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl animate-in fade-in zoom-in-95">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <Plus className="w-5 h-5 text-primary" />
+            Add Task Manually
+          </h2>
+          <button 
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <p className="text-sm text-gray-500 mb-6">
+          Adding task for {selectedDay.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
+        </p>
+        
+        <form onSubmit={onSubmit} className="space-y-5">
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Task Title</label>
+            <input 
+              required
+              name="title"
+              type="text" 
+              className="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all"
+              placeholder="e.g., Prepare buttercream frosting"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Category</label>
+            <select 
+              name="category"
+              required
+              className="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all"
+            >
+              {categories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Time</label>
+            <input 
+              required
+              name="time"
+              type="time" 
+              className="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all"
+              defaultValue="09:00"
+            />
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button 
+              type="button"
+              onClick={onClose}
+              className="flex-1 btn btn-secondary py-3"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit"
+              disabled={isLoading}
+              className="flex-1 btn btn-primary py-3 flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <Save className="w-4 h-4" /> Add Task
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

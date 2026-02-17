@@ -59,7 +59,7 @@ export default function Home() {
             <div>
               <h2 className="text-4xl md:text-5xl font-serif font-black mb-8">Why Join the <span className="text-pink-400">Beta</span>?</h2>
               <p className="text-gray-400 text-lg mb-10 leading-relaxed">
-                We're building BakeBot alongside the world's most talented custom bakers. As a beta tester, you'll get:
+                We&apos;re building BakeBot alongside the world&apos;s most talented custom bakers. As a beta tester, you&apos;ll get:
               </p>
               
               <ul className="space-y-6">
@@ -133,8 +133,8 @@ export default function Home() {
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-pink-200 rounded-full text-primary text-xs font-bold mb-6">
               <Sparkles className="w-3 h-3 fill-current animate-pulse" /> <span>Coming Soon</span>
             </div>
-            <h2 className="text-4xl font-serif font-black mb-6 text-secondary">What's Next</h2>
-            <p className="text-gray-500">We're constantly evolving. Here's what we're building for you next.</p>
+            <h2 className="text-4xl font-serif font-black mb-6 text-secondary">What&apos;s Next</h2>
+            <p className="text-gray-500">We&apos;re constantly evolving. Here&apos;s what we&apos;re building for you next.</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">

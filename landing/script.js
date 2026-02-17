@@ -29,6 +29,8 @@ const errorText = document.getElementById('error-text');
 const userStatus = document.getElementById('user-status');
 const userEmail = document.getElementById('user-email');
 const logoutBtn = document.getElementById('logout-btn');
+const googleLoginBtn = document.getElementById('google-login-btn');
+const appleLoginBtn = document.getElementById('apple-login-btn');
 
 /**
  * Validates email format
@@ -36,7 +38,7 @@ const logoutBtn = document.getElementById('logout-btn');
  * @returns {boolean} - True if valid, false otherwise
  */
 function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
 }
 
@@ -59,6 +61,11 @@ function showError(message) {
     errorText.textContent = message;
     errorMessage.style.display = 'flex';
     successMessage.style.display = 'none';
+
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        errorMessage.style.display = 'none';
+    }, 5000);
 }
 
 /**
@@ -74,6 +81,7 @@ function hideMessages() {
  * @param {boolean} isLoading - Whether form is submitting
  */
 function setLoginLoadingState(isLoading) {
+    document.body.classList.toggle('auth-loading', isLoading);
     if (isLoading) {
         loginBtn.disabled = true;
         loginSubmitText.style.display = 'none';
@@ -90,6 +98,7 @@ function setLoginLoadingState(isLoading) {
  * @param {boolean} isLoading - Whether form is submitting
  */
 function setSignupLoadingState(isLoading) {
+    document.body.classList.toggle('auth-loading', isLoading);
     if (isLoading) {
         signupBtn.disabled = true;
         signupSubmitText.style.display = 'none';
@@ -203,15 +212,8 @@ async function handleSignup(e) {
 
     const email = document.getElementById('signup-email').value.trim();
     const password = document.getElementById('signup-password').value;
-    const roleElements = document.getElementsByName('role');
-    let role = 'baker'; // Default value
-
-    for (const elem of roleElements) {
-        if (elem.checked) {
-            role = elem.value;
-            break;
-        }
-    }
+    const roleInput = document.querySelector('input[name="role"]:checked');
+    const role = roleInput ? roleInput.value : 'baker';
 
     // Validate inputs
     if (!email || !password) {
@@ -283,6 +285,25 @@ async function handleSignup(e) {
 }
 
 /**
+ * Handles social login (Google/Apple)
+ * @param {string} provider - 'google' | 'apple'
+ */
+async function handleSocialLogin(provider) {
+    try {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: provider,
+            options: {
+                redirectTo: window.location.href // Redirects back to this page after login
+            }
+        });
+        if (error) throw error;
+    } catch (error) {
+        console.error(`${provider} login error:`, error);
+        showError(`Unable to connect with ${provider}. Please try again.`);
+    }
+}
+
+/**
  * Handles logout
  */
 async function handleLogout() {
@@ -323,6 +344,10 @@ function init() {
 
     // Logout
     logoutBtn.addEventListener('click', handleLogout);
+
+    // Social Login Listeners (if elements exist in HTML)
+    if (googleLoginBtn) googleLoginBtn.addEventListener('click', () => handleSocialLogin('google'));
+    if (appleLoginBtn) appleLoginBtn.addEventListener('click', () => handleSocialLogin('apple'));
 
     // Input event listeners to clear errors
     document.getElementById('login-email').addEventListener('input', hideMessages);

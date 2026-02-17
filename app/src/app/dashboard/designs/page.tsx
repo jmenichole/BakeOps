@@ -12,6 +12,7 @@ interface Design {
   title: string;
   description: string | null;
   image_url: string | null;
+  configuration: Record<string, unknown> | null;
   estimated_price: number;
   baker_id: string;
   created_at: string;
@@ -252,7 +253,7 @@ export default function DesignListPage() {
             <Search className="w-10 h-10" />
           </div>
           <h2 className="text-2xl font-serif font-black text-secondary mb-2">No results found</h2>
-          <p className="text-gray-500 mb-10 max-w-sm mx-auto">No designs match "{searchQuery}". Try a different search term.</p>
+          <p className="text-gray-500 mb-10 max-w-sm mx-auto">No designs match &quot;{searchQuery}&quot;. Try a different search term.</p>
           <button 
             onClick={() => setSearchQuery('')} 
             className="btn btn-primary px-8 py-4"
