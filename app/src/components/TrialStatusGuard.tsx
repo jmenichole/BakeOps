@@ -17,7 +17,7 @@ export function TrialStatusGuard({ children }: { children: React.ReactNode }) {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        setLoading(false);
+        router.push('/login');
         return;
       }
 
