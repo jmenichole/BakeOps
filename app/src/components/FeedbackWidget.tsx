@@ -1,30 +1,57 @@
 'use client';
 
 import { useState } from 'react';
-import { MessageSquarePlus, X, Send, Check } from 'lucide-react';
+import { MessageSquarePlus, X, Send, Check, Sparkles } from 'lucide-react';
+import { createBrowserClient } from '@/lib/supabase';
+import { toast } from '@/hooks/useToast';
 
 export function FeedbackWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const supabase = createBrowserClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    console.log('Feedback submitted:', feedback);
-    setIsSuccess(true);
-    setIsSubmitting(false);
-    setFeedback('');
-    
-    setTimeout(() => {
-      setIsSuccess(false);
-      setIsOpen(false);
-    }, 3000);
+
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Submit feedback to database
+      const { error } = await supabase.from('feedback').insert({
+        user_id: user?.id,
+        message: feedback,
+        source: 'widget',
+      });
+
+      if (error) throw error;
+
+      // Also call API endpoint for additional processing
+      await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message: feedback,
+          userEmail: user?.email,
+        }),
+      });
+
+      setIsSuccess(true);
+      setFeedback('');
+      
+      setTimeout(() => {
+        setIsSuccess(false);
+        setIsOpen(false);
+      }, 3000);
+    } catch (error) {
+      console.error('Feedback submission error:', error);
+      toast.error('Failed to submit feedback. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -45,7 +72,11 @@ export function FeedbackWidget() {
             <h3 className="font-bold flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-pink-400" /> Beta Feedback
             </h3>
-            <button onClick={() => setIsOpen(false)} className="hover:text-pink-400">
+            <button 
+              onClick={() => setIsOpen(false)} 
+              className="hover:text-pink-400"
+              aria-label="Close feedback form"
+            >
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -89,25 +120,5 @@ export function FeedbackWidget() {
         </div>
       )}
     </div>
-  );
-}
-
-function Sparkles({ className }: { className?: string }) {
-  return (
-    <svg 
-      className={className} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    >
-      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
-      <path d="M5 3v4"/>
-      <path d="M19 17v4"/>
-      <path d="M3 5h4"/>
-      <path d="M17 19h4"/>
-    </svg>
   );
 }
