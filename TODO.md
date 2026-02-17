@@ -1,32 +1,24 @@
-# TODO List for BakeBot Deployment
+# Deployment Completion Tasks
 
-## 1. Deploy Landing Page ✅
-- Deploy static landing page to Netlify
-- Update script.js with production Supabase function URL
-- Configure custom domain if needed
+## Completed Tasks
+- [x] Analyzed project structure and deployment requirements
+- [x] Fix Tailwind CSS v4 configuration (updated globals.css to use v4 syntax)
 
-## 2. Deploy Supabase Functions ✅
-- Install Supabase CLI
-- Deploy waitlist-signup and stats functions
-- Configure production environment variables
+## Pending Tasks
+- [x] Update root vercel.json to include backend API routes
+- [x] Create .env.example for frontend (app/)
+- [x] Create .env.example for backend
+- [x] Verify all deployment configurations are correct
+- [x] Fix Tailwind CSS v4 build issues (nested @utility and dependencies)
+- [ ] Configure Environment Variables in Vercel Dashboard (Supabase, Stripe, Cron Secret)
+- [ ] Run final production deployment
+- [x] Improve Beta Tester Survey (better questions, dismissal logic)
+- [x] Replace hardcoded dashboard stats with real data fetching
+- [ ] Implement real AI generation endpoint for cake designs
+- [ ] Connect "Save Draft" and "Send to Customer" to Supabase
+- [ ] Add basic pricing engine logic for cake quotes
 
-## 3. Deploy Backend ✅
-- Install Vercel CLI
-- Deploy Node.js backend as serverless functions
-- Configure production environment variables
-
-## 4. Configure Production Environment ✅
-- Set up production secrets in hosting providers
-- Update environment variables for all components
-- Test database connections
-
-## 5. End-to-End Testing ✅
-- Test waitlist signup flow
-- Test stats endpoint
-- Test backend traction report functionality
-- Verify all components work together
-
-## 6. Monitoring & Maintenance ✅
-- Set up basic monitoring
-- Configure error tracking
-- Document production deployment process
+## Notes
+- Project is a monorepo with "app" (Next.js) and "backend" (Vercel serverless functions)
+- Uses Supabase for authentication and database
+- Tailwind v4 now uses CSS-based configuration (@theme directive)
