@@ -1,12 +1,12 @@
 /**
- * Shared constants for the BakeBot application
+ * Shared constants for the Bake Ops application
  */
 
 // LocalStorage keys
 export const STORAGE_KEYS = {
-  ONBOARDING_SEEN: 'bakebot_onboarding_seen',
+  ONBOARDING_SEEN: 'bakeops_onboarding_seen',
   SURVEY_DISMISSED: 'survey_dismissed',
-  THEME: 'bakebot_theme',
+  THEME: 'bakeops_theme',
 } as const;
 
 // API endpoints

@@ -52,7 +52,7 @@ export default function ReferralsPage() {
     <div className="max-w-4xl mx-auto">
       <div className="mb-10">
         <h1 className="text-3xl font-bold">Affiliate Program</h1>
-        <p className="text-gray-500 mt-1">Spread the word and get rewarded for every baker you bring to BOT.</p>
+        <p className="text-gray-500 mt-1">Spread the word and get rewarded for every baker you bring to Bake Ops.</p>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6 mb-10">

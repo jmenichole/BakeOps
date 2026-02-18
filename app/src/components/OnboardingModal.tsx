@@ -60,9 +60,9 @@ export function OnboardingModal() {
               <div className="w-20 h-20 bg-pink-50 rounded-[2rem] flex items-center justify-center mx-auto border border-pink-100">
                 <Sparkles className="w-10 h-10 text-primary" />
               </div>
-              <h2 className="text-3xl font-serif font-black text-secondary">Welcome to BakeBot!</h2>
+              <h2 className="text-3xl font-serif font-black text-secondary">Welcome to Bake Ops!</h2>
               <p className="text-gray-500 leading-relaxed">
-                We&apos;re so excited to have you in our beta program. BakeBot is designed to help you spend less time on paperwork and more time decorating.
+                We&apos;re so excited to have you in our beta program. Bake Ops is designed to help you spend less time on paperwork and more time decorating.
               </p>
               <button 
                 onClick={() => setStep(2)}
@@ -114,7 +114,7 @@ export function OnboardingModal() {
                 <h3 className="text-2xl font-serif font-black text-secondary">Install the App</h3>
               </div>
               <p className="text-sm text-gray-500 leading-relaxed">
-                BakeBot works best when installed as an app on your phone. It&apos;s fast, convenient, and takes up zero storage.
+                Bake Ops works best when installed as an app on your phone. It&apos;s fast, convenient, and takes up zero storage.
               </p>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

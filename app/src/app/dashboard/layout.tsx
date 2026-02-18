@@ -2,17 +2,18 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  ShoppingBag, 
-  Palette, 
-  Calendar, 
-  LogOut, 
-  Menu, 
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  Palette,
+  Calendar,
+  LogOut,
+  Menu,
   X,
   Plus,
   Clock,
-  Gift
+  Gift,
+  Settings
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
@@ -63,6 +64,7 @@ export default function DashboardLayout({
     { name: 'Designs', href: '/dashboard/designs', icon: Palette },
     { name: 'Production', href: '/dashboard/production', icon: Calendar },
     { name: 'Affiliates', href: '/dashboard/referrals', icon: Gift },
+    { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ];
 
   return (
@@ -71,7 +73,7 @@ export default function DashboardLayout({
         {/* Sidebar - Desktop */}
         <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200">
           <div className="p-6">
-            <Link href="/" className="text-2xl font-serif font-black text-secondary">BOT</Link>
+            <Link href="/" className="text-2xl font-serif font-black text-secondary">Bake Ops</Link>
           </div>
           
           <nav className="flex-1 px-4 space-y-2 py-4">
@@ -123,7 +125,7 @@ export default function DashboardLayout({
 
         {/* Mobile Header */}
         <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 z-50">
-          <Link href="/" className="text-xl font-serif font-black text-secondary">BOT</Link>
+          <Link href="/" className="text-xl font-serif font-black text-secondary">Bake Ops</Link>
           <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
             {isMobileMenuOpen ? <X /> : <Menu />}
           </button>

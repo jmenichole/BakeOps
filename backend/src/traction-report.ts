@@ -6,25 +6,15 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 
 dotenv.config();
 
-interface WaitlistEntry {
-  id: string;
-  email: string;
-  role: string;
-  source: string;
-  created_at: string;
-}
-
 interface TractionReportData {
-  totalSignups: number;
-  signupsByRole: Record<string, number>;
-  signupsBySource: Record<string, number>;
-  recentSignups: WaitlistEntry[];
+  totalBakers: number;
+  totalOrders: number;
+  totalDesigns: number;
+  totalRevenue: number;
+  recentOrders: { customer_name: string; status: string; total_price: number; created_at: string }[];
+  ordersByStatus: Record<string, number>;
 }
 
-/**
- * Validates required environment variables
- * @throws Error if any required variable is missing
- */
 function validateEnvironmentVariables(): void {
   const requiredEnvVars = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_SECRET_KEY'];
   const missingVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
@@ -34,10 +24,6 @@ function validateEnvironmentVariables(): void {
   }
 }
 
-/**
- * Creates and configures the Supabase client
- * @returns Configured Supabase client
- */
 function createSupabaseClient() {
   return createClient(
     process.env.SUPABASE_URL!,
@@ -45,10 +31,6 @@ function createSupabaseClient() {
   );
 }
 
-/**
- * Creates and configures the email transporter
- * @returns Configured nodemailer transporter
- */
 function createEmailTransporter() {
   return nodemailer.createTransport({
     service: 'Outlook',
@@ -59,89 +41,66 @@ function createEmailTransporter() {
   });
 }
 
-/**
- * Fetches waitlist data from Supabase
- * @param supabase - Supabase client instance
- * @returns Array of waitlist entries
- */
-async function fetchWaitlistData(supabase: any): Promise<WaitlistEntry[]> {
-  const { data: waitlist, error } = await supabase
-    .from('waitlist_signups') // Corrected table name
-    .select('*')
-    .order('created_at', { ascending: false });
+async function fetchTractionData(supabase: any): Promise<TractionReportData> {
+  const [bakersRes, ordersRes, designsRes] = await Promise.all([
+    supabase.from('bakers').select('id', { count: 'exact', head: true }),
+    supabase.from('orders').select('*').order('created_at', { ascending: false }),
+    supabase.from('cake_designs').select('id', { count: 'exact', head: true }),
+  ]);
 
-  if (error) {
-    throw new Error(`Failed to fetch waitlist data: ${error.message}`);
-  }
+  if (bakersRes.error) throw new Error(`Failed to fetch bakers: ${bakersRes.error.message}`);
+  if (ordersRes.error) throw new Error(`Failed to fetch orders: ${ordersRes.error.message}`);
+  if (designsRes.error) throw new Error(`Failed to fetch designs: ${designsRes.error.message}`);
 
-  return waitlist || [];
-}
+  const orders = ordersRes.data || [];
+  const ordersByStatus: Record<string, number> = {};
+  let totalRevenue = 0;
 
-/**
- * Generates traction report data from waitlist entries
- * @param waitlist - Array of waitlist entries
- * @returns Processed traction report data
- */
-function generateTractionData(waitlist: WaitlistEntry[]): TractionReportData {
-  const totalSignups = waitlist.length;
-
-  const signupsByRole: Record<string, number> = {};
-  const signupsBySource: Record<string, number> = {};
-
-  waitlist.forEach(entry => {
-    signupsByRole[entry.role] = (signupsByRole[entry.role] || 0) + 1;
-    signupsBySource[entry.source] = (signupsBySource[entry.source] || 0) + 1;
+  orders.forEach((o: any) => {
+    ordersByStatus[o.status] = (ordersByStatus[o.status] || 0) + 1;
+    totalRevenue += Number(o.total_price) || 0;
   });
 
-  const recentSignups = waitlist.slice(0, 10); // Last 10 signups
-
   return {
-    totalSignups,
-    signupsByRole,
-    signupsBySource,
-    recentSignups,
+    totalBakers: bakersRes.count || 0,
+    totalOrders: orders.length,
+    totalDesigns: designsRes.count || 0,
+    totalRevenue,
+    recentOrders: orders.slice(0, 10).map((o: any) => ({
+      customer_name: o.customer_name || 'Unknown',
+      status: o.status,
+      total_price: Number(o.total_price) || 0,
+      created_at: o.created_at,
+    })),
+    ordersByStatus,
   };
 }
 
-/**
- * Generates HTML email content for the traction report
- * @param data - Traction report data
- * @returns HTML string for email
- */
 function generateEmailContent(data: TractionReportData): string {
-  const roleBreakdown = Object.entries(data.signupsByRole)
-    .map(([role, count]) => `<li>${role}: ${count}</li>`)
+  const statusBreakdown = Object.entries(data.ordersByStatus)
+    .map(([status, count]) => `<li>${status}: ${count}</li>`)
     .join('');
 
-  const sourceBreakdown = Object.entries(data.signupsBySource)
-    .map(([source, count]) => `<li>${source}: ${count}</li>`)
-    .join('');
-
-  const recentSignupsList = data.recentSignups
-    .map(entry => `<li>${entry.email} (${entry.role}) - ${new Date(entry.created_at).toLocaleDateString()}</li>`)
+  const recentList = data.recentOrders
+    .map(o => `<li>${o.customer_name} - $${o.total_price} (${o.status}) - ${new Date(o.created_at).toLocaleDateString()}</li>`)
     .join('');
 
   return `
     <h1>Monthly Traction Report</h1>
     <h2>Summary</h2>
-    <p><strong>Total Waitlist Signups:</strong> ${data.totalSignups}</p>
+    <p><strong>Total Bakers:</strong> ${data.totalBakers}</p>
+    <p><strong>Total Orders:</strong> ${data.totalOrders}</p>
+    <p><strong>Total Designs:</strong> ${data.totalDesigns}</p>
+    <p><strong>Total Revenue:</strong> $${data.totalRevenue.toFixed(2)}</p>
 
-    <h2>Signups by Role</h2>
-    <ul>${roleBreakdown}</ul>
+    <h2>Orders by Status</h2>
+    <ul>${statusBreakdown || '<li>No orders yet</li>'}</ul>
 
-    <h2>Signups by Source</h2>
-    <ul>${sourceBreakdown}</ul>
-
-    <h2>Recent Signups (Last 10)</h2>
-    <ul>${recentSignupsList}</ul>
+    <h2>Recent Orders (Last 10)</h2>
+    <ul>${recentList || '<li>No orders yet</li>'}</ul>
   `;
 }
 
-/**
- * Sends the traction report email
- * @param transporter - Email transporter
- * @param emailContent - HTML content for the email
- */
 async function sendTractionReportEmail(transporter: any, emailContent: string): Promise<void> {
   const mailOptions = {
     from: process.env.EMAIL_USER,
@@ -153,20 +112,13 @@ async function sendTractionReportEmail(transporter: any, emailContent: string): 
   await transporter.sendMail(mailOptions);
 }
 
-/**
- * Generates and sends the monthly traction report
- * @returns Promise that resolves when report is sent
- */
 export async function generateTractionReport(): Promise<void> {
   try {
     validateEnvironmentVariables();
 
     const supabase = createSupabaseClient();
+    const tractionData = await fetchTractionData(supabase);
 
-    const waitlist = await fetchWaitlistData(supabase);
-    const tractionData = generateTractionData(waitlist);
-
-    // Only send email if email credentials are configured
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       const transporter = createEmailTransporter();
       const emailContent = generateEmailContent(tractionData);
@@ -177,12 +129,10 @@ export async function generateTractionReport(): Promise<void> {
     }
   } catch (error) {
     console.error('Error generating traction report:', error);
-    // Don't re-throw for scheduled jobs to prevent crashes
   }
 }
 
 // Schedule the report to run on the 1st of every month at midnight
-// Only run this if not in Vercel environment (where we use Vercel Crons)
 if (!process.env.VERCEL) {
   schedule.scheduleJob('0 0 1 * *', async () => {
     try {
@@ -197,7 +147,6 @@ if (!process.env.VERCEL) {
  * Vercel Serverless Function handler
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Add basic authentication for the cron job (e.g., check for a secret header)
   const authHeader = req.headers.authorization;
   if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return res.status(401).json({ success: false, error: 'Unauthorized' });

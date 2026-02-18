@@ -26,7 +26,7 @@ export function SiteFooter() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="text-3xl font-serif font-black text-white mb-6 block">BOT</Link>
+            <Link href="/" className="text-3xl font-serif font-black text-white mb-6 block">Bake Ops</Link>
             <p className="text-gray-400 text-sm leading-relaxed">
               AI-Powered Cake Design Platform for Professional Bakers.
               Efficiency baked into every order.
@@ -66,7 +66,7 @@ export function SiteFooter() {
 
         <div className="border-t border-white/10 pt-10 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-gray-500">
-            &copy; 2026 BakeBot. All rights reserved. Built with ❤️ for Bakers.
+            &copy; 2026 Bake Ops. All rights reserved. Built with love for Bakers.
           </p>
           <div className="flex gap-6">
             <a href="#" className="text-gray-500 hover:text-white transition-colors text-xs">Instagram</a>

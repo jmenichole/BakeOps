@@ -14,7 +14,7 @@ export default function TrialExpiredPage() {
         <h1 className="text-4xl font-serif font-black mb-4">Beta Trial Completed!</h1>
         <p className="text-xl text-gray-600 mb-10 leading-relaxed">
           Thank you for being part of our early beta! Your 14-day testing period has ended. 
-          We&apos;re currently polishing the final version of <strong>BakeBot</strong> based on your feedback.
+          We&apos;re currently polishing the final version of <strong>Bake Ops</strong> based on your feedback.
         </p>
 
         <div className="grid md:grid-cols-2 gap-6 mb-10 text-left">
@@ -40,7 +40,7 @@ export default function TrialExpiredPage() {
         </div>
         
         <p className="mt-8 text-sm text-gray-400">
-          Have more feedback? <a href="mailto:beta@bakebot.ai" className="text-primary hover:underline">beta@bakebot.ai</a>
+          Have more feedback? <a href="mailto:beta@bakeops.app" className="text-primary hover:underline">beta@bakeops.app</a>
         </p>
       </div>
     </div>

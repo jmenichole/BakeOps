@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
 export const metadata: Metadata = {
-  title: "BOT — Baked On Time | AI-Powered Cake Design Platform",
+  title: "Bake Ops | AI-Powered Cake Design Platform",
   description: "AI-Powered Cake Quotes & Designs — Turn customer ideas into instant cake mockups, accurate quotes, and auto-bookings.",
 };
 

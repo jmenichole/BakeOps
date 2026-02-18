@@ -34,9 +34,9 @@ export async function GET(req: Request) {
 
     // 3. Send Report Email
     await resend.emails.send({
-      from: 'BakeBot Reports <reports@resend.dev>',
+      from: 'Bake Ops Reports <reports@resend.dev>',
       to: ['jmenichole007@outlook.com'],
-      subject: `Daily BakeBot Report - ${new Date().toLocaleDateString()}`,
+      subject: `Daily Bake Ops Report - ${new Date().toLocaleDateString()}`,
       html: `
         <h1>Daily Beta Report</h1>
         <p><strong>Unique Active Users:</strong> ${uniqueUsers}</p>

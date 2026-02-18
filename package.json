@@ -1,5 +1,5 @@
 {
-  "name": "bakebot-monorepo",
+  "name": "bakeops-monorepo",
   "version": "1.0.0",
   "workspaces": [
     "app",
@@ -19,6 +19,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.6.1",
     "date-fns": "^4.1.0",
     "resend": "^6.9.2"
   },

@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-BakeBot (aka "BOT - Baked On Time") is a web-based platform for custom bakers to accept orders through AI-powered cake design and automated pricing. The application features AI image generation, dynamic pricing, production planning, and payment processing.
+Bake Ops is a web-based platform for custom bakers to accept orders through AI-powered cake design and automated pricing. The application features AI image generation, dynamic pricing, production planning, and payment processing.
 
 ## Monorepo Structure
 
 This is an npm workspaces monorepo with two main packages:
 
-- `app/` - Next.js 16 frontend application (React 19, TypeScript, Tailwind CSS v4)
+- `app/` - Next.js 14 frontend application (React 18, TypeScript, Tailwind CSS v4)
 - `backend/` - TypeScript backend (primarily serverless functions)
 
 Additional directories:
@@ -54,8 +54,8 @@ npm run lint:app  # Same as above
 ## Tech Stack & Architecture
 
 ### Frontend (Next.js App)
-- **Framework**: Next.js 16 with App Router
-- **UI**: React 19, TypeScript, Tailwind CSS v4
+- **Framework**: Next.js 14 with App Router
+- **UI**: React 18, TypeScript, Tailwind CSS v4
 - **Styling**: Tailwind CSS v4 (uses CSS-based config in `globals.css`, no `tailwind.config.js`)
 - **Forms**: react-hook-form with zod validation
 - **Icons**: lucide-react
@@ -80,7 +80,8 @@ npm run lint:app  # Same as above
 - **Supabase**: Authentication, PostgreSQL database, edge functions
 - **Vercel**: Deployment platform with cron job support (monthly traction report)
 - **Stripe**: Payment processing (referenced but not fully integrated)
-- **AI Image Generation**: Stable Diffusion API integration planned
+- **AI Image Generation**: Stability AI (Stable Diffusion) via `/api/generate`
+- **Email**: Resend for transactional emails
 
 ## Important Files & Directories
 
@@ -88,7 +89,7 @@ npm run lint:app  # Same as above
 ```
 app/src/
 ├── app/                    # Next.js App Router
-│   ├── api/               # API routes (generate, report, survey, traction-report, waitlist-signup)
+│   ├── api/               # API routes (generate, feedback, report, survey, traction-report, track-referral)
 │   ├── dashboard/         # Protected dashboard pages
 │   │   ├── designs/       # Design management
 │   │   ├── orders/        # Order management
@@ -106,9 +107,12 @@ app/src/
 │   └── trial-expired/
 ├── components/            # Shared React components
 │   ├── DailySurveyModal.tsx
+│   ├── AuthButton.tsx
 │   ├── DesignDetailModal.tsx
 │   ├── FeedbackWidget.tsx
+│   ├── NewOrderModal.tsx
 │   ├── OnboardingModal.tsx
+│   ├── OrderManagementModal.tsx
 │   ├── SiteFooter.tsx
 │   └── TrialStatusGuard.tsx
 └── lib/                   # Utility functions
@@ -120,9 +124,9 @@ app/src/
 ### Backend Structure
 ```
 backend/src/
+├── index.ts               # Entry point (re-exports handlers)
 ├── traction-report.ts     # Monthly traction email generation
-├── traction-report.test.ts
-└── waitlist-signup.ts     # Waitlist signup handling
+└── traction-report.test.ts
 ```
 
 ### Supabase
@@ -144,11 +148,11 @@ Key dashboard pages:
 - **Orders** (`/dashboard/orders`) - Order management with "Send to Customer" and "Save as Draft" features
 - **Production** (`/dashboard/production`) - Production planning with multi-day prep scheduling
 - **Referrals** (`/dashboard/referrals`) - Affiliate program management
-- **Settings** (`/dashboard/settings`) - User profile and preferences (mostly UI only, database integration incomplete)
+- **Settings** (`/dashboard/settings`) - User profile, notifications, account management (change password, logout, delete account)
 
 ## Authentication & Authorization
 
-- Uses Supabase Auth with NextAuth.js
+- Uses Supabase Auth via @supabase/auth-helpers-nextjs
 - Protected routes wrapped with TrialStatusGuard component
 - Trial system limits access after expiration
 - Auth helpers from @supabase/auth-helpers-nextjs
@@ -170,10 +174,9 @@ Environment variables required (see `.env.vercel` for Vercel setup):
 ## Known Issues & Incomplete Features
 
 See `TODO.md` for comprehensive list. Key items:
-- Settings page doesn't save to database yet
-- Production "Add Manual" button exists but needs onClick handler implementation
+- See `ISSUES.md` for full audit findings and fix phases
 - Design history needs to be limited to last 20 designs or 30 days
-- Many profile editing features are UI-only without backend persistence
+- Production "Add Manual" button exists but needs onClick handler implementation
 
 ## Code Style & Patterns
 

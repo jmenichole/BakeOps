@@ -11,7 +11,7 @@ export default function RefundPage() {
           <section>
             <h2 className="text-xl font-bold text-gray-900 mb-4">1. Beta Testing Period</h2>
             <p>
-              During the beta testing period, BakeBot is free to use for 14 days. No refunds are applicable for free trial periods.
+              During the beta testing period, Bake Ops is free to use for 14 days. No refunds are applicable for free trial periods.
             </p>
           </section>
 
