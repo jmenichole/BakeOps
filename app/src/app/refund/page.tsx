@@ -18,7 +18,7 @@ export default function RefundPage() {
           <section>
             <h2 className="text-xl font-bold text-gray-900 mb-4">2. Lifetime Plan</h2>
             <p>
-              Our Lifetime Plan offered to beta testers is a one-time payment. We offer a 14-day "no questions asked" refund policy for this plan if you are not satisfied with the Service.
+              Our Lifetime Plan offered to beta testers is a one-time payment. We offer a 14-day &quot;no questions asked&quot; refund policy for this plan if you are not satisfied with the Service.
             </p>
           </section>
 

@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
         {!success ? (
           <>
             <h1 className="text-3xl font-serif font-black mb-2 text-secondary">Reset Password</h1>
-            <p className="text-gray-500 mb-8 text-sm">Enter your email and we'll send you a link to reset your password.</p>
+            <p className="text-gray-500 mb-8 text-sm">Enter your email and we&apos;ll send you a link to reset your password.</p>
 
             {error && (
               <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-2xl text-xs border border-red-100 flex items-center gap-3">
@@ -82,7 +82,7 @@ export default function ForgotPasswordPage() {
             </div>
             <h2 className="text-2xl font-serif font-black text-secondary mb-4">Check your email</h2>
             <p className="text-gray-500 leading-relaxed mb-10">
-              We've sent a password reset link to <span className="font-bold text-secondary">{email}</span>. Please check your inbox and spam folder.
+              We&apos;ve sent a password reset link to <span className="font-bold text-secondary">{email}</span>. Please check your inbox and spam folder.
             </p>
             <Link href="/login" className="btn btn-secondary w-full py-4">
               Return to Login

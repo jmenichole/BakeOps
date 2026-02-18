@@ -150,7 +150,7 @@ export function DailySurveyModal() {
 
               {step === 3 && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-                  <h2 className="text-xl sm:text-2xl font-serif font-black text-secondary">What's the #1 missing feature?</h2>
+                  <h2 className="text-xl sm:text-2xl font-serif font-black text-secondary">What&apos;s the #1 missing feature?</h2>
                   <p className="text-sm sm:text-base text-gray-500">What is the one thing keeping you from using BakeBot for your entire business?</p>
                   <textarea 
                     autoFocus
@@ -177,7 +177,7 @@ export function DailySurveyModal() {
                   <div className="bg-pink-50 p-5 sm:p-6 rounded-xl sm:rounded-2xl flex gap-4 mb-2 border border-pink-100">
                     <Info className="w-5 h-5 sm:w-6 sm:h-6 text-primary shrink-0" />
                     <p className="text-xs sm:text-sm text-pink-800 leading-relaxed font-medium">
-                      Your trial is ending soon. What <strong>monthly or yearly price</strong> would make BakeBot a "no-brainer" for your bakery?
+                      Your trial is ending soon. What <strong>monthly or yearly price</strong> would make BakeBot a &quot;no-brainer&quot; for your bakery?
                     </p>
                   </div>
                   <div className="relative">
@@ -220,7 +220,7 @@ export function DailySurveyModal() {
                 </div>
                 <h3 className="font-bold text-lg sm:text-xl mb-2 text-pink-400">Exclusive Beta Offer</h3>
                 <p className="text-xs sm:text-sm text-gray-300 mb-6">
-                  Upgrade today and lock in our <strong>Founder's Rate</strong> of $149 for lifetime access before we move to monthly subscriptions.
+                  Upgrade today and lock in our <strong>Founder&apos;s Rate</strong> of $149 for lifetime access before we move to monthly subscriptions.
                 </p>
                 <Link 
                   href="/pricing"

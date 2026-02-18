@@ -102,7 +102,7 @@ export default function DashboardLayout({
                 {trialDays !== null ? `${trialDays} Days Left` : 'Beta Trial'}
               </div>
               <p className="text-[10px] text-pink-800 leading-tight mb-3">
-                You're in the 14-day beta period. Enjoy full access!
+                You&apos;re in the 14-day beta period. Enjoy full access!
               </p>
               <button className="w-full py-2 bg-primary text-white text-[10px] font-bold rounded-lg hover:bg-primary-hover transition-colors">
                 UPGRADE NOW

@@ -1,12 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ShieldCheck, Sparkles, ArrowRight } from 'lucide-react';
 
 export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#FFF9F9]">
+        <div className="w-8 h-8 border-4 border-pink-200 border-t-pink-500 rounded-full animate-spin" />
+      </div>
+    }>
+      <SignupContent />
+    </Suspense>
+  );
+}
+
+function SignupContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('baker');
@@ -94,11 +106,11 @@ export default function SignupPage() {
           <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-8 animate-bounce border-4 border-white shadow-sm">✓</div>
           <h1 className="text-3xl font-serif font-black mb-4 text-secondary">BakeBot Welcome!</h1>
           <p className="text-gray-600 mb-6 leading-relaxed">
-            We've sent a confirmation link to <span className="text-secondary font-bold">{email}</span>. 
+            We&apos;ve sent a confirmation link to <span className="text-secondary font-bold">{email}</span>. 
           </p>
           <div className="bg-pink-50/50 p-6 rounded-2xl mb-10 border border-pink-100/50">
             <p className="text-xs text-pink-800 font-medium leading-relaxed">
-              <strong>Note:</strong> The email may appear from "Supabase" or "BakeBot Support". Please check your spam folder if you don't see it in 2 minutes.
+              <strong>Note:</strong> The email may appear from &quot;Supabase&quot; or &quot;BakeBot Support&quot;. Please check your spam folder if you don&apos;t see it in 2 minutes.
             </p>
           </div>
           <Link href="/login" className="btn btn-primary w-full py-4 text-lg">

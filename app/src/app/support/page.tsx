@@ -103,7 +103,7 @@ export default function SupportPage() {
               {!submitted ? (
                 <>
                   <h3 className="text-xl font-bold text-secondary mb-2">Send a Message</h3>
-                  <p className="text-sm text-gray-400 mb-8">Need something specific? We're here.</p>
+                  <p className="text-sm text-gray-400 mb-8">Need something specific? We&apos;re here.</p>
                   
                   <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
@@ -148,7 +148,7 @@ export default function SupportPage() {
                   </div>
                   <h3 className="text-xl font-bold text-secondary mb-2">Message Sent!</h3>
                   <p className="text-sm text-gray-500 leading-relaxed mb-8">
-                    Thanks for reaching out. We've received your request and will get back to you shortly.
+                    Thanks for reaching out. We&apos;ve received your request and will get back to you shortly.
                   </p>
                   <button onClick={() => setSubmitted(false)} className="text-primary font-bold hover:underline text-sm">Send another message</button>
                 </div>

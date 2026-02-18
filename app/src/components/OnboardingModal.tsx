@@ -62,21 +62,21 @@ export function OnboardingModal() {
               </div>
               <h2 className="text-3xl font-serif font-black text-secondary">Welcome to BakeBot!</h2>
               <p className="text-gray-500 leading-relaxed">
-                We're so excited to have you in our beta program. BakeBot is designed to help you spend less time on paperwork and more time decorating.
+                We&apos;re so excited to have you in our beta program. BakeBot is designed to help you spend less time on paperwork and more time decorating.
               </p>
               <button 
                 onClick={() => setStep(2)}
                 className="w-full btn btn-primary py-4 text-lg flex items-center justify-center gap-2 group"
                 aria-label="Get started with onboarding"
               >
-                Let's get started <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                Let&apos;s get started <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           )}
 
           {step === 2 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-              <h3 className="text-2xl font-serif font-black text-secondary">What's inside?</h3>
+              <h3 className="text-2xl font-serif font-black text-secondary">What&apos;s inside?</h3>
               <div className="space-y-4">
                 <div className="flex gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100">
                   <LayoutDashboard className="w-6 h-6 text-primary shrink-0" />
@@ -114,7 +114,7 @@ export function OnboardingModal() {
                 <h3 className="text-2xl font-serif font-black text-secondary">Install the App</h3>
               </div>
               <p className="text-sm text-gray-500 leading-relaxed">
-                BakeBot works best when installed as an app on your phone. It's fast, convenient, and takes up zero storage.
+                BakeBot works best when installed as an app on your phone. It&apos;s fast, convenient, and takes up zero storage.
               </p>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -122,14 +122,14 @@ export function OnboardingModal() {
                   <h4 className="font-bold text-primary text-xs uppercase tracking-widest mb-4">iPhone (iOS)</h4>
                   <ol className="text-xs space-y-3 text-pink-900">
                     <li className="flex gap-2"><Share className="w-3 h-3 shrink-0" /> 1. Tap the Share button in Safari</li>
-                    <li className="flex gap-2"><PlusSquare className="w-3 h-3 shrink-0" /> 2. Select "Add to Home Screen"</li>
+                    <li className="flex gap-2"><PlusSquare className="w-3 h-3 shrink-0" /> 2. Select &quot;Add to Home Screen&quot;</li>
                   </ol>
                 </div>
                 <div className="p-5 rounded-2xl border border-gray-100 bg-gray-50">
                   <h4 className="font-bold text-secondary text-xs uppercase tracking-widest mb-4">Android</h4>
                   <ol className="text-xs space-y-3 text-gray-500">
                     <li className="flex gap-2"><MoreVertical className="w-3 h-3 shrink-0" /> 1. Tap the three dots (menu)</li>
-                    <li className="flex gap-2"><Smartphone className="w-3 h-3 shrink-0" /> 2. Tap "Install App" or "Add to Home"</li>
+                    <li className="flex gap-2"><Smartphone className="w-3 h-3 shrink-0" /> 2. Tap &quot;Install App&quot; or &quot;Add to Home&quot;</li>
                   </ol>
                 </div>
               </div>
@@ -147,9 +147,9 @@ export function OnboardingModal() {
                 <CheckCircle2 className="w-12 h-12" />
               </div>
               <div className="space-y-3">
-                <h3 className="text-3xl font-serif font-black text-secondary">You're All Set!</h3>
+                <h3 className="text-3xl font-serif font-black text-secondary">You&apos;re All Set!</h3>
                 <p className="text-gray-500 max-w-sm mx-auto">
-                  We can't wait to see what you create. If you have any feedback, just use the widget in the corner.
+                  We can&apos;t wait to see what you create. If you have any feedback, just use the widget in the corner.
                 </p>
               </div>
               <button 

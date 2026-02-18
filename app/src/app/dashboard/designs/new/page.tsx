@@ -2,9 +2,14 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Sparkles, Save, Info, Palette, Send, Mail, Phone, Copy, X, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Sparkles, Save, Info, Palette, Send, Mail, Phone, Copy, X, Image as ImageIcon, Star, CheckCircle2, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { createBrowserClient } from '@/lib/supabase';
+
+interface FileData {
+  mimeType: string;
+  data: string;
+}
 
 export default function NewDesignPage() {
   const router = useRouter();
@@ -14,6 +19,8 @@ export default function NewDesignPage() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [savedDesignId, setSavedDesignId] = useState<string | null>(null);
   const [shareLink, setShareLink] = useState('');
+  const [referenceImages, setReferenceImages] = useState<FileData[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const quoteRef = useRef<HTMLDivElement>(null);
   const [config, setConfig] = useState({
     productType: 'cake', // cake, cupcakes, cookies, cakepops
@@ -26,9 +33,14 @@ export default function NewDesignPage() {
     notes: ''
   });
   const [isGenerating, setIsGenerating] = useState(false);
-  const [mockupUrl, setMockupUrl] = useState<string | null>(null);
+  const [currentDesign, setCurrentDesign] = useState<string | null>(null);
   const [useAiPricing, setUseAiPricing] = useState(true);
   const [manualPrice, setManualPrice] = useState<number | string>('');
+  const [accuracyRating, setAccuracyRating] = useState<number | null>(null);
+  const [feedbackComment, setFeedbackComment] = useState('');
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  const [refinementText, setRefinementText] = useState('');
   const [quote, setQuote] = useState({
     base: 65,
     decor: 0,
@@ -79,19 +91,55 @@ export default function NewDesignPage() {
   const flavors = ['Vanilla Bean', 'Rich Chocolate', 'Red Velvet', 'Lemon Zest', 'Carrot Cake', 'Confetti'];
   const fillings = ['None', 'Strawberry', 'Chocolate Ganache', 'Cream Cheese', 'Lemon Curd', 'Salted Caramel'];
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      if (referenceImages.length + files.length > 5) {
+        alert("You can only upload up to 5 reference images.");
+        return;
+      }
+
+      Array.from(files).forEach(file => {
+        if (file.size > 5 * 1024 * 1024) {
+          alert("One or more files are too large. Limit is 5MB per image.");
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          const matches = result.match(/^data:(.+);base64,(.+)$/);
+          if (matches) {
+            setReferenceImages(prev => [...prev, {
+              mimeType: matches[1],
+              data: matches[2]
+            }]);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const removeReference = (index: number) => {
+    setReferenceImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleGenerate = async () => {
     if (!config.theme) {
       alert('Please describe your theme first!');
       return;
     }
     setIsGenerating(true);
+    setCurrentDesign(null);
+
     try {
-      const prompt = `A professional bakery photograph of ${config.productType === 'cake' ? `${config.tiers} tier cake` : `${config.quantity} ${config.productType}`}, theme: ${config.theme}. ${config.addOns.length > 0 ? `Add-ons: ${config.addOns.join(', ')}.` : ''} High quality, detailed icing, elegant presentation, soft studio lighting.`;
+      const prompt = `((${config.productType === 'cake' ? `${config.tiers} tier cake` : `${config.quantity} ${config.productType}`})), professional bakery photograph, theme: ${config.theme}. ${config.addOns.length > 0 ? `Add-ons: ${config.addOns.join(', ')}.` : ''} High quality, detailed icing, elegant presentation, soft studio lighting.`;
       
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({ prompt, referenceImages })
       });
 
       const data = await response.json();
@@ -100,13 +148,76 @@ export default function NewDesignPage() {
         throw new Error(data.error);
       }
       
-      setMockupUrl(data.imageUrl);
+      setCurrentDesign(data.imageUrl);
       setStep(2);
+      setAccuracyRating(null);
+      setFeedbackComment('');
+      setFeedbackSubmitted(false);
     } catch (err: any) {
       console.error(err);
       alert('AI Generation failed: ' + err.message);
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleRefine = async () => {
+    if (!refinementText) return;
+    setIsGenerating(true);
+    
+    try {
+      // Construct a prompt that includes the refinement
+      const prompt = `((${config.productType === 'cake' ? `${config.tiers} tier cake` : `${config.quantity} ${config.productType}`})), professional bakery photograph, theme: ${config.theme}. ${config.addOns.length > 0 ? `Add-ons: ${config.addOns.join(', ')}.` : ''} Modifications: ${refinementText}. High quality, detailed icing, elegant presentation, soft studio lighting.`;
+      
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, referenceImages })
+      });
+
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      setCurrentDesign(data.imageUrl);
+      setRefinementText('');
+      setAccuracyRating(null);
+      setFeedbackSubmitted(false);
+    } catch (err: any) {
+      console.error(err);
+      alert('Refinement failed: ' + err.message);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleFeedbackSubmit = async () => {
+    if (!accuracyRating) return;
+    setIsSubmittingFeedback(true);
+    try {
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rating: accuracyRating,
+          comment: feedbackComment,
+          prompt: config.theme
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit feedback.');
+      }
+
+      setFeedbackSubmitted(true);
+    } catch (err) {
+      console.error('Feedback error:', err);
+      alert(`Error: ${err instanceof Error ? err.message : 'Could not submit feedback.'}`);
+    } finally {
+      setIsSubmittingFeedback(false);
     }
   };
 
@@ -127,7 +238,7 @@ export default function NewDesignPage() {
           baker_id: user.id,
           title: `${config.productType.toUpperCase()}: ${config.theme.slice(0, 20)}...` || 'Custom Design',
           description: config.theme,
-          image_url: mockupUrl,
+          image_url: currentDesign,
           configuration_data: config,
           estimated_price: finalPrice,
           is_public: false
@@ -210,7 +321,7 @@ export default function NewDesignPage() {
 
   // Handle saving as image
   const handleSaveAsImage = async () => {
-    if (!mockupUrl) return;
+    if (!currentDesign) return;
     
     setIsSaving(true);
     try {
@@ -229,7 +340,7 @@ export default function NewDesignPage() {
           baker_id: user.id,
           title: `${config.productType.toUpperCase()}: ${config.theme.slice(0, 20)}...` || 'Custom Design',
           description: config.theme,
-          image_url: mockupUrl,
+          image_url: currentDesign,
           configuration_data: config,
           estimated_price: finalPrice,
           is_public: false,
@@ -239,9 +350,12 @@ export default function NewDesignPage() {
         .single();
 
       if (designError) throw designError;
+      if (!design) throw new Error('Design was not created.');
+
+    
 
       // Download the mockup image
-      const response = await fetch(mockupUrl);
+      const response = await fetch(currentDesign);
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       
@@ -383,6 +497,40 @@ export default function NewDesignPage() {
                 />
               </div>
             </div>
+
+            {/* Reference Images */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 ml-1">
+                Your Style References (Max 5)
+              </label>
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-2">
+                {referenceImages.map((img, idx) => (
+                  <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 group">
+                    <img 
+                      src={`data:${img.mimeType};base64,${img.data}`} 
+                      alt={`Ref ${idx}`} 
+                      className="w-full h-full object-cover" 
+                    />
+                    <button 
+                      onClick={() => removeReference(idx)}
+                      className="absolute top-1 right-1 bg-white/80 text-gray-700 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-600"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+                {referenceImages.length < 5 && (
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="aspect-square rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:bg-gray-50 hover:border-primary transition-all"
+                  >
+                    <Plus size={20} />
+                    <span className="text-xs mt-1">Add</span>
+                  </button>
+                )}
+              </div>
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple onChange={handleFileChange} />
+            </div>
           </div>
 
           <button 
@@ -407,11 +555,75 @@ export default function NewDesignPage() {
         {/* Right: Preview / Mockup */}
         <div className="space-y-6">
           <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm aspect-square flex flex-col items-center justify-center relative overflow-hidden">
-            {mockupUrl ? (
+            {currentDesign ? (
               <>
-                <img src={mockupUrl} alt="Cake Mockup" className="w-full h-full object-cover rounded-xl" />
+                <img src={currentDesign} alt="Cake Mockup" className="w-full h-full object-cover rounded-xl" />
                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-primary shadow-sm flex items-center gap-1">
                   <Sparkles className="w-3 h-3" /> AI GENERATED
+                </div>
+
+                {/* Accuracy Feedback */}
+                <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-pink-100 animate-in slide-in-from-bottom-2">
+                  {feedbackSubmitted ? (
+                    <div className="text-green-600 flex items-center justify-center gap-2 font-bold text-sm">
+                      <CheckCircle2 className="w-4 h-4" /> Thanks for your feedback!
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Rate Accuracy</span>
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              onClick={() => setAccuracyRating(star)}
+                              className="hover:scale-110 transition-transform focus:outline-none"
+                            >
+                              <Star 
+                                className={`w-5 h-5 ${accuracyRating && star <= accuracyRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 hover:text-yellow-400'}`} 
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {accuracyRating && (
+                        <div className="animate-in fade-in slide-in-from-top-1">
+                          <textarea
+                            value={feedbackComment}
+                            onChange={(e) => setFeedbackComment(e.target.value)}
+                            placeholder="What could be better? (Optional)"
+                            className="w-full p-2 text-xs border border-gray-200 rounded-lg bg-gray-50 focus:bg-white outline-none focus:border-primary mb-2 resize-none"
+                            rows={2}
+                          />
+                          <button
+                            onClick={handleFeedbackSubmit}
+                            disabled={isSubmittingFeedback}
+                            className="w-full btn btn-primary py-2 text-xs h-8"
+                          >
+                            {isSubmittingFeedback ? 'Sending...' : 'Submit Feedback'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Refinement Chat Input */}
+                <div className="absolute -bottom-16 left-0 right-0 animate-in fade-in slide-in-from-top-2">
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      value={refinementText}
+                      onChange={(e) => setRefinementText(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleRefine()}
+                      placeholder="Refine design (e.g. 'Make it 3 tiers', 'Add blue flowers')"
+                      className="flex-1 p-3 rounded-xl border border-gray-200 bg-white shadow-sm text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                    <button onClick={handleRefine} disabled={isGenerating} className="btn btn-secondary p-3 shadow-sm bg-white">
+                      <Send className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </>
             ) : (
@@ -420,13 +632,13 @@ export default function NewDesignPage() {
                   <Palette className="w-10 h-10" />
                 </div>
                 <h3 className="font-bold text-gray-400 mb-2">No Mockup Yet</h3>
-                <p className="text-sm text-gray-400">Configure your cake and click "Generate" to see the AI magic.</p>
+                <p className="text-sm text-gray-400">Configure your cake and click &quot;Generate&quot; to see the AI magic.</p>
               </div>
             )}
           </div>
 
-          {mockupUrl && (
-            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm animate-in fade-in slide-in-from-bottom-4">
+          {currentDesign && (
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm animate-in fade-in slide-in-from-bottom-4 mt-20">
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <h3 className="font-bold text-lg">Final Quote</h3>

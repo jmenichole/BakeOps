@@ -41,3 +41,6 @@ Thumbs.db
 .DS_Store
 .vercel
 .env*.local
+.blackboxcli/
+worktree-*
+install.ps1
