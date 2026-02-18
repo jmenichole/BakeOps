@@ -91,7 +91,7 @@ Features that are stubbed but not wired up, plus missing config files.
 
 ## Progress Tracking
 
-- [ ] Phase 1 — Fix What's Broken
-- [ ] Phase 2 — Security
+- [x] Phase 1 — Fix What's Broken
+- [x] Phase 2 — Security
 - [ ] Phase 3 — Code Quality & Cleanup
 - [ ] Phase 4 — Missing Features & Config

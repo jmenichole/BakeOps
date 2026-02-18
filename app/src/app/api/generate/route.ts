@@ -1,7 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAuthUser } from '@/lib/auth';
+import { rateLimit, getRequestIdentifier } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
   try {
+    // Auth check (middleware handles this, but double-check for direct access)
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limit: 5 generations per minute per user
+    const limited = rateLimit(`generate:${user.id}`, { maxRequests: 5, windowMs: 60_000 });
+    if (limited) return limited;
+
     const { prompt, referenceImages } = await req.json();
 
     if (!prompt) {

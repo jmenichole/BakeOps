@@ -76,13 +76,18 @@ async function fetchTractionData(supabase: any): Promise<TractionReportData> {
   };
 }
 
+function escapeHtml(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value).replace(/[<>&"']/g, (c) => `&#${c.charCodeAt(0)};`);
+}
+
 function generateEmailContent(data: TractionReportData): string {
   const statusBreakdown = Object.entries(data.ordersByStatus)
-    .map(([status, count]) => `<li>${status}: ${count}</li>`)
+    .map(([status, count]) => `<li>${escapeHtml(status)}: ${count}</li>`)
     .join('');
 
   const recentList = data.recentOrders
-    .map(o => `<li>${o.customer_name} - $${o.total_price} (${o.status}) - ${new Date(o.created_at).toLocaleDateString()}</li>`)
+    .map(o => `<li>${escapeHtml(o.customer_name)} - $${o.total_price.toFixed(2)} (${escapeHtml(o.status)}) - ${new Date(o.created_at).toLocaleDateString()}</li>`)
     .join('');
 
   return `

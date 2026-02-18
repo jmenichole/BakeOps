@@ -1,11 +1,23 @@
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getAuthUser } from '@/lib/auth';
+import { rateLimit } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
+    // Auth check
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limit: 5 surveys per hour per user
+    const limited = rateLimit(`survey:${user.id}`, { maxRequests: 5, windowMs: 60 * 60_000 });
+    if (limited) return limited;
+
     const body = await req.json();
     const { rating, valuableFeature, changeOneThing, estimatedValue, userEmail, userId } = body;
 

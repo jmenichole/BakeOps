@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
+import { escapeHtml } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,11 +16,11 @@ interface TractionReportData {
 
 function generateEmailContent(data: TractionReportData): string {
   const statusBreakdown = Object.entries(data.ordersByStatus)
-    .map(([status, count]) => `<li>${status}: ${count}</li>`)
+    .map(([status, count]) => `<li>${escapeHtml(status)}: ${count}</li>`)
     .join('');
 
   const recentList = data.recentOrders
-    .map(o => `<li>${o.customer_name} - $${o.total_price} (${o.status}) - ${new Date(o.created_at).toLocaleDateString()}</li>`)
+    .map(o => `<li>${escapeHtml(o.customer_name)} - $${o.total_price.toFixed(2)} (${escapeHtml(o.status)}) - ${new Date(o.created_at).toLocaleDateString()}</li>`)
     .join('');
 
   return `
@@ -39,8 +40,15 @@ function generateEmailContent(data: TractionReportData): string {
 }
 
 export async function GET(req: Request) {
+  // Fail closed: always require CRON_SECRET
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret) {
+    console.error('CRON_SECRET is not configured');
+    return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
+  }
+
   const authHeader = req.headers.get('authorization');
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
