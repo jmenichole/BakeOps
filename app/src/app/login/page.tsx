@@ -38,7 +38,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#FFF9F9] selection:bg-pink-200">
-      <Link href="/" className="text-4xl font-serif font-black mb-10 text-secondary hover:scale-105 transition-transform">BOT</Link>
+      <Link href="/" className="text-4xl font-serif font-black mb-10 text-secondary hover:scale-105 transition-transform">Bake Ops</Link>
       
       <div className="max-w-md w-full bg-white p-10 rounded-[2.5rem] shadow-2xl border border-pink-50 relative overflow-hidden">
         <h1 className="text-3xl font-serif font-black mb-2 text-secondary">Welcome back</h1>
@@ -66,7 +66,7 @@ export default function LoginPage() {
           <div className="space-y-2">
             <div className="flex justify-between items-center ml-1">
               <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Password</label>
-              <Link href="/forgot-password" university-font-medium className="text-[10px] text-primary font-bold hover:underline">
+              <Link href="/forgot-password" className="text-[10px] text-primary font-bold hover:underline">
                 Forgot password?
               </Link>
             </div>
@@ -90,7 +90,7 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-10 text-center text-gray-500 text-sm">
-          New to BakeBot?{' '}
+          New to Bake Ops?{' '}
           <Link href="/signup" className="text-primary font-bold hover:underline">
             Join the Beta
           </Link>

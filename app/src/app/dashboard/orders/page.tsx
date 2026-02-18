@@ -2,14 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
-import { Plus, Search, Filter, MoreVertical, ExternalLink, Trash2, Mail, Phone, Calendar, CreditCard } from 'lucide-react';
+import { Plus, Search, Filter, MoreVertical, ExternalLink, Trash2, Mail, Phone, Calendar, CreditCard, ClipboardPlus } from 'lucide-react';
 import Link from 'next/link';
 import { OrderManagementModal } from '@/components/OrderManagementModal';
+import { NewOrderModal } from '@/components/NewOrderModal';
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [showNewOrderModal, setShowNewOrderModal] = useState(false);
   const supabase = createBrowserClient();
 
   const fetchOrders = async () => {
@@ -51,9 +53,17 @@ export default function OrdersPage() {
           <h1 className="text-3xl font-serif font-black text-secondary">Orders</h1>
           <p className="text-gray-500 mt-2 font-medium text-sm">Track and manage your customer orders.</p>
         </div>
-        <Link href="/dashboard/designs/new" className="btn btn-primary px-8 py-4 flex items-center gap-3 shadow-xl shadow-pink-100">
-          <Plus className="w-5 h-5" /> New Quote
-        </Link>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowNewOrderModal(true)}
+            className="btn btn-secondary px-6 py-4 flex items-center gap-2"
+          >
+            <ClipboardPlus className="w-5 h-5" /> Manual Order
+          </button>
+          <Link href="/dashboard/designs/new" className="btn btn-primary px-6 py-4 flex items-center gap-3 shadow-xl shadow-pink-100">
+            <Plus className="w-5 h-5" /> New Quote
+          </Link>
+        </div>
       </div>
 
       {/* Search & Filter Bar */}
@@ -160,6 +170,15 @@ export default function OrdersPage() {
         onUpdate={() => {
           fetchOrders();
           setSelectedOrder(null);
+        }}
+      />
+
+      <NewOrderModal
+        isOpen={showNewOrderModal}
+        onClose={() => setShowNewOrderModal(false)}
+        onCreated={() => {
+          setShowNewOrderModal(false);
+          fetchOrders();
         }}
       />
     </div>

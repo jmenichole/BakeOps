@@ -10,7 +10,7 @@ export default function PricingPage() {
             Simple, Transparent <span className="text-primary">Pricing</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Join the BakeBot beta and lock in exclusive founder pricing.
+            Join the Bake Ops beta and lock in exclusive founder pricing.
           </p>
         </div>
 
@@ -23,7 +23,7 @@ export default function PricingPage() {
               <span className="text-gray-500 ml-2">for 14 days</span>
             </div>
             <p className="text-gray-600 mb-8">
-              Experience the full power of BakeBot while helping us shape the future of baking management.
+              Experience the full power of Bake Ops while helping us shape the future of baking management.
             </p>
             <ul className="space-y-4 mb-8 flex-grow">
               {[

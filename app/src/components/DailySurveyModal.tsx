@@ -151,7 +151,7 @@ export function DailySurveyModal() {
               {step === 3 && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                   <h2 className="text-xl sm:text-2xl font-serif font-black text-secondary">What&apos;s the #1 missing feature?</h2>
-                  <p className="text-sm sm:text-base text-gray-500">What is the one thing keeping you from using BakeBot for your entire business?</p>
+                  <p className="text-sm sm:text-base text-gray-500">What is the one thing keeping you from using Bake Ops for your entire business?</p>
                   <textarea 
                     autoFocus
                     className="w-full p-4 rounded-xl sm:rounded-2xl border border-gray-100 bg-gray-50 text-base outline-none focus:ring-4 focus:ring-primary/10 transition-all min-h-[120px]"
@@ -177,7 +177,7 @@ export function DailySurveyModal() {
                   <div className="bg-pink-50 p-5 sm:p-6 rounded-xl sm:rounded-2xl flex gap-4 mb-2 border border-pink-100">
                     <Info className="w-5 h-5 sm:w-6 sm:h-6 text-primary shrink-0" />
                     <p className="text-xs sm:text-sm text-pink-800 leading-relaxed font-medium">
-                      Your trial is ending soon. What <strong>monthly or yearly price</strong> would make BakeBot a &quot;no-brainer&quot; for your bakery?
+                      Your trial is ending soon. What <strong>monthly or yearly price</strong> would make Bake Ops a &quot;no-brainer&quot; for your bakery?
                     </p>
                   </div>
                   <div className="relative">

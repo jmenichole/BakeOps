@@ -11,14 +11,14 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-gray-900 mb-4">1. Acceptance of Terms</h2>
             <p>
-              By accessing and using BakeBot (&quot;the Service&quot;), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.
+              By accessing and using Bake Ops (&quot;the Service&quot;), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-bold text-gray-900 mb-4">2. Beta Testing Period</h2>
             <p>
-              BakeBot is currently in a Beta Testing phase. You acknowledge that the Service is provided &quot;as is&quot; and may contain bugs or errors. We reserve the right to modify or discontinue features at any time.
+              Bake Ops is currently in a Beta Testing phase. You acknowledge that the Service is provided &quot;as is&quot; and may contain bugs or errors. We reserve the right to modify or discontinue features at any time.
             </p>
           </section>
 
@@ -39,14 +39,14 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-gray-900 mb-4">5. Content Ownership</h2>
             <p>
-              You retain all rights to the designs and data you create within BakeBot. We do not claim ownership over your specific business data.
+              You retain all rights to the designs and data you create within Bake Ops. We do not claim ownership over your specific business data.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-bold text-gray-900 mb-4">6. Limitation of Liability</h2>
             <p>
-              BakeBot shall not be liable for any indirect, incidental, special, or consequential damages resulting from the use or inability to use the Service.
+              Bake Ops shall not be liable for any indirect, incidental, special, or consequential damages resulting from the use or inability to use the Service.
             </p>
           </section>
 

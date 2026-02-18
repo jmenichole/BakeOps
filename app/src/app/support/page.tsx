@@ -12,11 +12,11 @@ export default function SupportPage() {
   const faqs = [
     {
       q: "How does the AI cake design work?",
-      a: "BakeBot uses advanced stable diffusion models trained on thousands of bakery images. When you describe a theme, our AI generates a unique, professional mockup to help your clients visualize their order before you even touch a spatula."
+      a: "Bake Ops uses advanced stable diffusion models trained on thousands of bakery images. When you describe a theme, our AI generates a unique, professional mockup to help your clients visualize their order before you even touch a spatula."
     },
     {
       q: "Can I customize the pricing suggestions?",
-      a: "Absolutely! BakeBot provides an AI-suggested price based on complexity, but you have full control to override it with your own pricing, markups, and supply costs."
+      a: "Absolutely! Bake Ops provides an AI-suggested price based on complexity, but you have full control to override it with your own pricing, markups, and supply costs."
     },
     {
       q: "What are 'Non-Cake Sweets'?",
@@ -51,7 +51,7 @@ export default function SupportPage() {
           <Link href="/" className="inline-block text-primary font-black tracking-widest text-xs uppercase mb-6 hover:opacity-80 transition-opacity">Back to Home</Link>
           <h1 className="text-4xl sm:text-6xl font-serif font-black mb-6">How can we help?</h1>
           <p className="text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed">
-            Welcome to BakeBot Support. Find answers to common questions or reach out to our team directly.
+            Welcome to Bake Ops Support. Find answers to common questions or reach out to our team directly.
           </p>
         </div>
       </div>

@@ -23,20 +23,19 @@ export default function DashboardPage() {
       if (!user) return;
 
       // Fetch Stats
-      const [ordersRes, designsRes, signupsRes] = await Promise.all([
+      const [ordersRes, designsRes] = await Promise.all([
         supabase.from('orders').select('*').eq('baker_id', user.id),
         supabase.from('cake_designs').select('*').eq('baker_id', user.id),
-        supabase.from('waitlist_signups').select('id', { count: 'exact' }) // Placeholder for "leads"
       ]);
 
       const active = ordersRes.data?.filter(o => !['delivered', 'cancelled'].includes(o.status)).length || 0;
       const rev = ordersRes.data?.reduce((sum, o) => sum + (Number(o.total_price) || 0), 0) || 0;
-      
+
       setStats({
         activeOrders: active,
         pendingQuotes: designsRes.data?.length || 0,
         revenue: rev,
-        newLeads: signupsRes.count || 0
+        newLeads: 0
       });
 
       // Fetch Recent Orders

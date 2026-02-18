@@ -1,18 +1,25 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_SECRET_KEY!;
+import { rateLimit, getRequestIdentifier } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 10 referral tracks per minute per IP
+    const ip = getRequestIdentifier(request);
+    const limited = rateLimit(`track-referral:${ip}`, { maxRequests: 10, windowMs: 60_000 });
+    if (limited) return limited;
+
     const { referralCode } = await request.json();
 
-    if (!referralCode) {
+    if (!referralCode || typeof referralCode !== 'string') {
       return NextResponse.json({ error: 'Referral code is required' }, { status: 400 });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // Use service role key here since RLS may block anonymous inserts to referral_clicks
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_SECRET_KEY!
+    );
 
     // Find the referrer
     const { data: baker } = await supabase

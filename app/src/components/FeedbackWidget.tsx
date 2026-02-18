@@ -88,7 +88,7 @@ export function FeedbackWidget() {
                   <Check className="w-6 h-6" />
                 </div>
                 <p className="font-bold text-gray-900">Thank you!</p>
-                <p className="text-sm text-gray-500">Your feedback helps us bake a better BOT.</p>
+                <p className="text-sm text-gray-500">Your feedback helps us build a better Bake Ops.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">

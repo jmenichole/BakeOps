@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useSyncExternalStore, useCallback } from 'react';
+
+// ---------- Types ----------
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -15,134 +17,58 @@ interface ToastOptions {
   duration?: number;
 }
 
-interface UseToastReturn {
-  toasts: Toast[];
-  success: (message: string, options?: ToastOptions) => void;
-  error: (message: string, options?: ToastOptions) => void;
-  info: (message: string, options?: ToastOptions) => void;
-  warning: (message: string, options?: ToastOptions) => void;
-  dismiss: (id: string) => void;
-  dismissAll: () => void;
+// ---------- Store (singleton, lives outside React) ----------
+
+let toasts: Toast[] = [];
+const listeners = new Set<() => void>();
+let nextId = 0;
+
+function getSnapshot(): Toast[] {
+  return toasts;
 }
 
-// Global state for toasts (works across components)
-let globalToasts: Toast[] = [];
-let listeners: ((toasts: Toast[]) => void)[] = [];
-
-function notifyListeners() {
-  listeners.forEach(listener => listener([...globalToasts]));
+function subscribe(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
 }
 
-function generateId(): string {
-  return `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+function notify() {
+  listeners.forEach((l) => l());
 }
 
-/**
- * Custom hook for managing toast notifications
- * Uses global state so toasts can be shown from anywhere
- */
-export function useToast(): UseToastReturn {
-  const [toasts, setToasts] = useState<Toast[]>([]);
+function addToast(message: string, type: ToastType, options: ToastOptions = {}) {
+  const { duration = 4000 } = options;
+  const id = String(++nextId);
+  toasts = [...toasts, { id, message, type, duration }];
+  notify();
 
-  // Subscribe to global toasts
-  if (typeof window !== 'undefined') {
-    const listener = (newToasts: Toast[]) => {
-      setToasts(newToasts);
-    };
-    
-    if (!listeners.includes(listener)) {
-      listeners.push(listener);
-    }
+  if (duration > 0) {
+    setTimeout(() => dismissToast(id), duration);
   }
+}
 
-  const addToast = useCallback((message: string, type: ToastType, options: ToastOptions = {}) => {
-    const { duration = 5000 } = options;
-    
-    const toast: Toast = {
-      id: generateId(),
-      message,
-      type,
-      duration,
-    };
+function dismissToast(id: string) {
+  toasts = toasts.filter((t) => t.id !== id);
+  notify();
+}
 
-    globalToasts.push(toast);
-    notifyListeners();
+// ---------- Imperative API (for non-hook consumers) ----------
 
-    // Auto-dismiss
-    if (duration > 0) {
-      setTimeout(() => {
-        dismiss(toast.id);
-      }, duration);
-    }
+export const toast = {
+  success: (message: string, options?: ToastOptions) => addToast(message, 'success', options),
+  error: (message: string, options?: ToastOptions) => addToast(message, 'error', options),
+  info: (message: string, options?: ToastOptions) => addToast(message, 'info', options),
+  warning: (message: string, options?: ToastOptions) => addToast(message, 'warning', options),
+};
 
-    return toast.id;
-  }, []);
+// ---------- React Hook ----------
+
+export function useToast() {
+  const currentToasts = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
   const dismiss = useCallback((id: string) => {
-    globalToasts = globalToasts.filter(t => t.id !== id);
-    notifyListeners();
+    dismissToast(id);
   }, []);
 
-  const dismissAll = useCallback(() => {
-    globalToasts = [];
-    notifyListeners();
-  }, []);
-
-  return {
-    toasts,
-    success: (message, options) => addToast(message, 'success', options),
-    error: (message, options) => addToast(message, 'error', options),
-    info: (message, options) => addToast(message, 'info', options),
-    warning: (message, options) => addToast(message, 'warning', options),
-    dismiss,
-    dismissAll,
-  };
+  return { toasts: currentToasts, dismiss, toast };
 }
-
-// Standalone functions for showing toasts without hook
-export const toast = {
-  success: (message: string, options?: ToastOptions) => {
-    const id = generateId();
-    globalToasts.push({ id, message, type: 'success', ...options });
-    notifyListeners();
-    if (options?.duration !== 0) {
-      setTimeout(() => toast.dismiss(id), options?.duration || 5000);
-    }
-    return id;
-  },
-  error: (message: string, options?: ToastOptions) => {
-    const id = generateId();
-    globalToasts.push({ id, message, type: 'error', ...options });
-    notifyListeners();
-    if (options?.duration !== 0) {
-      setTimeout(() => toast.dismiss(id), options?.duration || 5000);
-    }
-    return id;
-  },
-  info: (message: string, options?: ToastOptions) => {
-    const id = generateId();
-    globalToasts.push({ id, message, type: 'info', ...options });
-    notifyListeners();
-    if (options?.duration !== 0) {
-      setTimeout(() => toast.dismiss(id), options?.duration || 5000);
-    }
-    return id;
-  },
-  warning: (message: string, options?: ToastOptions) => {
-    const id = generateId();
-    globalToasts.push({ id, message, type: 'warning', ...options });
-    notifyListeners();
-    if (options?.duration !== 0) {
-      setTimeout(() => toast.dismiss(id), options?.duration || 5000);
-    }
-    return id;
-  },
-  dismiss: (id: string) => {
-    globalToasts = globalToasts.filter(t => t.id !== id);
-    notifyListeners();
-  },
-  dismissAll: () => {
-    globalToasts = [];
-    notifyListeners();
-  },
-};
