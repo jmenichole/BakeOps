@@ -1,0 +1,2 @@
+# Treat generated manifests as binary to avoid line-by-line merge conflicts
+*.yaml -merge
