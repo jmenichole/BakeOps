@@ -14,7 +14,7 @@ export default function PricingPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {/* Trial Plan */}
           <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
             <h3 className="text-xl font-bold mb-2">Beta Tester</h3>
@@ -25,16 +25,15 @@ export default function PricingPage() {
             <p className="text-gray-600 mb-8">
               Experience the full power of Bake Ops while helping us shape the future of baking management.
             </p>
-            <ul className="space-y-4 mb-8 flex-grow">
+            <ul className="space-y-4 mb-8 flex-grow text-sm">
               {[
                 'AI Cake Configurator',
                 'Production Planning',
                 'Order Management',
-                'Daily Analytics Reports',
-                'Affiliate Rewards'
+                'Daily Analytics Reports'
               ].map((feature) => (
                 <li key={feature} className="flex items-center gap-3 text-gray-700">
-                  <Check className="w-5 h-5 text-green-500" />
+                  <Check className="w-4 h-4 text-green-500" />
                   {feature}
                 </li>
               ))}
@@ -47,11 +46,46 @@ export default function PricingPage() {
             </Link>
           </div>
 
+          {/* Monthly Plan */}
+          <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-pink-50 rounded-bl-[4rem] -mr-8 -mt-8 transition-transform group-hover:scale-110" />
+            <h3 className="text-xl font-bold mb-2">Monthly Pro</h3>
+            <div className="mb-6">
+              <span className="text-4xl font-extrabold">$29</span>
+              <span className="text-gray-500 ml-2">/month</span>
+            </div>
+            <p className="text-gray-600 mb-8">
+              Full access to all professional features with the flexibility of a monthly subscription.
+            </p>
+            <ul className="space-y-4 mb-8 flex-grow text-sm">
+              {[
+                'Everything in Beta Trial',
+                'Unlimited AI Generations',
+                'Advanced Production Tools',
+                'Client CRM & History',
+                'Remove BakeBot Branding'
+              ].map((feature) => (
+                <li key={feature} className="flex items-center gap-3 text-gray-700">
+                  <Check className="w-4 h-4 text-primary" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+            <a
+              href="https://ko-fi.com/s/e962d231c7"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-center py-4 px-6 rounded-xl border-2 border-primary text-primary font-bold hover:bg-pink-50 transition-colors"
+            >
+              Subscribe Now
+            </a>
+          </div>
+
           {/* Lifetime Plan */}
           <div className="bg-white p-8 rounded-3xl border-2 border-primary shadow-xl relative flex flex-col">
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-bold flex items-center gap-1">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-bold flex items-center gap-1 shadow-lg whitespace-nowrap">
               <Sparkles className="w-4 h-4" />
-              EARLY BIRD DEAL
+              FOUNDER LIFETIME DEAL
             </div>
             <h3 className="text-xl font-bold mb-2">Lifetime Founder</h3>
             <div className="mb-6">
@@ -59,28 +93,30 @@ export default function PricingPage() {
               <span className="text-gray-500 ml-2">one-time</span>
             </div>
             <p className="text-gray-600 mb-8">
-              Pay once, own it forever. Exclusive to our first 100 beta testers.
+              Pay once, own it forever. Exclusive to our first 100 beta testers. Locked-in value.
             </p>
-            <ul className="space-y-4 mb-8 flex-grow">
+            <ul className="space-y-4 mb-8 flex-grow text-sm">
               {[
-                'Everything in Beta Trial',
+                'Everything in Monthly Pro',
                 'Lifetime Updates',
-                'Priority Support',
+                'Priority Feature Requests',
                 'Founder Badge on Profile',
-                'No Monthly Fees, Ever'
+                'Direct Founder Support'
               ].map((feature) => (
                 <li key={feature} className="flex items-center gap-3 text-gray-700">
-                  <Check className="w-5 h-5 text-primary" />
+                  <Check className="w-4 h-4 text-primary" />
                   {feature}
                 </li>
               ))}
             </ul>
-            <Link
-              href="/signup"
+            <a
+              href="https://ko-fi.com/s/b8ebf64289"
+              target="_blank"
+              rel="noopener noreferrer"
               className="block text-center py-4 px-6 rounded-xl bg-primary text-white font-bold hover:bg-pink-600 transition-colors shadow-lg shadow-pink-200"
             >
               Get Lifetime Access
-            </Link>
+            </a>
           </div>
         </div>
 

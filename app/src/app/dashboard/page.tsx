@@ -5,6 +5,7 @@ import { Plus, TrendingUp, Users, ShoppingBag, Clock, ArrowUpRight } from 'lucid
 import Link from 'next/link';
 import { DailySurveyModal } from '@/components/DailySurveyModal';
 import { createBrowserClient } from '@/lib/supabase';
+import { toast } from '@/hooks/useToast';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -21,6 +22,13 @@ export default function DashboardPage() {
     async function fetchDashboardData() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
+      // Handle plan activation (redirect from Ko-fi)
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('success') === 'plan_activated') {
+        toast.success('Subscription activated! Welcome to the pro community. 🍰');
+        window.history.replaceState({}, '', window.location.pathname);
+      }
 
       // Fetch Stats
       const [ordersRes, designsRes] = await Promise.all([

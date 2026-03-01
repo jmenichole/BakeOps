@@ -1,9 +1,20 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+import { getAuthUser } from '@/lib/auth';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
   try {
+    // 1. Auth check
+    const user = await getAuthUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // 2. Rate limit: 5 submissions per hour per user
+    const limited = rateLimit(`feedback:${user.id}`, { maxRequests: 5, windowMs: 60 * 60_000 });
+    if (limited) return limited;
+
     const body = await req.json();
     const {
       category,
@@ -11,13 +22,14 @@ export async function POST(req: Request) {
       message,
       page_url,
       browser_info,
-      userEmail,
       user_id
     } = body;
 
+    const currentUserEmail = user.email; // Use verified session email
+
     // 1. Send Email Notification via Resend
     const resendKey = process.env.RESEND_API_KEY;
-    if (resendKey && userEmail) {
+    if (resendKey && currentUserEmail) {
       const resend = new Resend(resendKey);
 
       const categoryEmoji = {
@@ -36,7 +48,7 @@ export async function POST(req: Request) {
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 12px; padding: 24px;">
             <h2 style="color: #FF1CF7; margin-top: 0;">New Beta Feedback</h2>
-            <p><strong>User:</strong> ${userEmail}</p>
+            <p><strong>User:</strong> ${currentUserEmail}</p>
             <p><strong>Category:</strong> ${category} ${categoryEmoji}</p>
             <p><strong>Rating:</strong> ${rating}/5 ${ratingEmoji}</p>
             <p><strong>Page:</strong> <a href="${page_url}">${page_url}</a></p>
