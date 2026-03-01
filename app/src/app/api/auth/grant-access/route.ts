@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
     const plan = searchParams.get('plan');
 
     const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session) {

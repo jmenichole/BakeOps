@@ -7,7 +7,7 @@ import { cookies } from 'next/headers';
  */
 export async function getAuthUser() {
   const cookieStore = await cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+  const supabase = createRouteHandlerClient({ cookies: async () => cookieStore });
   const { data: { session } } = await supabase.auth.getSession();
   return session?.user ?? null;
 }
