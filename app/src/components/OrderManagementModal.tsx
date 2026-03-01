@@ -5,21 +5,7 @@ import { createBrowserClient } from '@/lib/supabase';
 import { X, Calendar, Mail, Phone, DollarSign, Package, Trash2, Edit2, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from '@/hooks/useToast';
 
-interface Order {
-  id: string;
-  customer_name: string | null;
-  customer_email: string;
-  customer_phone?: string | null;
-  total_price: number;
-  deposit_paid: number;
-  delivery_date: string | null;
-  notes: string | null;
-  status: string;
-  cake_designs?: {
-    title: string;
-    image_url: string | null;
-  };
-}
+import { Order } from '@/types/database';
 
 interface OrderManagementModalProps {
   order: Order | null;
@@ -116,14 +102,14 @@ export function OrderManagementModal({ order, isOpen, onClose, onUpdate }: Order
           {order.cake_designs && (
             <div className="bg-gray-50 rounded-2xl p-4 flex gap-4 items-center">
               <div className="w-20 h-20 bg-white rounded-xl overflow-hidden flex-shrink-0">
-                {order.cake_designs.image_url ? (
+                {order.cake_designs?.image_url ? (
                   <img src={order.cake_designs.image_url} alt={order.cake_designs.title} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-2xl">🎂</div>
                 )}
               </div>
               <div>
-                <h3 className="font-bold text-secondary">{order.cake_designs.title}</h3>
+                <h3 className="font-bold text-secondary">{order.cake_designs?.title}</h3>
                 <p className="text-xs text-gray-400">Design Template</p>
               </div>
             </div>

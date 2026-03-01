@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
+import { Toaster } from "@/components/Toaster";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -19,9 +21,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${playfair.variable} font-sans`}>
+        <AnalyticsTracker />
+        <Toaster />
         {children}
         <Analytics />
       </body>
     </html>
   );
 }
+

@@ -2,10 +2,10 @@
 // (c) jmenichole
 
 import { useState, useEffect } from 'react';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  CheckCircle2, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle2,
   Circle,
   Clock,
   ClipboardList,
@@ -17,6 +17,7 @@ import {
   Truck
 } from 'lucide-react';
 import { createBrowserClient } from '@/lib/supabase';
+import { toast } from '@/hooks/useToast';
 
 // Pre-made task templates for Quick Add
 const QUICK_ADD_TASKS = [
@@ -42,7 +43,7 @@ export default function ProductionPage() {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [addingTask, setAddingTask] = useState(false);
-  const [quickAddTask, setQuickAddTask] = useState<{title: string, category: string} | null>(null);
+  const [quickAddTask, setQuickAddTask] = useState<{ title: string, category: string } | null>(null);
   const supabase = createBrowserClient();
 
   const getWeekDays = (start: Date) => {
@@ -102,7 +103,7 @@ export default function ProductionPage() {
     fetchOrders();
   }, [supabase]);
 
-const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
+  const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'completed' ? 'todo' : 'completed';
     const { error } = await supabase
       .from('prep_tasks')
@@ -117,7 +118,7 @@ const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
   const handleAddTask = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setAddingTask(true);
-    
+
     const formData = new FormData(e.currentTarget);
     const title = formData.get('title') as string;
     const category = formData.get('category') as string;
@@ -126,7 +127,7 @@ const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        alert('Please login to add tasks');
+        toast.error('Please login to add tasks');
         return;
       }
 
@@ -165,7 +166,7 @@ const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
       setShowAddModal(false);
     } catch (err: any) {
       console.error('Error adding task:', err);
-      alert('Error adding task: ' + err.message);
+      toast.error('Error adding task: ' + err.message);
     } finally {
       setAddingTask(false);
     }
@@ -179,7 +180,7 @@ const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
           <p className="text-gray-500 mt-1">Manage your weekly prep and baking schedule.</p>
         </div>
         <div className="flex items-center gap-2 bg-white p-2 rounded-xl border border-gray-100 shadow-sm">
-          <button 
+          <button
             onClick={() => {
               const d = new Date(selectedDay);
               d.setDate(d.getDate() - 7);
@@ -192,7 +193,7 @@ const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
           <span className="text-sm font-bold px-4 text-center min-w-[180px]">
             {weekDays[0].toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - {weekDays[6].toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
           </span>
-          <button 
+          <button
             onClick={() => {
               const d = new Date(selectedDay);
               d.setDate(d.getDate() + 7);
@@ -213,11 +214,10 @@ const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
             <button
               key={day.toISOString()}
               onClick={() => setSelectedDay(day)}
-              className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
-                isSelected
-                  ? 'border-primary bg-pink-50 text-primary shadow-sm' 
+              className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${isSelected
+                  ? 'border-primary bg-pink-50 text-primary shadow-sm'
                   : 'border-white bg-white text-gray-400 hover:border-pink-100'
-              }`}
+                }`}
             >
               <span className="text-xs font-bold uppercase tracking-wider">
                 {day.toLocaleDateString(undefined, { weekday: 'short' })}
@@ -280,7 +280,7 @@ const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
               ) : (
                 <div className="p-12 text-center border-2 border-dashed border-gray-50 m-6 rounded-3xl">
                   <p className="text-gray-400 font-medium">No tasks scheduled for this day.</p>
-                  <button 
+                  <button
                     onClick={() => setShowAddModal(true)}
                     className="text-primary text-sm font-bold mt-2 hover:underline"
                   >
@@ -318,7 +318,7 @@ const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
         </div>
       </div>
 
-      <AddTaskModal 
+      <AddTaskModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onSubmit={handleAddTask}
@@ -330,15 +330,15 @@ const toggleTaskStatus = async (taskId: string, currentStatus: string) => {
 }
 
 // Add Task Modal Component
-function AddTaskModal({ 
-  isOpen, 
-  onClose, 
-  onSubmit, 
+function AddTaskModal({
+  isOpen,
+  onClose,
+  onSubmit,
   isLoading,
-  selectedDay 
-}: { 
-  isOpen: boolean; 
-  onClose: () => void; 
+  selectedDay
+}: {
+  isOpen: boolean;
+  onClose: () => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   isLoading: boolean;
   selectedDay: Date;
@@ -355,7 +355,7 @@ function AddTaskModal({
             <Plus className="w-5 h-5 text-primary" />
             Add Task Manually
           </h2>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
@@ -366,22 +366,22 @@ function AddTaskModal({
         <p className="text-sm text-gray-500 mb-6">
           Adding task for {selectedDay.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
         </p>
-        
+
         <form onSubmit={onSubmit} className="space-y-5">
           <div>
             <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Task Title</label>
-            <input 
+            <input
               required
               name="title"
-              type="text" 
+              type="text"
               className="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all"
               placeholder="e.g., Prepare buttercream frosting"
             />
           </div>
-          
+
           <div>
             <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Category</label>
-            <select 
+            <select
               name="category"
               required
               className="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all"
@@ -394,24 +394,24 @@ function AddTaskModal({
 
           <div>
             <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Time</label>
-            <input 
+            <input
               required
               name="time"
-              type="time" 
+              type="time"
               className="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all"
               defaultValue="09:00"
             />
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button 
+            <button
               type="button"
               onClick={onClose}
               className="flex-1 btn btn-secondary py-3"
             >
               Cancel
             </button>
-            <button 
+            <button
               type="submit"
               disabled={isLoading}
               className="flex-1 btn btn-primary py-3 flex items-center justify-center gap-2"

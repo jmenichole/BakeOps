@@ -21,14 +21,16 @@ export function DailySurveyModal() {
   const supabase = createBrowserClient();
 
   useEffect(() => {
-    async function checkToday() {
+    let timer: NodeJS.Timeout;
+
+    async function initSurvey() {
       // Don't show if dismissed in this session
       if (sessionStorage.getItem('survey_dismissed')) return;
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('survey_responses')
         .select('created_at')
         .eq('user_id', user.id)
@@ -36,13 +38,32 @@ export function DailySurveyModal() {
 
       if (data && data.length > 0) {
         setHasCompletedToday(true);
-      } else {
-        // Show popup after 5 seconds to be less intrusive
-        const timer = setTimeout(() => setIsOpen(true), 5000);
-        return () => clearTimeout(timer);
+        return;
       }
+
+      // 1. Exit Intent Trigger (Mouse leaves the window towards the top)
+      const handleExitIntent = (e: MouseEvent) => {
+        if (e.clientY <= 0) {
+          setIsOpen(true);
+          document.removeEventListener('mouseleave', handleExitIntent);
+        }
+      };
+
+      // 2. Delayed Fallback (After 60 seconds of browsing, instead of 5)
+      timer = setTimeout(() => {
+        setIsOpen(true);
+        document.removeEventListener('mouseleave', handleExitIntent);
+      }, 60000);
+
+      document.addEventListener('mouseleave', handleExitIntent);
+
+      return () => {
+        clearTimeout(timer);
+        document.removeEventListener('mouseleave', handleExitIntent);
+      };
     }
-    checkToday();
+
+    initSurvey();
   }, [supabase]);
 
   const handleSubmit = async () => {
@@ -80,9 +101,9 @@ export function DailySurveyModal() {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-secondary/60 backdrop-blur-md animate-in fade-in duration-300">
       <div className="bg-white w-full max-w-lg rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl border-t sm:border border-pink-100 relative overflow-hidden animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-500">
-        
+
         {/* Close Button */}
-        <button 
+        <button
           onClick={() => {
             setIsOpen(false);
             sessionStorage.setItem('survey_dismissed', 'true');
@@ -114,7 +135,7 @@ export function DailySurveyModal() {
                       </button>
                     ))}
                   </div>
-                  <button 
+                  <button
                     disabled={formData.rating === 0}
                     onClick={() => setStep(2)}
                     className="w-full btn btn-primary py-4 text-base sm:text-lg disabled:opacity-50"
@@ -128,7 +149,7 @@ export function DailySurveyModal() {
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                   <h2 className="text-xl sm:text-2xl font-serif font-black text-secondary">Any technical friction?</h2>
                   <p className="text-sm sm:text-base text-gray-500">Did you encounter any bugs, slow loading, or confusing buttons today?</p>
-                  <textarea 
+                  <textarea
                     autoFocus
                     className="w-full p-4 rounded-xl sm:rounded-2xl border border-gray-100 bg-gray-50 text-base outline-none focus:ring-4 focus:ring-primary/10 transition-all min-h-[100px]"
                     placeholder="e.g. The 'Create' button didn't respond at first..."
@@ -137,7 +158,7 @@ export function DailySurveyModal() {
                   />
                   <div className="flex gap-4">
                     <button onClick={() => setStep(1)} className="w-1/3 btn btn-secondary py-4">Back</button>
-                    <button 
+                    <button
                       disabled={!formData.valuableFeature}
                       onClick={() => setStep(3)}
                       className="w-2/3 btn btn-primary py-4"
@@ -152,7 +173,7 @@ export function DailySurveyModal() {
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                   <h2 className="text-xl sm:text-2xl font-serif font-black text-secondary">What&apos;s the #1 missing feature?</h2>
                   <p className="text-sm sm:text-base text-gray-500">What is the one thing keeping you from using Bake Ops for your entire business?</p>
-                  <textarea 
+                  <textarea
                     autoFocus
                     className="w-full p-4 rounded-xl sm:rounded-2xl border border-gray-100 bg-gray-50 text-base outline-none focus:ring-4 focus:ring-primary/10 transition-all min-h-[120px]"
                     placeholder="e.g. I need a way to track ingredient costs..."
@@ -161,7 +182,7 @@ export function DailySurveyModal() {
                   />
                   <div className="flex gap-4">
                     <button onClick={() => setStep(2)} className="w-1/3 btn btn-secondary py-4">Back</button>
-                    <button 
+                    <button
                       disabled={!formData.changeOneThing}
                       onClick={() => setStep(4)}
                       className="w-2/3 btn btn-primary py-4"
@@ -182,7 +203,7 @@ export function DailySurveyModal() {
                   </div>
                   <div className="relative">
                     <span className="absolute left-4 top-4 text-gray-400 text-lg">$</span>
-                    <input 
+                    <input
                       type="number"
                       autoFocus
                       className="w-full pl-8 p-4 rounded-xl sm:rounded-2xl border border-gray-100 bg-gray-50 text-lg font-bold outline-none focus:ring-4 focus:ring-primary/10 transition-all"
@@ -193,7 +214,7 @@ export function DailySurveyModal() {
                   </div>
                   <div className="flex gap-4">
                     <button onClick={() => setStep(3)} className="w-1/3 btn btn-secondary py-4">Back</button>
-                    <button 
+                    <button
                       disabled={loading || !formData.estimatedValue}
                       onClick={handleSubmit}
                       className="w-2/3 btn btn-primary py-4 text-base sm:text-lg flex items-center justify-center gap-2"
@@ -213,7 +234,7 @@ export function DailySurveyModal() {
               <p className="text-sm sm:text-base text-gray-500 mb-8 sm:mb-10 leading-relaxed">
                 Thank you for helping us build the future of bakery management. Your insights are invaluable.
               </p>
-              
+
               <div className="bg-secondary text-white p-6 sm:p-8 rounded-[2rem] relative overflow-hidden mb-8 sm:mb-10 text-left">
                 <div className="absolute top-0 right-0 p-4 opacity-10">
                   <Sparkles className="w-16 h-16 sm:w-20 sm:h-20" />
@@ -222,7 +243,7 @@ export function DailySurveyModal() {
                 <p className="text-xs sm:text-sm text-gray-300 mb-6">
                   Upgrade today and lock in our <strong>Founder&apos;s Rate</strong> of $149 for lifetime access before we move to monthly subscriptions.
                 </p>
-                <Link 
+                <Link
                   href="/pricing"
                   className="inline-block bg-white text-secondary font-black px-6 sm:px-8 py-3 rounded-xl text-xs sm:text-sm hover:bg-pink-50 transition-colors"
                 >
@@ -230,7 +251,7 @@ export function DailySurveyModal() {
                 </Link>
               </div>
 
-              <button 
+              <button
                 onClick={() => setIsOpen(false)}
                 className="text-gray-400 text-sm font-bold hover:text-secondary transition-colors"
               >

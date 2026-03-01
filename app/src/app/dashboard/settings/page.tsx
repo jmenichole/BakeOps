@@ -41,6 +41,8 @@ export default function SettingsPage() {
 
         if (baker) {
           setBakeryName(baker.business_name || '');
+          setEmailLeads(baker.email_leads ?? true);
+          setOrderUpdates(baker.order_updates ?? true);
         }
       }
     }
@@ -64,6 +66,8 @@ export default function SettingsPage() {
         .upsert({
           id: user.id,
           business_name: bakeryName,
+          email_leads: emailLeads,
+          order_updates: orderUpdates,
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'id'

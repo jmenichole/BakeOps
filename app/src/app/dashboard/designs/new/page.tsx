@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Sparkles, Save, Info, Palette, Send, Mail, Phone, Copy, X, Image as ImageIcon, Star, CheckCircle2, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { createBrowserClient } from '@/lib/supabase';
+import { toast } from '@/hooks/useToast';
 
 interface FileData {
   mimeType: string;
@@ -95,13 +96,13 @@ export default function NewDesignPage() {
     const files = event.target.files;
     if (files && files.length > 0) {
       if (referenceImages.length + files.length > 5) {
-        alert("You can only upload up to 5 reference images.");
+        toast.error("You can only upload up to 5 reference images.");
         return;
       }
 
       Array.from(files).forEach(file => {
         if (file.size > 5 * 1024 * 1024) {
-          alert("One or more files are too large. Limit is 5MB per image.");
+          toast.error("One or more files are too large. Limit is 5MB per image.");
           return;
         }
 
@@ -127,7 +128,7 @@ export default function NewDesignPage() {
 
   const handleGenerate = async () => {
     if (!config.theme) {
-      alert('Please describe your theme first!');
+      toast.error('Please describe your theme first!');
       return;
     }
     setIsGenerating(true);
@@ -135,7 +136,7 @@ export default function NewDesignPage() {
 
     try {
       const prompt = `((${config.productType === 'cake' ? `${config.tiers} tier cake` : `${config.quantity} ${config.productType}`})), professional bakery photograph, theme: ${config.theme}. ${config.addOns.length > 0 ? `Add-ons: ${config.addOns.join(', ')}.` : ''} High quality, detailed icing, elegant presentation, soft studio lighting.`;
-      
+
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -143,11 +144,11 @@ export default function NewDesignPage() {
       });
 
       const data = await response.json();
-      
+
       if (data.error) {
         throw new Error(data.error);
       }
-      
+
       setCurrentDesign(data.imageUrl);
       setStep(2);
       setAccuracyRating(null);
@@ -155,7 +156,7 @@ export default function NewDesignPage() {
       setFeedbackSubmitted(false);
     } catch (err: any) {
       console.error(err);
-      alert('AI Generation failed: ' + err.message);
+      toast.error('AI Generation failed: ' + err.message);
     } finally {
       setIsGenerating(false);
     }
@@ -164,11 +165,11 @@ export default function NewDesignPage() {
   const handleRefine = async () => {
     if (!refinementText) return;
     setIsGenerating(true);
-    
+
     try {
       // Construct a prompt that includes the refinement
       const prompt = `((${config.productType === 'cake' ? `${config.tiers} tier cake` : `${config.quantity} ${config.productType}`})), professional bakery photograph, theme: ${config.theme}. ${config.addOns.length > 0 ? `Add-ons: ${config.addOns.join(', ')}.` : ''} Modifications: ${refinementText}. High quality, detailed icing, elegant presentation, soft studio lighting.`;
-      
+
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -176,18 +177,18 @@ export default function NewDesignPage() {
       });
 
       const data = await response.json();
-      
+
       if (data.error) {
         throw new Error(data.error);
       }
-      
+
       setCurrentDesign(data.imageUrl);
       setRefinementText('');
       setAccuracyRating(null);
       setFeedbackSubmitted(false);
     } catch (err: any) {
       console.error(err);
-      alert('Refinement failed: ' + err.message);
+      toast.error('Refinement failed: ' + err.message);
     } finally {
       setIsGenerating(false);
     }
@@ -215,7 +216,7 @@ export default function NewDesignPage() {
       setFeedbackSubmitted(true);
     } catch (err) {
       console.error('Feedback error:', err);
-      alert(`Error: ${err instanceof Error ? err.message : 'Could not submit feedback.'}`);
+      toast.error(`Error: ${err instanceof Error ? err.message : 'Could not submit feedback.'}`);
     } finally {
       setIsSubmittingFeedback(false);
     }
@@ -226,7 +227,7 @@ export default function NewDesignPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        alert('Please login to save designs');
+        toast.error('Please login to save designs');
         return;
       }
 
@@ -261,16 +262,16 @@ export default function NewDesignPage() {
             total_price: finalPrice,
             delivery_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // Default 1 week out
           });
-        
+
         if (orderError) throw orderError;
-        
+
         // Set up share modal
         const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/quote/${design.id}`;
         setShareLink(link);
         setSavedDesignId(design.id);
         setShowShareModal(true);
       } else {
-        alert('Draft saved! Screenshot this page and send to your customer.');
+        toast.success('Draft saved!');
       }
 
       // Don't redirect yet if we're showing share modal
@@ -279,7 +280,7 @@ export default function NewDesignPage() {
       }
     } catch (err: any) {
       console.error(err);
-      alert('Error: ' + err.message);
+      toast.error('Error: ' + err.message);
     } finally {
       setIsSaving(false);
     }
@@ -313,7 +314,7 @@ export default function NewDesignPage() {
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareLink);
-      alert('Link copied to clipboard!');
+      toast.success('Link copied to clipboard!');
     } catch (err) {
       console.error('Failed to copy:', err);
     }
@@ -322,13 +323,13 @@ export default function NewDesignPage() {
   // Handle saving as image
   const handleSaveAsImage = async () => {
     if (!currentDesign) return;
-    
+
     setIsSaving(true);
     try {
       // First save as draft
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        alert('Please login to save designs');
+        toast.error('Please login to save designs');
         return;
       }
 
@@ -352,13 +353,13 @@ export default function NewDesignPage() {
       if (designError) throw designError;
       if (!design) throw new Error('Design was not created.');
 
-    
+
 
       // Download the mockup image
       const response = await fetch(currentDesign);
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
-      
+
       const link = document.createElement('a');
       link.href = url;
       link.download = `cake-quote-${design.id}.jpg`;
@@ -367,11 +368,11 @@ export default function NewDesignPage() {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      alert('Draft saved! Image downloaded to your camera roll.');
+      toast.success('Draft saved! Image downloaded.');
       router.push('/dashboard');
     } catch (err: any) {
       console.error(err);
-      alert('Error: ' + err.message);
+      toast.error('Error: ' + err.message);
     } finally {
       setIsSaving(false);
     }
@@ -399,7 +400,7 @@ export default function NewDesignPage() {
                 <button
                   key={type.id}
                   className={`py-3 rounded-xl border-2 transition-all font-bold text-sm ${config.productType === type.id ? 'border-primary bg-pink-50 text-primary shadow-sm' : 'border-gray-50 text-gray-400 hover:border-pink-100'}`}
-                  onClick={() => setConfig({...config, productType: type.id})}
+                  onClick={() => setConfig({ ...config, productType: type.id })}
                 >
                   {type.label}
                 </button>
@@ -410,7 +411,7 @@ export default function NewDesignPage() {
               <span className="w-6 h-6 bg-pink-100 text-primary rounded-full flex items-center justify-center text-xs">2</span>
               Details
             </h2>
-            
+
             <div className="space-y-6">
               {config.productType === 'cake' ? (
                 <div>
@@ -420,7 +421,7 @@ export default function NewDesignPage() {
                       <button
                         key={n}
                         className={`py-2 rounded-lg border-2 transition-all ${config.tiers === n ? 'border-primary bg-pink-50 text-primary font-bold' : 'border-gray-50 text-gray-400'}`}
-                        onClick={() => setConfig({...config, tiers: n})}
+                        onClick={() => setConfig({ ...config, tiers: n })}
                       >
                         {n}
                       </button>
@@ -430,13 +431,13 @@ export default function NewDesignPage() {
               ) : (
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 ml-1">Quantity (Dozens)</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     step="12"
                     min="12"
                     className="w-full p-3 rounded-xl border border-gray-100 bg-gray-50 outline-none focus:ring-4 focus:ring-primary/10 transition-all"
                     value={config.quantity}
-                    onChange={(e) => setConfig({...config, quantity: parseInt(e.target.value)})}
+                    onChange={(e) => setConfig({ ...config, quantity: parseInt(e.target.value) })}
                   />
                 </div>
               )}
@@ -444,22 +445,22 @@ export default function NewDesignPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="base-flavor" className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Flavor</label>
-                  <select 
+                  <select
                     id="base-flavor"
                     className="w-full p-3 rounded-xl border border-gray-100 bg-gray-50 outline-none focus:ring-2 focus:ring-primary/20"
                     value={config.flavor}
-                    onChange={(e) => setConfig({...config, flavor: e.target.value})}
+                    onChange={(e) => setConfig({ ...config, flavor: e.target.value })}
                   >
                     {flavors.map(f => <option key={f} value={f}>{f}</option>)}
                   </select>
                 </div>
                 <div>
                   <label htmlFor="filling" className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Filling</label>
-                  <select 
+                  <select
                     id="filling"
                     className="w-full p-3 rounded-xl border border-gray-100 bg-gray-50 outline-none focus:ring-2 focus:ring-primary/20"
                     value={config.filling}
-                    onChange={(e) => setConfig({...config, filling: e.target.value})}
+                    onChange={(e) => setConfig({ ...config, filling: e.target.value })}
                   >
                     {fillings.map(f => <option key={f} value={f}>{f}</option>)}
                   </select>
@@ -473,10 +474,10 @@ export default function NewDesignPage() {
                     <button
                       key={opt}
                       onClick={() => {
-                        const newAddOns = config.addOns.includes(opt) 
+                        const newAddOns = config.addOns.includes(opt)
                           ? config.addOns.filter(a => a !== opt)
                           : [...config.addOns, opt];
-                        setConfig({...config, addOns: newAddOns});
+                        setConfig({ ...config, addOns: newAddOns });
                       }}
                       className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${config.addOns.includes(opt) ? 'bg-primary border-primary text-white shadow-md' : 'bg-white border-gray-100 text-gray-400 hover:border-pink-200 hover:text-primary'}`}
                     >
@@ -488,12 +489,12 @@ export default function NewDesignPage() {
 
               <div>
                 <label htmlFor="theme" className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Theme / Description</label>
-                <textarea 
+                <textarea
                   id="theme"
                   className="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 outline-none focus:ring-4 focus:ring-primary/10 min-h-[100px] transition-all"
                   placeholder="e.g. Modern minimalist with white fondant and single gold butterfly..."
                   value={config.theme}
-                  onChange={(e) => setConfig({...config, theme: e.target.value})}
+                  onChange={(e) => setConfig({ ...config, theme: e.target.value })}
                 />
               </div>
             </div>
@@ -506,12 +507,12 @@ export default function NewDesignPage() {
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-2">
                 {referenceImages.map((img, idx) => (
                   <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 group">
-                    <img 
-                      src={`data:${img.mimeType};base64,${img.data}`} 
-                      alt={`Ref ${idx}`} 
-                      className="w-full h-full object-cover" 
+                    <img
+                      src={`data:${img.mimeType};base64,${img.data}`}
+                      alt={`Ref ${idx}`}
+                      className="w-full h-full object-cover"
                     />
-                    <button 
+                    <button
                       onClick={() => removeReference(idx)}
                       className="absolute top-1 right-1 bg-white/80 text-gray-700 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-600"
                     >
@@ -520,7 +521,7 @@ export default function NewDesignPage() {
                   </div>
                 ))}
                 {referenceImages.length < 5 && (
-                  <button 
+                  <button
                     onClick={() => fileInputRef.current?.click()}
                     className="aspect-square rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:bg-gray-50 hover:border-primary transition-all"
                   >
@@ -533,7 +534,7 @@ export default function NewDesignPage() {
             </div>
           </div>
 
-          <button 
+          <button
             onClick={handleGenerate}
             disabled={isGenerating}
             className="w-full btn btn-primary py-4 text-lg flex items-center justify-center gap-3"
@@ -579,14 +580,14 @@ export default function NewDesignPage() {
                               onClick={() => setAccuracyRating(star)}
                               className="hover:scale-110 transition-transform focus:outline-none"
                             >
-                              <Star 
-                                className={`w-5 h-5 ${accuracyRating && star <= accuracyRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 hover:text-yellow-400'}`} 
+                              <Star
+                                className={`w-5 h-5 ${accuracyRating && star <= accuracyRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 hover:text-yellow-400'}`}
                               />
                             </button>
                           ))}
                         </div>
                       </div>
-                      
+
                       {accuracyRating && (
                         <div className="animate-in fade-in slide-in-from-top-1">
                           <textarea
@@ -612,8 +613,8 @@ export default function NewDesignPage() {
                 {/* Refinement Chat Input */}
                 <div className="absolute -bottom-16 left-0 right-0 animate-in fade-in slide-in-from-top-2">
                   <div className="flex gap-2">
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={refinementText}
                       onChange={(e) => setRefinementText(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleRefine()}
@@ -648,16 +649,16 @@ export default function NewDesignPage() {
                   ${useAiPricing ? quote.total.toFixed(2) : (parseFloat(manualPrice as string) || 0).toFixed(2)}
                 </div>
               </div>
-              
+
               <div className="space-y-4 mb-8">
                 <div className="flex items-center gap-4 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                  <button 
+                  <button
                     onClick={() => setUseAiPricing(true)}
                     className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all ${useAiPricing ? 'bg-white shadow-sm text-primary' : 'text-gray-400'}`}
                   >
                     AI Suggestion
                   </button>
-                  <button 
+                  <button
                     onClick={() => setUseAiPricing(false)}
                     className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all ${!useAiPricing ? 'bg-white shadow-sm text-primary' : 'text-gray-400'}`}
                   >
@@ -677,7 +678,7 @@ export default function NewDesignPage() {
                 ) : (
                   <div className="space-y-2 px-1">
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Set Custom Price ($)</label>
-                    <input 
+                    <input
                       type="number"
                       className="w-full p-3 rounded-xl border border-gray-100 bg-gray-50 text-lg font-black outline-none focus:ring-4 focus:ring-primary/10"
                       placeholder="0.00"
@@ -690,14 +691,14 @@ export default function NewDesignPage() {
               </div>
 
               <div className="flex gap-3">
-                <button 
+                <button
                   disabled={isSaving}
                   onClick={() => handleSave(false)}
                   className="flex-1 btn btn-secondary py-3 flex items-center justify-center gap-2"
                 >
                   <Save className="w-4 h-4" /> {isSaving ? 'Saving...' : 'Save Draft'}
                 </button>
-                <button 
+                <button
                   disabled={isSaving}
                   onClick={() => handleSave(true)}
                   className="flex-1 btn btn-primary py-3 flex items-center justify-center gap-2 shadow-lg shadow-pink-100"
@@ -719,25 +720,25 @@ export default function NewDesignPage() {
                 <Send className="w-5 h-5 text-primary" />
                 Share Quote with Customer
               </h2>
-              <button 
+              <button
                 onClick={() => setShowShareModal(false)}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="mb-6">
               <p className="text-gray-600 mb-4">Share this link with your customer to view their custom cake quote.</p>
-              
+
               <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={shareLink}
                   readOnly
                   className="flex-1 bg-transparent outline-none text-sm text-gray-700"
                 />
-                <button 
+                <button
                   onClick={handleCopyLink}
                   className="p-2 hover:bg-white rounded-lg transition-colors"
                   title="Copy link"
@@ -748,14 +749,14 @@ export default function NewDesignPage() {
             </div>
 
             <div className="flex gap-3">
-              <button 
+              <button
                 onClick={handleSendViaEmail}
                 className="flex-1 bg-primary text-white py-3 px-4 rounded-xl hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 font-bold"
               >
                 <Mail className="w-4 h-4" />
                 Send via Email
               </button>
-              <button 
+              <button
                 onClick={handleSendViaSMS}
                 className="flex-1 bg-secondary text-white py-3 px-4 rounded-xl hover:bg-secondary/90 transition-colors flex items-center justify-center gap-2 font-bold"
               >

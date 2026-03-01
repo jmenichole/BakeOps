@@ -49,6 +49,26 @@ export async function middleware(req: NextRequest) {
   const supabase = createMiddlewareClient({ req, res });
   const { data: { session } } = await supabase.auth.getSession();
 
+  // Admin IP Allowlist Check
+  if (pathname.startsWith('/admin')) {
+    const allowedIps = (process.env.ALLOWED_ADMIN_IP || '').split(',').map(ip => ip.trim()).filter(Boolean);
+    const clientIp =
+      req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+      req.headers.get('x-real-ip') ||
+      (req as any).ip;
+
+    // If allowlist is set, check if client IP is in it
+    if (allowedIps.length > 0) {
+      if (!clientIp || !allowedIps.includes(clientIp)) {
+        console.warn(`Blocked unauthorized admin access attempt from IP: ${clientIp || 'Unknown'}`);
+        return new NextResponse(
+          JSON.stringify({ error: 'Access Denied: IP not allowed' }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+  }
+
   // Redirect unauthenticated users to login
   if (!session) {
     // For API routes, return 401 instead of redirect
@@ -67,6 +87,7 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     '/dashboard/:path*',
+    '/admin/:path*',
     '/api/:path*',
   ],
 };

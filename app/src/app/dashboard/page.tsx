@@ -62,7 +62,7 @@ export default function DashboardPage() {
   return (
     <div className="animate-in fade-in duration-700 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <DailySurveyModal />
-      
+
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10 sm:mb-16">
         <div>
           <span className="text-primary font-bold text-[10px] uppercase tracking-[0.2em] mb-2 block">Bakery Overview</span>
@@ -76,34 +76,24 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12 sm:mb-20">
-        <StatCard 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-12 sm:mb-20">
+        <StatCard
           icon={<ShoppingBag className="w-6 h-6 text-primary" />}
           label="Active Orders"
           value={loading ? '...' : stats.activeOrders.toString()}
-          change="+0 this week"
           bgColor="bg-pink-50"
         />
-        <StatCard 
+        <StatCard
           icon={<Clock className="w-6 h-6 text-secondary" />}
           label="Live Designs"
           value={loading ? '...' : stats.pendingQuotes.toString()}
-          change="Awaiting client"
           bgColor="bg-gray-100"
         />
-        <StatCard 
+        <StatCard
           icon={<TrendingUp className="w-6 h-6 text-green-600" />}
           label="Total Revenue"
           value={loading ? '...' : `$${stats.revenue.toLocaleString()}`}
-          change="All-time earnings"
           bgColor="bg-green-50"
-        />
-        <StatCard 
-          icon={<Users className="w-6 h-6 text-blue-600" />}
-          label="Network Reach"
-          value={loading ? '...' : stats.newLeads.toString()}
-          change="Community signups"
-          bgColor="bg-blue-50"
         />
       </div>
 
@@ -120,11 +110,11 @@ export default function DashboardPage() {
                 Full Calendar <ArrowUpRight className="w-4 h-4 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
-            
+
             <div className="space-y-3 sm:space-y-4">
               {recentOrders.length > 0 ? (
                 recentOrders.map((order) => (
-                  <OrderRow 
+                  <OrderRow
                     key={order.id}
                     customer={order.customer_name || 'Anonymous'}
                     cake={order.cake_designs?.title || 'Custom Cake'}
@@ -165,9 +155,7 @@ export default function DashboardPage() {
           <div className="card-bake">
             <h3 className="text-xl font-bold mb-8 text-secondary">Beta Progress</h3>
             <div className="space-y-8">
-              <ProgressItem label="Profile Setup" progress={40} color="bg-secondary" />
-              <ProgressItem label="AI Training" progress={0} color="bg-primary" />
-              <ProgressItem label="Order Proof" progress={stats.activeOrders > 0 ? 100 : 0} color="bg-green-500" />
+              <ProgressItem label="Active Orders Achievement" progress={stats.activeOrders > 0 ? 100 : 0} color="bg-green-500" />
             </div>
             <div className="mt-10 pt-8 border-t border-gray-50">
               <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-4">Support</p>
@@ -194,12 +182,12 @@ function getStatusColor(status: string) {
 function Sparkles({ className }: any) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
     </svg>
   );
 }
 
-function StatCard({ icon, label, value, change, bgColor }: any) {
+function StatCard({ icon, label, value, bgColor }: any) {
   return (
     <div className="card-bake p-8">
       <div className={`w-14 h-14 ${bgColor} rounded-2xl flex items-center justify-center mb-6 border border-white shadow-sm`}>
@@ -207,7 +195,6 @@ function StatCard({ icon, label, value, change, bgColor }: any) {
       </div>
       <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.15em]">{label}</p>
       <h3 className="text-3xl font-black mt-2 text-secondary">{value}</h3>
-      <p className="text-[10px] text-gray-400 mt-4 font-bold bg-gray-50/50 inline-block px-2 py-1 rounded-md border border-gray-100">{change}</p>
     </div>
   );
 }
@@ -243,8 +230,8 @@ function ProgressItem({ label, progress, color }: any) {
         <span>{progress}%</span>
       </div>
       <div className="w-full h-3 bg-gray-50 rounded-full overflow-hidden p-0.5 border border-gray-100">
-        <div 
-          className={`h-full ${color} rounded-full transition-all duration-1000 shadow-sm`} 
+        <div
+          className={`h-full ${color} rounded-full transition-all duration-1000 shadow-sm`}
           style={{ width: `${progress}%` }}
         />
       </div>
