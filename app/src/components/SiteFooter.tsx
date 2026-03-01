@@ -69,8 +69,8 @@ export function SiteFooter() {
             &copy; 2026 Bake Ops. All rights reserved. Built with love for Bakers.
           </p>
           <div className="flex gap-6">
-            <a href="#" className="text-gray-500 hover:text-white transition-colors text-xs">Instagram</a>
-            <a href="#" className="text-gray-500 hover:text-white transition-colors text-xs">Twitter</a>
+            <a href="https://instagram.com/bakeops_beta" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors text-xs">Instagram</a>
+            <a href="https://twitter.com/bakeops" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors text-xs">Twitter</a>
             <Link href="/support" className="text-gray-500 hover:text-white transition-colors text-xs">Support</Link>
           </div>
         </div>

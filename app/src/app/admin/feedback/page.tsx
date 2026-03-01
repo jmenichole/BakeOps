@@ -103,7 +103,7 @@ export default function AdminFeedback() {
                                     </div>
 
                                     <p className="text-lg font-medium text-white/80 leading-relaxed italic">
-                                        "{item.message}"
+                                        &quot;{item.message}&quot;
                                     </p>
 
                                     <div className="flex flex-wrap items-center gap-6 pt-4 border-t border-white/5">

@@ -6,7 +6,8 @@ import { cookies } from 'next/headers';
  * Returns the user object or null if not authenticated.
  */
 export async function getAuthUser() {
-  const supabase = createRouteHandlerClient({ cookies });
+  const cookieStore = await cookies();
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
   const { data: { session } } = await supabase.auth.getSession();
   return session?.user ?? null;
 }

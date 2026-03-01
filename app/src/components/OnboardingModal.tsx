@@ -1,44 +1,78 @@
 'use client';
 
-import { useState } from 'react';
-import { 
-  X, 
-  Sparkles, 
-  Smartphone, 
-  LayoutDashboard, 
-  Palette, 
-  Calendar, 
-  CheckCircle2, 
-  ChevronRight, 
+import { useState, useEffect } from 'react';
+import {
+  X,
+  Sparkles,
+  Smartphone,
+  LayoutDashboard,
+  Palette,
+  Calendar,
+  CheckCircle2,
+  ChevronRight,
   ChevronLeft,
   Share,
   PlusSquare,
   MoreVertical
 } from 'lucide-react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { STORAGE_KEYS } from '@/constants';
+import { createBrowserClient } from '@/lib/supabase';
 
 export function OnboardingModal() {
   const [step, setStep] = useState(1);
   const totalSteps = 4;
-  const [hasSeenOnboarding, setHasSeenOnboarding] = useLocalStorage(STORAGE_KEYS.ONBOARDING_SEEN, false);
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const supabase = createBrowserClient();
 
-  const isOpen = !hasSeenOnboarding;
+  useEffect(() => {
+    async function checkOnboarding() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setHasSeenOnboarding(true); // Don't show to non-auth
+        return;
+      }
 
-  const handleDismiss = () => {
-    setHasSeenOnboarding(true);
+      const { data: baker } = await supabase
+        .from('bakers')
+        .select('onboarding_completed')
+        .eq('id', user.id)
+        .single();
+
+      setHasSeenOnboarding(baker?.onboarding_completed ?? false);
+    }
+    checkOnboarding();
+  }, [supabase]);
+
+  const handleDismiss = async () => {
+    setIsUpdating(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from('bakers')
+          .update({ onboarding_completed: true })
+          .eq('id', user.id);
+      }
+      setHasSeenOnboarding(true);
+    } catch (err) {
+      console.error('Failed to update onboarding status:', err);
+      // Fallback to local state if DB fails
+      setHasSeenOnboarding(true);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
-  if (!isOpen) return null;
+  if (hasSeenOnboarding === null || hasSeenOnboarding) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-secondary/60 backdrop-blur-md animate-in fade-in duration-300">
       <div className="bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl border border-pink-100 relative overflow-hidden animate-in zoom-in-95 duration-500">
-        
+
         {/* Progress Bar */}
         <div className="absolute top-0 left-0 w-full h-1.5 bg-gray-50 flex">
           {[...Array(totalSteps)].map((_, i) => (
-            <div 
+            <div
               key={i}
               className={`flex-1 transition-all duration-500 ${i + 1 <= step ? 'bg-primary' : ''}`}
             />
@@ -46,9 +80,10 @@ export function OnboardingModal() {
         </div>
 
         {/* Close Button */}
-        <button 
+        <button
           onClick={handleDismiss}
-          className="absolute top-6 right-6 p-2 hover:bg-gray-50 rounded-full transition-colors z-10"
+          disabled={isUpdating}
+          className="absolute top-6 right-6 p-2 hover:bg-gray-50 rounded-full transition-colors z-10 disabled:opacity-50"
           aria-label="Close onboarding"
         >
           <X className="w-5 h-5 text-gray-400" />
@@ -64,7 +99,7 @@ export function OnboardingModal() {
               <p className="text-gray-500 leading-relaxed">
                 We&apos;re so excited to have you in our beta program. Bake Ops is designed to help you spend less time on paperwork and more time decorating.
               </p>
-              <button 
+              <button
                 onClick={() => setStep(2)}
                 className="w-full btn btn-primary py-4 text-lg flex items-center justify-center gap-2 group"
                 aria-label="Get started with onboarding"
@@ -116,7 +151,7 @@ export function OnboardingModal() {
               <p className="text-sm text-gray-500 leading-relaxed">
                 Bake Ops works best when installed as an app on your phone. It&apos;s fast, convenient, and takes up zero storage.
               </p>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-5 rounded-2xl border border-pink-50 bg-pink-50/30">
                   <h4 className="font-bold text-primary text-xs uppercase tracking-widest mb-4">iPhone (iOS)</h4>
@@ -152,15 +187,17 @@ export function OnboardingModal() {
                   We can&apos;t wait to see what you create. If you have any feedback, just use the widget in the corner.
                 </p>
               </div>
-              <button 
+              <button
                 onClick={handleDismiss}
+                disabled={isUpdating}
                 className="w-full btn btn-primary py-5 text-xl shadow-xl shadow-pink-200"
               >
-                Start Baking!
+                {isUpdating ? 'Saving...' : 'Start Baking!'}
               </button>
-              <button 
+              <button
                 onClick={handleDismiss}
-                className="text-gray-400 text-sm font-bold hover:text-secondary transition-colors"
+                disabled={isUpdating}
+                className="text-gray-400 text-sm font-bold hover:text-secondary transition-colors disabled:opacity-50"
               >
                 Skip for now
               </button>

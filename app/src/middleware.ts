@@ -55,7 +55,7 @@ export async function middleware(req: NextRequest) {
     const clientIp =
       req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
       req.headers.get('x-real-ip') ||
-      (req as any).ip;
+      req.ip;
 
     // If allowlist is set, check if client IP is in it
     if (allowedIps.length > 0) {

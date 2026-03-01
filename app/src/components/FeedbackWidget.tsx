@@ -33,7 +33,16 @@ export function FeedbackWidget() {
   const [rating, setRating] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const supabase = createBrowserClient();
+
+  useEffect(() => {
+    async function checkAuth() {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    }
+    checkAuth();
+  }, [supabase]);
 
   // Close on escape
   useEffect(() => {
@@ -43,6 +52,8 @@ export function FeedbackWidget() {
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
   }, []);
+
+  if (isAuthenticated === false) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,8 +151,8 @@ export function FeedbackWidget() {
                 <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6 scale-in duration-500">
                   <Check className="w-10 h-10" strokeWidth={3} />
                 </div>
-                <h4 className="font-bold text-xl text-gray-900 mb-2">You're Awesome!</h4>
-                <p className="text-sm text-gray-500">Your feedback has been beamed to the kitchen. We'll start cooking right away!</p>
+                <h4 className="font-bold text-xl text-gray-900 mb-2">You&apos;re Awesome!</h4>
+                <p className="text-sm text-gray-500">Your feedback has been beamed to the kitchen. We&apos;ll start cooking right away!</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -153,8 +164,8 @@ export function FeedbackWidget() {
                       type="button"
                       onClick={() => setCategory(cat.value)}
                       className={`flex items-center gap-2 p-3 rounded-2xl text-xs font-bold transition-all border ${category === cat.value
-                          ? 'bg-secondary/5 border-secondary text-secondary shadow-sm'
-                          : 'bg-gray-50 border-gray-100 text-gray-500 hover:bg-gray-100'
+                        ? 'bg-secondary/5 border-secondary text-secondary shadow-sm'
+                        : 'bg-gray-50 border-gray-100 text-gray-500 hover:bg-gray-100'
                         }`}
                     >
                       <cat.icon className={`w-4 h-4 ${cat.color}`} />
@@ -165,7 +176,7 @@ export function FeedbackWidget() {
 
                 {/* Feedback Input */}
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider pl-1">What's on your mind?</label>
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider pl-1">What&apos;s on your mind?</label>
                   <textarea
                     required
                     autoFocus
@@ -183,7 +194,7 @@ export function FeedbackWidget() {
 
                 {/* Rating */}
                 <div className="space-y-3">
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider pl-1 text-center block">How's your experience?</label>
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider pl-1 text-center block">How&apos;s your experience?</label>
                   <div className="flex justify-between px-2">
                     {ratings.map((r) => (
                       <button
@@ -191,8 +202,8 @@ export function FeedbackWidget() {
                         type="button"
                         onClick={() => setRating(r.value)}
                         className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${rating === r.value
-                            ? 'bg-secondary text-white scale-110 shadow-lg'
-                            : `bg-gray-50 text-gray-400 ${r.color}`
+                          ? 'bg-secondary text-white scale-110 shadow-lg'
+                          : `bg-gray-50 text-gray-400 ${r.color}`
                           }`}
                       >
                         <r.icon className="w-6 h-6" />
