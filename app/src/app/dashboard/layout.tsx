@@ -37,13 +37,38 @@ export default function DashboardLayout({
     async function fetchTrialInfo() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data: baker } = await supabase
+        // Try to fetch baker profile
+        const { data: baker, error: fetchError } = await supabase
           .from('bakers')
-          .select('trial_ends_at')
+          .select('trial_ends_at, referral_code')
           .eq('id', user.id)
           .single();
         
-        if (baker?.trial_ends_at) {
+        if (fetchError || !baker) {
+          // If profile is missing, initialize it
+          const trialEndDate = new Date();
+          trialEndDate.setDate(trialEndDate.getDate() + 14); // 14-day beta trial
+          const newReferralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+          const { data: newBaker } = await supabase
+            .from('bakers')
+            .upsert({
+              id: user.id,
+              trial_ends_at: trialEndDate.toISOString(),
+              is_beta_tester: true,
+              referral_code: newReferralCode,
+              onboarding_completed: false,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .select()
+            .single();
+          
+          if (newBaker?.trial_ends_at) {
+            const status = getTrialStatus(newBaker.trial_ends_at);
+            setTrialDays(status.daysRemaining);
+          }
+        } else if (baker?.trial_ends_at) {
           const status = getTrialStatus(baker.trial_ends_at);
           setTrialDays(status.daysRemaining);
         }

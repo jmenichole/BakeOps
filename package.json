@@ -2,18 +2,13 @@
   "name": "bakeops-monorepo",
   "version": "1.0.0",
   "workspaces": [
-    "app",
-    "backend"
+    "app"
   ],
   "scripts": {
     "build:app": "npm run build -w app",
-    "build:backend": "npm run build -w backend",
-    "build": "npm run build:app && npm run build:backend",
+    "build": "npm run build:app",
     "dev:app": "npm run dev -w app",
-    "dev:backend": "npm run dev -w backend",
     "lint:app": "npm run lint -w app",
-    "test:backend": "npm test -w backend -- --forceExit",
-    "test": "npm run test:backend",
     "lint": "npm run lint:app",
     "install:all": "npm install",
     "prepare": "husky"

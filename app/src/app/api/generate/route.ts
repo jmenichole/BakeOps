@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const limited = rateLimit(`generate:${user.id}`, { maxRequests: 5, windowMs: 60_000 });
     if (limited) return limited;
 
-    const { prompt, referenceImages } = await req.json();
+    const { prompt, negative_prompt, referenceImages } = await req.json();
 
     if (!prompt) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
           weight: 1,
         },
         {
-          text: 'blurry, distorted, low quality, text, watermark, messy',
+          text: negative_prompt || 'blurry, distorted, low quality, text, watermark, messy',
           weight: -1,
         }
       ],

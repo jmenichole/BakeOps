@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Sparkles, Save, Info, Palette, Send, Mail, Phone, Copy, X, Image as ImageIcon, Star, CheckCircle2, Plus } from 'lucide-react';
 import Link from 'next/link';
@@ -14,13 +14,14 @@ interface FileData {
 
 export default function NewDesignPage() {
   const router = useRouter();
-  const supabase = createBrowserClient();
+  const supabase = useMemo(() => createBrowserClient(), []);
   const [step, setStep] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [savedDesignId, setSavedDesignId] = useState<string | null>(null);
   const [shareLink, setShareLink] = useState('');
   const [referenceImages, setReferenceImages] = useState<FileData[]>([]);
+  const [bakerZip, setBakerZip] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const quoteRef = useRef<HTMLDivElement>(null);
   const [config, setConfig] = useState({
@@ -42,6 +43,22 @@ export default function NewDesignPage() {
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
   const [refinementText, setRefinementText] = useState('');
+
+  // Fetch baker info for pricing context
+  useEffect(() => {
+    async function fetchBakerInfo() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: baker } = await supabase
+          .from('bakers')
+          .select('zip_code')
+          .eq('id', user.id)
+          .single();
+        if (baker?.zip_code) setBakerZip(baker.zip_code);
+      }
+    }
+    fetchBakerInfo();
+  }, [supabase]);
   const [quote, setQuote] = useState({
     base: 65,
     decor: 0,
@@ -57,8 +74,13 @@ export default function NewDesignPage() {
     let filling = 0;
     let decor = config.theme.length > 50 ? 80 : 40;
     let addOnsPrice = config.addOns.length * 20;
+    
+    // Zip-based market multiplier (Example: simple check for high-cost zip starts)
+    const isHighCostArea = bakerZip ? ['100', '902', '941', '606'].some(prefix => bakerZip.startsWith(prefix)) : false;
+    const marketMultiplier = isHighCostArea ? 1.45 : 1.15;
+    
     // Pseudo-AI market adjustment based on complexity and "area"
-    let marketAdjustment = Math.floor((config.theme.length / 10) + (config.addOns.length * 5));
+    let marketAdjustment = Math.floor(((config.theme.length / 10) + (config.addOns.length * 5)) * marketMultiplier);
 
     if (config.productType === 'cake') {
       base = config.tiers * 65;
@@ -79,7 +101,7 @@ export default function NewDesignPage() {
       marketAdjustment,
       total: base + decor + filling + addOnsPrice + marketAdjustment + 25 // + $25 service fee
     });
-  }, [config]);
+  }, [config, bakerZip]);
 
   const productTypes = [
     { id: 'cake', label: 'Custom Cake' },
@@ -135,12 +157,14 @@ export default function NewDesignPage() {
     setCurrentDesign(null);
 
     try {
-      const prompt = `((${config.productType === 'cake' ? `${config.tiers} tier cake` : `${config.quantity} ${config.productType}`})), professional bakery photograph, theme: ${config.theme}. ${config.addOns.length > 0 ? `Add-ons: ${config.addOns.join(', ')}.` : ''} High quality, detailed icing, elegant presentation, soft studio lighting.`;
+      const productDesc = config.productType === 'cake' ? `${config.tiers} tier custom cake` : `${config.quantity} gourmet ${config.productType}`;
+      const prompt = `Professional high-end bakery photography of a ${productDesc}. Theme: ${config.theme}. ${config.addOns.length > 0 ? `Features: ${config.addOns.join(', ')}.` : ''} The design should be elegant, sharp focus, ${config.flavor} style, sophisticated frosting, detailed decorations. Set on a clean marble countertop with soft warm natural lighting, 8k resolution, photorealistic, masterpiece.`;
+      const negative_prompt = "cartoon, drawing, low quality, blurry, text, watermark, messy, plastic, artificial, distorted tiers, floating elements, low-res, ugly, grainy, pixelated";
 
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, referenceImages })
+        body: JSON.stringify({ prompt, negative_prompt, referenceImages })
       });
 
       const data = await response.json();
@@ -628,12 +652,15 @@ export default function NewDesignPage() {
                 </div>
               </>
             ) : (
-              <div className="text-center p-8">
-                <div className="w-20 h-20 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Palette className="w-10 h-10" />
+              <div className="text-center p-12 lg:p-20 group relative overflow-hidden flex flex-col items-center">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--primary)_0%,_transparent_70%)] opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-1000" />
+                <div className="w-32 h-32 bg-white rounded-[2.5rem] border border-pink-50 shadow-2xl shadow-pink-100/50 flex items-center justify-center mx-auto mb-10 transform -rotate-6 group-hover:rotate-0 transition-transform duration-700">
+                  <span className="text-5xl group-hover:scale-110 transition-transform duration-700">🎂</span>
                 </div>
-                <h3 className="font-bold text-gray-400 mb-2">No Mockup Yet</h3>
-                <p className="text-sm text-gray-400">Configure your cake and click &quot;Generate&quot; to see the AI magic.</p>
+                <h3 className="text-2xl font-serif font-black text-secondary/30 mb-3 tracking-tight">Your Masterpiece Awaits</h3>
+                <p className="text-sm text-gray-400 font-medium max-w-[240px] leading-relaxed mx-auto">
+                  Configure your cake and hit <strong className="text-primary/60">Generate</strong> to see the AI magic build your vision.
+                </p>
               </div>
             )}
           </div>

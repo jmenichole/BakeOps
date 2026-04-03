@@ -9,6 +9,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [bakeryName, setBakeryName] = useState('');
+  const [zipCode, setZipCode] = useState('');
   const [emailLeads, setEmailLeads] = useState(true);
   const [orderUpdates, setOrderUpdates] = useState(true);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -41,6 +42,7 @@ export default function SettingsPage() {
 
         if (baker) {
           setBakeryName(baker.business_name || '');
+          setZipCode(baker.zip_code || '');
           setEmailLeads(baker.email_leads ?? true);
           setOrderUpdates(baker.order_updates ?? true);
         }
@@ -66,6 +68,7 @@ export default function SettingsPage() {
         .upsert({
           id: user.id,
           business_name: bakeryName,
+          zip_code: zipCode,
           email_leads: emailLeads,
           order_updates: orderUpdates,
           updated_at: new Date().toISOString(),
@@ -169,6 +172,17 @@ export default function SettingsPage() {
             <div className="space-y-2">
               <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Email Address</label>
               <input type="email" readOnly className="w-full p-4 rounded-xl border border-gray-100 bg-gray-100 text-sm outline-none text-gray-500" value={user?.email || ''} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Zip / Postal Code</label>
+              <input
+                type="text"
+                maxLength={10}
+                className="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all"
+                placeholder="90210"
+                value={zipCode}
+                onChange={(e) => setZipCode(e.target.value)}
+              />
             </div>
           </div>
         </div>

@@ -17,6 +17,10 @@ const PUBLIC_ROUTES = new Set([
   '/auth/callback',
 ]);
 
+const PUBLIC_DYNAMIC_ROUTES = [
+  '/quote/',
+];
+
 // API routes that don't require user auth (cron jobs, public endpoints)
 const PUBLIC_API_ROUTES = new Set([
   '/api/traction-report', // protected by CRON_SECRET instead
@@ -29,6 +33,11 @@ export async function middleware(req: NextRequest) {
 
   // Skip auth check for public routes
   if (PUBLIC_ROUTES.has(pathname)) {
+    return res;
+  }
+
+  // Skip auth check for public dynamic routes
+  if (PUBLIC_DYNAMIC_ROUTES.some(route => pathname.startsWith(route))) {
     return res;
   }
 

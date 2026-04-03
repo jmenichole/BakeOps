@@ -71,25 +71,6 @@ function SignupContent() {
 
       if (signupError) throw signupError;
 
-      // If there's a referral code, create a referral record
-      if (referralCode && data.user) {
-        const { data: referrer } = await supabase
-          .from('bakers')
-          .select('id')
-          .eq('referral_code', referralCode)
-          .single();
-
-        if (referrer) {
-          await supabase.from('referrals').insert({
-            referrer_id: referrer.id,
-            referred_email: email,
-            referred_user_id: data.user.id,
-            referral_code: referralCode,
-            status: 'pending',
-          });
-        }
-      }
-
       setSuccess(true);
     } catch (err: any) {
       setError(err.message || 'An error occurred during signup');

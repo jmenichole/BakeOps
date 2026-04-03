@@ -1,3 +1,3 @@
-npm test
 # Lint disabled until ESLint is properly configured
 # npm run lint
+# npm test

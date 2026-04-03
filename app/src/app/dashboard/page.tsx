@@ -1,22 +1,41 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus, TrendingUp, Users, ShoppingBag, Clock, ArrowUpRight } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Plus, TrendingUp, Users, ShoppingBag, Clock, ArrowUpRight, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { DailySurveyModal } from '@/components/DailySurveyModal';
 import { createBrowserClient } from '@/lib/supabase';
 import { toast } from '@/hooks/useToast';
+import { StatusBadge } from '@/components/ui/StatusBadge';
+
+interface DashboardStats {
+  activeOrders: number;
+  pendingQuotes: number;
+  revenue: number;
+  newLeads: number;
+}
+
+interface RecentOrder {
+  id: string;
+  customer_name: string | null;
+  status: string;
+  delivery_date: string;
+  cake_designs: {
+    title: string;
+  } | null;
+}
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<DashboardStats>({
     activeOrders: 0,
     pendingQuotes: 0,
     revenue: 0,
     newLeads: 0
   });
-  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [loading, setLoading] = useState(true);
-  const supabase = createBrowserClient();
+
+  const supabase = useMemo(() => createBrowserClient(), []);
 
   useEffect(() => {
     async function fetchDashboardData() {
@@ -31,9 +50,10 @@ export default function DashboardPage() {
       }
 
       // Fetch Stats
-      const [ordersRes, designsRes] = await Promise.all([
+      const [ordersRes, designsRes, leadsRes] = await Promise.all([
         supabase.from('orders').select('*').eq('baker_id', user.id),
         supabase.from('cake_designs').select('*').eq('baker_id', user.id),
+        supabase.from('referrals').select('id', { count: 'exact', head: true }).eq('referrer_id', user.id),
       ]);
 
       const active = ordersRes.data?.filter(o => !['delivered', 'cancelled'].includes(o.status)).length || 0;
@@ -43,7 +63,7 @@ export default function DashboardPage() {
         activeOrders: active,
         pendingQuotes: designsRes.data?.length || 0,
         revenue: rev,
-        newLeads: 0
+        newLeads: leadsRes.count || 0
       });
 
       // Fetch Recent Orders
@@ -60,7 +80,7 @@ export default function DashboardPage() {
         .order('delivery_date', { ascending: true })
         .limit(3);
 
-      setRecentOrders(orders || []);
+      setRecentOrders((orders as any) || []);
       setLoading(false);
     }
 
@@ -84,7 +104,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-12 sm:mb-20">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12 sm:mb-20">
         <StatCard
           icon={<ShoppingBag className="w-6 h-6 text-primary" />}
           label="Active Orders"
@@ -96,6 +116,12 @@ export default function DashboardPage() {
           label="Live Designs"
           value={loading ? '...' : stats.pendingQuotes.toString()}
           bgColor="bg-gray-100"
+        />
+        <StatCard
+          icon={<Users className="w-6 h-6 text-blue-600" />}
+          label="New Leads"
+          value={loading ? '...' : stats.newLeads.toString()}
+          bgColor="bg-blue-50"
         />
         <StatCard
           icon={<TrendingUp className="w-6 h-6 text-green-600" />}
@@ -127,8 +153,7 @@ export default function DashboardPage() {
                     customer={order.customer_name || 'Anonymous'}
                     cake={order.cake_designs?.title || 'Custom Cake'}
                     date={new Date(order.delivery_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                    status={order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                    statusColor={getStatusColor(order.status)}
+                    status={order.status}
                   />
                 ))
               ) : (
@@ -178,24 +203,7 @@ export default function DashboardPage() {
   );
 }
 
-function getStatusColor(status: string) {
-  switch (status) {
-    case 'preparing': return 'bg-orange-50 text-orange-600 border border-orange-100';
-    case 'confirmed': return 'bg-blue-50 text-blue-600 border border-blue-100';
-    case 'paid': return 'bg-green-50 text-green-600 border border-green-100';
-    default: return 'bg-gray-50 text-gray-600 border border-gray-100';
-  }
-}
-
-function Sparkles({ className }: any) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-    </svg>
-  );
-}
-
-function StatCard({ icon, label, value, bgColor }: any) {
+function StatCard({ icon, label, value, bgColor }: { icon: React.ReactNode, label: string, value: string, bgColor: string }) {
   return (
     <div className="card-bake p-8">
       <div className={`w-14 h-14 ${bgColor} rounded-2xl flex items-center justify-center mb-6 border border-white shadow-sm`}>
@@ -207,7 +215,7 @@ function StatCard({ icon, label, value, bgColor }: any) {
   );
 }
 
-function OrderRow({ customer, cake, date, status, statusColor }: any) {
+function OrderRow({ customer, cake, date, status }: { customer: string, cake: string, date: string, status: string }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 sm:p-6 rounded-2xl border border-gray-50 hover:border-pink-100 hover:bg-pink-50/30 transition-all duration-300 group gap-4">
       <div className="flex items-center gap-5">
@@ -220,9 +228,7 @@ function OrderRow({ customer, cake, date, status, statusColor }: any) {
       <div className="flex items-center justify-between sm:justify-end sm:text-right gap-6 px-1 sm:px-0">
         <div>
           <p className="text-sm font-black text-secondary mb-1">{date}</p>
-          <span className={`text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-widest border ${statusColor}`}>
-            {status}
-          </span>
+          <StatusBadge status={status} />
         </div>
         <ArrowUpRight className="w-5 h-5 text-gray-300 group-hover:text-primary transition-colors" />
       </div>
@@ -230,7 +236,7 @@ function OrderRow({ customer, cake, date, status, statusColor }: any) {
   );
 }
 
-function ProgressItem({ label, progress, color }: any) {
+function ProgressItem({ label, progress, color }: { label: string, progress: number, color: string }) {
   return (
     <div>
       <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2.5">
