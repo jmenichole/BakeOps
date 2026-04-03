@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
 import { Plus, Search, Filter, MoreVertical, ExternalLink, Trash2, Mail, Phone, Calendar, CreditCard, ClipboardPlus, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { OrderManagementModal } from '@/components/OrderManagementModal';
 import { NewOrderModal } from '@/components/NewOrderModal';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -132,9 +133,9 @@ export default function OrdersPage() {
           {filteredOrders.map((order) => (
             <div key={order.id} className="card-bake p-6 flex flex-col md:flex-row gap-6 items-start md:items-center">
               {/* Design Image */}
-              <div className="w-20 h-20 bg-gray-50 rounded-2xl overflow-hidden flex-shrink-0">
+              <div className="relative w-20 h-20 bg-gray-50 rounded-2xl overflow-hidden flex-shrink-0">
                 {order.cake_designs?.image_url ? (
-                  <img src={order.cake_designs.image_url} alt={order.cake_designs.title} className="w-full h-full object-cover" />
+                  <Image src={order.cake_designs.image_url} alt={order.cake_designs.title || "Cake Design"} className="w-full h-full object-cover" fill />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-2xl">🎂</div>
                 )}

@@ -1,6 +1,7 @@
 'use client';
 
 import { X, Calendar, Download, Share2, ShoppingBag } from 'lucide-react';
+import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
@@ -151,10 +152,11 @@ export function DesignDetailModal({ design, isOpen, onClose }: DesignDetailModal
         {/* Image Section */}
         <div className="w-full md:w-1/2 bg-gray-100 relative min-h-[300px] md:min-h-full">
           {design.image_url ? (
-            <img 
+            <Image 
               src={design.image_url} 
               alt={design.title || 'Design image'} 
               className="w-full h-full object-cover absolute inset-0"
+              fill
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">

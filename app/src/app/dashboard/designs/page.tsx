@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
 import { Plus, Search, Filter, MoreVertical, ExternalLink, Trash2, AlertCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { DesignDetailModal } from '@/components/DesignDetailModal';
 
 // TypeScript interfaces
@@ -80,9 +81,14 @@ export default function DesignListPage() {
     }
   }, [supabase, page]);
 
+  const initialFetchDone = useRef(false);
+
   useEffect(() => {
-    fetchDesigns();
-  }, [supabase]); // On mount
+    if (initialFetchDone.current === false) {
+      fetchDesigns();
+      initialFetchDone.current = true;
+    }
+  }, [fetchDesigns]);
 
   // Filtered designs based on search query
   const filteredDesigns = useMemo(() => {
@@ -176,11 +182,11 @@ export default function DesignListPage() {
               <div key={design.id} className="card-bake group overflow-hidden p-0">
                 <div className="aspect-square relative overflow-hidden bg-gray-50">
                   {design.image_url ? (
-                    <img
+                    <Image
                       src={design.image_url}
                       alt={design.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      loading="lazy"
+                      fill
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-200">

@@ -17,6 +17,7 @@ import {
   Info
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { CakeConfig } from '@/types/database';
 
 interface Design {
@@ -121,10 +122,11 @@ export default function PublicQuotePage() {
           {/* LEFT: MOCKUP PREVIEW */}
           <div className="lg:col-span-7 space-y-6">
             <div className="group relative aspect-square bg-white rounded-[3rem] p-4 shadow-2xl shadow-pink-100/30 overflow-hidden border border-white">
-                <img 
+                <Image 
                   src={design.image_url} 
                   alt="Cake Mockup" 
                   className="w-full h-full object-cover rounded-[2.5rem] transition-transform duration-700 group-hover:scale-105"
+                  fill
                 />
                 <div className="absolute top-8 right-8 bg-white/90 backdrop-blur font-bold text-[10px] uppercase tracking-widest text-primary px-4 py-2 rounded-full shadow-lg border border-pink-50">
                     AI Visual Concept

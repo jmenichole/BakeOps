@@ -11,7 +11,7 @@
     "lint:app": "npm run lint -w app",
     "lint": "npm run lint:app",
     "install:all": "npm install",
-    "prepare": "node -e \"try { require('husky').install() } catch (e) { if (e.code !== 'MODULE_NOT_FOUND') throw e }\""
+    "prepare": "husky"
   },
   "dependencies": {
     "@vercel/analytics": "^1.6.1"

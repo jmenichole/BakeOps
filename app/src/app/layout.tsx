@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
+import { Analytics } from "@vercel/analytics/react";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { Toaster } from "@/components/Toaster";
 import "./globals.css";

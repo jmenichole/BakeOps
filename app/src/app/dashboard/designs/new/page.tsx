@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Sparkles, Save, Info, Palette, Send, Mail, Phone, Copy, X, Image as ImageIcon, Star, CheckCircle2, Plus } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { createBrowserClient } from '@/lib/supabase';
 import { toast } from '@/hooks/useToast';
 import { calculateQuote } from '@/lib/pricing';
@@ -512,10 +513,11 @@ export default function NewDesignPage() {
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-2">
                 {referenceImages.map((img, idx) => (
                   <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 group">
-                    <img
+                    <Image
                       src={`data:${img.mimeType};base64,${img.data}`}
                       alt={`Ref ${idx}`}
                       className="w-full h-full object-cover"
+                      fill
                     />
                     <button
                       onClick={() => removeReference(idx)}
@@ -563,7 +565,7 @@ export default function NewDesignPage() {
           <div className="bg-[#111] p-4 rounded-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] aspect-square flex flex-col items-center justify-center relative overflow-hidden ring-1 ring-inset ring-white/5">
             {currentDesign ? (
               <>
-                <img src={currentDesign} alt="Cake Mockup" className="w-full h-full object-cover rounded-2xl shadow-inner" />
+                <Image src={currentDesign} alt="Cake Mockup" className="w-full h-full object-cover rounded-2xl shadow-inner" fill />
                 <div className="absolute top-6 right-6 bg-black/60 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-black text-white border border-white/20 shadow-lg flex items-center gap-2">
                   <Sparkles className="w-3 h-3 text-primary animate-pulse" /> AI GENERATED
                 </div>
