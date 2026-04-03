@@ -17,6 +17,7 @@ import {
   Info
 } from 'lucide-react';
 import Link from 'next/link';
+import { CakeConfig } from '@/types/database';
 
 interface Design {
   id: string;
@@ -24,7 +25,7 @@ interface Design {
   description: string;
   image_url: string;
   estimated_price: number;
-  configuration_data: any;
+  configuration_data: CakeConfig;
   bakers: {
     email: string;
     role: string;

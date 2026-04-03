@@ -74,7 +74,7 @@ export async function GET(req: Request) {
     const ordersByStatus: Record<string, number> = {};
     let totalRevenue = 0;
 
-    orders.forEach((o: any) => {
+    orders.forEach((o: { status: string; total_price: number | string; customer_name?: string; created_at: string; }) => {
       ordersByStatus[o.status] = (ordersByStatus[o.status] || 0) + 1;
       totalRevenue += Number(o.total_price) || 0;
     });
@@ -85,7 +85,7 @@ export async function GET(req: Request) {
       totalDesigns: designsRes.count || 0,
       totalRevenue,
       ordersByStatus,
-      recentOrders: orders.slice(0, 10).map((o: any) => ({
+      recentOrders: orders.slice(0, 10).map((o: { status: string; total_price: number | string; customer_name?: string; created_at: string; }) => ({
         customer_name: o.customer_name || 'Unknown',
         status: o.status,
         total_price: Number(o.total_price) || 0,
@@ -103,8 +103,8 @@ export async function GET(req: Request) {
     });
 
     return NextResponse.json({ success: true, data: tractionData });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Traction report failed:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

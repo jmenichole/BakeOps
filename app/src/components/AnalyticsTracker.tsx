@@ -10,7 +10,7 @@ export function AnalyticsTracker() {
 
     const trackEvent = useCallback(async (
         eventType: string,
-        metadata: any = {},
+        metadata: Record<string, unknown> = {},
         x?: number,
         y?: number,
         isDeadClick: boolean = false

@@ -11,7 +11,7 @@ import { toast } from '@/hooks/useToast';
 
 type FeedbackCategory = 'bug' | 'feature_request' | 'ui_ux' | 'other';
 
-const categories: { value: FeedbackCategory; label: string; icon: any; color: string }[] = [
+const categories: { value: FeedbackCategory; label: string; icon: React.ElementType; color: string }[] = [
   { value: 'bug', label: 'Report Bug', icon: Bug, color: 'text-red-500' },
   { value: 'feature_request', label: 'Feature Idea', icon: Lightbulb, color: 'text-amber-500' },
   { value: 'ui_ux', label: 'Improvement', icon: MousePointer2, color: 'text-blue-500' },

@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@/lib/supabase';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 import { User, Bell, Shield, Palette, Save, CheckCircle2, AlertCircle, LogOut, KeyRound, Trash2 } from 'lucide-react';
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [bakeryName, setBakeryName] = useState('');
   const [zipCode, setZipCode] = useState('');
   const [emailLeads, setEmailLeads] = useState(true);
@@ -116,9 +117,12 @@ export default function SettingsPage() {
       setNewPassword('');
       setConfirmPassword('');
       setShowPasswordForm(false);
-    } catch (error: any) {
+      setConfirmPassword('');
+      setShowPasswordForm(false);
+    } catch (error: unknown) {
       console.error('Error changing password:', error);
-      showMessage('error', error.message || 'Failed to change password.');
+      const message = error instanceof Error ? error.message : 'Failed to change password.';
+      showMessage('error', message);
     } finally {
       setPasswordLoading(false);
     }
@@ -138,9 +142,12 @@ export default function SettingsPage() {
       await supabase.auth.signOut();
       router.push('/');
       router.refresh();
-    } catch (error: any) {
+      router.push('/');
+      router.refresh();
+    } catch (error: unknown) {
       console.error('Error deleting account:', error);
-      showMessage('error', error.message || 'Failed to delete account. Please contact support.');
+      const message = error instanceof Error ? error.message : 'Failed to delete account.';
+      showMessage('error', message + ' Please contact support.');
       setDeleteLoading(false);
     }
   };

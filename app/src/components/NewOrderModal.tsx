@@ -77,9 +77,9 @@ export function NewOrderModal({ isOpen, onClose, onCreated }: NewOrderModalProps
         status: 'pending',
       });
       onCreated();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating order:', error);
-      setMessage({ type: 'error', text: error.message || 'Failed to create order.' });
+      setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Failed to create order.' });
     } finally {
       setLoading(false);
     }

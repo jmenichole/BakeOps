@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { createBrowserClient } from '@/lib/supabase';
 import { toast } from '@/hooks/useToast';
+import { PrepTask, Order } from '@/types/database';
 
 // Pre-made task templates for Quick Add
 const QUICK_ADD_TASKS = [
@@ -38,8 +39,8 @@ const QUICK_ADD_TASKS = [
 
 export default function ProductionPage() {
   const [selectedDay, setSelectedDay] = useState(new Date());
-  const [tasks, setTasks] = useState<any[]>([]);
-  const [orders, setOrders] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<PrepTask[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [addingTask, setAddingTask] = useState(false);
@@ -164,9 +165,10 @@ export default function ProductionPage() {
 
       setTasks(data || []);
       setShowAddModal(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error adding task:', err);
-      toast.error('Error adding task: ' + err.message);
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      toast.error('Error adding task: ' + message);
     } finally {
       setAddingTask(false);
     }
@@ -253,7 +255,7 @@ export default function ProductionPage() {
                     <button className="mt-1" onClick={() => toggleTaskStatus(task.id, task.status)}>
                       {task.status === 'completed' ? (
                         <CheckCircle2 className="w-6 h-6 text-green-500 fill-green-50" />
-                      ) : task.status === 'in-progress' ? (
+                      ) : task.status === 'in_progress' ? (
                         <div className="w-6 h-6 rounded-full border-2 border-orange-400 border-t-transparent animate-spin" />
                       ) : (
                         <Circle className="w-6 h-6 text-gray-200" />

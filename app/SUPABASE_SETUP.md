@@ -73,3 +73,5 @@ alter table public.bakers add column if not exists zip_code text;
 alter table public.bakers add column if not exists business_name text;
 alter table public.bakers add column if not exists role text default 'baker';
 ```
+
+

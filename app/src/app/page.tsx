@@ -2,8 +2,28 @@ import Link from 'next/link';
 import { SiteFooter } from '@/components/SiteFooter';
 import { AuthButton } from '@/components/AuthButton';
 import { ArrowRight, Zap, Palette, Calendar, Calculator, ShieldCheck, Star, Clock, Users, TrendingUp, ChevronRight } from 'lucide-react';
+import { createSupabaseServerClient } from '@/lib/supabase-server';
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createSupabaseServerClient();
+  
+  const [{ count: bakersCount }, { count: designsCount }, { data: orders }] = await Promise.all([
+    supabase.from('bakers').select('*', { count: 'exact', head: true }),
+    supabase.from('cake_designs').select('*', { count: 'exact', head: true }),
+    supabase.from('orders').select('total_price')
+  ]);
+
+  const rawBakers = bakersCount || 0;
+  const rawDesigns = designsCount || 0;
+  
+  // Real stats calculation
+  const totalRevenue = orders?.reduce((acc, order) => acc + (order.total_price || 0), 0) || 0;
+  
+  // Provide honest fallback formats
+  const displayBakers = rawBakers > 5 ? `${rawBakers}` : '< 10';
+  const displayDesigns = rawDesigns > 20 ? `${rawDesigns}` : '< 50';
+  const displayRevenue = totalRevenue > 0 ? `$${Math.floor(totalRevenue).toLocaleString()}` : '$0';
+
   return (
     <main className="min-h-screen bg-white selection:bg-pink-100">
       {/* STICKY NAV */}
@@ -67,10 +87,10 @@ export default function Home() {
       <section className="border-y border-gray-100 py-10 bg-gray-50/50">
         <div className="container px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
-            <ProofStat icon={<Users className="w-5 h-5" />} value="500+" label="Bakers in beta" />
-            <ProofStat icon={<Palette className="w-5 h-5" />} value="2,000+" label="Designs generated" />
-            <ProofStat icon={<TrendingUp className="w-5 h-5" />} value="$150K+" label="Revenue processed" />
-            <ProofStat icon={<Star className="w-5 h-5" />} value="4.9/5" label="Baker satisfaction" />
+            <ProofStat icon={<Users className="w-5 h-5" />} value={displayBakers} label="Bakers in beta" />
+            <ProofStat icon={<Palette className="w-5 h-5" />} value={displayDesigns} label="Designs generated" />
+            <ProofStat icon={<TrendingUp className="w-5 h-5" />} value={displayRevenue} label="Revenue quoted" />
+            <ProofStat icon={<ShieldCheck className="w-5 h-5" />} value="100%" label="Secure & Encrypted" />
           </div>
         </div>
       </section>

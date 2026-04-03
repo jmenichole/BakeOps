@@ -1,16 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/auth';
-import { rateLimit, getRequestIdentifier } from '@/lib/rate-limit';
+import { rateLimit } from '@/lib/rate-limit';
+import { trackServerEvent } from '@/lib/analytics-server';
+
+interface StabilityBody {
+  text_prompts: { text: string; weight: number }[];
+  cfg_scale: number;
+  steps: number;
+  samples: number;
+  height?: number;
+  width?: number;
+  init_image?: string;
+  image_strength?: number;
+  init_image_mode?: string;
+}
 
 export async function POST(req: NextRequest) {
   try {
-    // Auth check (middleware handles this, but double-check for direct access)
     const user = await getAuthUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Rate limit: 5 generations per minute per user
     const limited = rateLimit(`generate:${user.id}`, { maxRequests: 5, windowMs: 60_000 });
     if (limited) return limited;
 
@@ -31,7 +42,7 @@ export async function POST(req: NextRequest) {
 
     let endpoint = `${apiUrl}/generation/${engineId}/text-to-image`;
     
-    const body: any = {
+    const body: StabilityBody = {
       text_prompts: [
         {
           text: prompt,
@@ -43,15 +54,14 @@ export async function POST(req: NextRequest) {
         }
       ],
       cfg_scale: 7,
-      steps: 30,
+      steps: 30, // Could offer lower steps for faster drafts if needed
       samples: 1,
     };
 
     if (referenceImages && Array.isArray(referenceImages) && referenceImages.length > 0) {
       endpoint = `${apiUrl}/generation/${engineId}/image-to-image`;
-      // Use the first image as the reference
       body.init_image = referenceImages[0].data;
-      body.image_strength = 0.35;
+      body.image_strength = 0.35; // Adjust this if we want more/less adherence
       body.init_image_mode = 'IMAGE_STRENGTH';
     } else {
       body.height = 1024;
@@ -74,6 +84,13 @@ export async function POST(req: NextRequest) {
     if (!response.ok) {
       const errorData = await response.json();
       console.error('Stability AI Error:', errorData);
+      
+      await trackServerEvent('ai_generation_error', {
+        engineId,
+        status: response.status,
+        error: errorData
+      });
+      
       return NextResponse.json({ error: 'Failed to generate image' }, { status: response.status });
     }
 
@@ -81,9 +98,22 @@ export async function POST(req: NextRequest) {
     const base64Image = result.artifacts[0].base64;
     const imageUrl = `data:image/png;base64,${base64Image}`;
 
+    // Server-side analytics tracking for successful generation
+    await trackServerEvent('design_generated', {
+      engineId,
+      hasReferenceImages: referenceImages && referenceImages.length > 0,
+      promptLength: prompt.length
+    });
+
     return NextResponse.json({ imageUrl });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Generation API Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Unknown generation error';
+    
+    await trackServerEvent('ai_generation_exception', {
+      error: message
+    });
+    
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

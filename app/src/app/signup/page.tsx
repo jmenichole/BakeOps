@@ -72,8 +72,9 @@ function SignupContent() {
       if (signupError) throw signupError;
 
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during signup');
+    } catch (err: unknown) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : 'An error occurred during signup');
     } finally {
       setLoading(false);
     }

@@ -16,7 +16,7 @@ export function Toaster() {
     );
 }
 
-function ToastItem({ toast, onDismiss }: { toast: any; onDismiss: () => void }) {
+function ToastItem({ toast, onDismiss }: { toast: { id: string; type: string; message: string }; onDismiss: () => void }) {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {

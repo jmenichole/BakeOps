@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 export default function AdminOverview() {
-    const [stats, setStats] = useState<any>({
+    const [stats, setStats] = useState<{ totalFeedback: number; avgRating: number | string; deadClicks: number; totalEvents: number; loading: boolean; }>({
         totalFeedback: 0,
         avgRating: 0,
         deadClicks: 0,
@@ -62,7 +62,7 @@ export default function AdminOverview() {
         fetchStats();
     }, [supabase]);
 
-    const StatCard = ({ icon: Icon, label, value, trend, color }: any) => (
+    const StatCard = ({ icon: Icon, label, value, trend, color }: { icon: React.ElementType; label: string; value: string | number; trend: string; color: { bg: string; text: string; }; }) => (
         <div className="bg-[#111114] p-8 rounded-[2rem] border border-white/5 relative overflow-hidden group">
             <div className={`absolute top-0 right-0 w-32 h-32 opacity-[0.02] translate-x-10 -translate-y-10 group-hover:scale-150 transition-transform duration-700 ${color.bg}`} />
             <div className="flex items-center justify-between mb-8">

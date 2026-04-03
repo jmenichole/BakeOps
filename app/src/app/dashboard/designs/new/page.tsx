@@ -6,6 +6,7 @@ import { ArrowLeft, Sparkles, Save, Info, Palette, Send, Mail, Phone, Copy, X, I
 import Link from 'next/link';
 import { createBrowserClient } from '@/lib/supabase';
 import { toast } from '@/hooks/useToast';
+import { calculateQuote } from '@/lib/pricing';
 
 interface FileData {
   mimeType: string;
@@ -68,39 +69,19 @@ export default function NewDesignPage() {
     total: 92
   });
 
-  // Dynamic pricing calculation (AI Suggestion)
+  // Dynamic pricing calculation via Engine
   useEffect(() => {
-    let base = 0;
-    let filling = 0;
-    let decor = config.theme.length > 50 ? 80 : 40;
-    let addOnsPrice = config.addOns.length * 20;
-    
-    // Zip-based market multiplier (Example: simple check for high-cost zip starts)
-    const isHighCostArea = bakerZip ? ['100', '902', '941', '606'].some(prefix => bakerZip.startsWith(prefix)) : false;
-    const marketMultiplier = isHighCostArea ? 1.45 : 1.15;
-    
-    // Pseudo-AI market adjustment based on complexity and "area"
-    let marketAdjustment = Math.floor(((config.theme.length / 10) + (config.addOns.length * 5)) * marketMultiplier);
-
-    if (config.productType === 'cake') {
-      base = config.tiers * 65;
-      filling = config.filling === 'None' ? 0 : 15;
-    } else if (config.productType === 'cupcakes') {
-      base = (config.quantity / 12) * 45;
-      filling = config.filling === 'None' ? 0 : 10;
-    } else {
-      base = (config.quantity / 12) * 35;
-      filling = 0;
-    }
-
-    setQuote({
-      base,
-      decor,
-      filling,
-      addOns: addOnsPrice,
-      marketAdjustment,
-      total: base + decor + filling + addOnsPrice + marketAdjustment + 25 // + $25 service fee
+    const breakdown = calculateQuote({
+      productType: config.productType,
+      tiers: config.tiers,
+      quantity: config.quantity,
+      flavor: config.flavor,
+      filling: config.filling,
+      addOns: config.addOns,
+      themeComplexity: Math.min(config.theme.length / 200, 1),
+      zipCode: bakerZip
     });
+    setQuote(breakdown);
   }, [config, bakerZip]);
 
   const productTypes = [
@@ -178,9 +159,9 @@ export default function NewDesignPage() {
       setAccuracyRating(null);
       setFeedbackComment('');
       setFeedbackSubmitted(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error('AI Generation failed: ' + err.message);
+      toast.error('AI Generation failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
     } finally {
       setIsGenerating(false);
     }
@@ -210,9 +191,9 @@ export default function NewDesignPage() {
       setRefinementText('');
       setAccuracyRating(null);
       setFeedbackSubmitted(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error('Refinement failed: ' + err.message);
+      toast.error('Refinement failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
     } finally {
       setIsGenerating(false);
     }
@@ -302,9 +283,9 @@ export default function NewDesignPage() {
       if (!isFinal) {
         router.push('/dashboard');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error('Error: ' + err.message);
+      toast.error('Error: ' + (err instanceof Error ? err.message : 'Unknown error'));
     } finally {
       setIsSaving(false);
     }
@@ -394,9 +375,9 @@ export default function NewDesignPage() {
 
       toast.success('Draft saved! Image downloaded.');
       router.push('/dashboard');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error('Error: ' + err.message);
+      toast.error('Error: ' + (err instanceof Error ? err.message : 'Unknown error'));
     } finally {
       setIsSaving(false);
     }
@@ -579,12 +560,12 @@ export default function NewDesignPage() {
 
         {/* Right: Preview / Mockup */}
         <div className="space-y-6">
-          <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm aspect-square flex flex-col items-center justify-center relative overflow-hidden">
+          <div className="bg-[#111] p-4 rounded-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] aspect-square flex flex-col items-center justify-center relative overflow-hidden ring-1 ring-inset ring-white/5">
             {currentDesign ? (
               <>
-                <img src={currentDesign} alt="Cake Mockup" className="w-full h-full object-cover rounded-xl" />
-                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-primary shadow-sm flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" /> AI GENERATED
+                <img src={currentDesign} alt="Cake Mockup" className="w-full h-full object-cover rounded-2xl shadow-inner" />
+                <div className="absolute top-6 right-6 bg-black/60 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-black text-white border border-white/20 shadow-lg flex items-center gap-2">
+                  <Sparkles className="w-3 h-3 text-primary animate-pulse" /> AI GENERATED
                 </div>
 
                 {/* Accuracy Feedback */}
@@ -652,14 +633,17 @@ export default function NewDesignPage() {
                 </div>
               </>
             ) : (
-              <div className="text-center p-12 lg:p-20 group relative overflow-hidden flex flex-col items-center">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--primary)_0%,_transparent_70%)] opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-1000" />
-                <div className="w-32 h-32 bg-white rounded-[2.5rem] border border-pink-50 shadow-2xl shadow-pink-100/50 flex items-center justify-center mx-auto mb-10 transform -rotate-6 group-hover:rotate-0 transition-transform duration-700">
-                  <span className="text-5xl group-hover:scale-110 transition-transform duration-700">🎂</span>
+              <div className="text-center p-12 lg:p-20 group relative overflow-hidden flex flex-col items-center z-10 w-full h-full justify-center">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#ff69b4_0%,_transparent_60%)] opacity-[0.05] group-hover:opacity-[0.10] transition-opacity duration-1000" />
+                
+                {/* 3D-ish glowing container */}
+                <div className="w-32 h-32 bg-white/5 rounded-[2.5rem] border border-white/10 shadow-[0_0_30px_rgba(255,105,180,0.15)] flex items-center justify-center mx-auto mb-10 transform -rotate-6 group-hover:rotate-0 transition-all duration-700 backdrop-blur-xl relative before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/5 before:to-transparent before:rounded-[2.5rem]">
+                  <span className="text-5xl group-hover:scale-110 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-transform duration-700 relative z-10">✨</span>
                 </div>
-                <h3 className="text-2xl font-serif font-black text-secondary/30 mb-3 tracking-tight">Your Masterpiece Awaits</h3>
-                <p className="text-sm text-gray-400 font-medium max-w-[240px] leading-relaxed mx-auto">
-                  Configure your cake and hit <strong className="text-primary/60">Generate</strong> to see the AI magic build your vision.
+                
+                <h3 className="text-2xl font-serif font-black text-white mb-3 tracking-tight drop-shadow-md">Your Masterpiece Awaits</h3>
+                <p className="text-sm text-gray-400 font-medium max-w-[260px] leading-relaxed mx-auto">
+                  Configure your details and hit <strong className="text-primary font-bold filter drop-shadow-[0_0_8px_rgba(255,105,180,0.8)]">Generate</strong> to see the AI magic build your vision.
                 </p>
               </div>
             )}

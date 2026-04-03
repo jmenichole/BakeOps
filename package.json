@@ -11,12 +11,10 @@
     "lint:app": "npm run lint -w app",
     "lint": "npm run lint:app",
     "install:all": "npm install",
-    "prepare": "husky"
+    "prepare": "node -e \"try { require('husky').install() } catch (e) { if (e.code !== 'MODULE_NOT_FOUND') throw e }\""
   },
   "dependencies": {
-    "@vercel/analytics": "^1.6.1",
-    "date-fns": "^4.1.0",
-    "resend": "^6.9.2"
+    "@vercel/analytics": "^1.6.1"
   },
   "devDependencies": {
     "husky": "^9.1.7",

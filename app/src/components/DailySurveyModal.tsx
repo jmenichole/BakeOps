@@ -41,6 +41,16 @@ export function DailySurveyModal() {
         return;
       }
 
+      // Check if they have actually used the cake designer
+      const { count: designsCount } = await supabase
+        .from('cake_designs')
+        .select('*', { count: 'exact', head: true })
+        .eq('baker_id', user.id);
+
+      if (!designsCount || designsCount === 0) {
+        return; // Don't show survey if they haven't used the tool yet
+      }
+
       // 1. Exit Intent Trigger (Mouse leaves the window towards the top)
       const handleExitIntent = (e: MouseEvent) => {
         if (e.clientY <= 0) {
