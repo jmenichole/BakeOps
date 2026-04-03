@@ -1,107 +1,120 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
-// Routes that don't require authentication
 const PUBLIC_ROUTES = new Set([
-  '/',
-  '/login',
-  '/signup',
-  '/forgot-password',
-  '/pricing',
-  '/support',
-  '/terms',
-  '/privacy',
-  '/refund',
-  '/trial-expired',
-  '/auth/callback',
+  "/",
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/pricing",
+  "/support",
+  "/terms",
+  "/privacy",
+  "/refund",
+  "/trial-expired",
+  "/auth/callback",
 ]);
 
-const PUBLIC_DYNAMIC_ROUTES = [
-  '/quote/',
-];
+const PUBLIC_DYNAMIC_ROUTES = ["/quote/"];
 
-// API routes that don't require user auth (cron jobs, public endpoints)
 const PUBLIC_API_ROUTES = new Set([
-  '/api/traction-report', // protected by CRON_SECRET instead
-  '/api/track-referral',  // public referral click tracking
+  "/api/traction-report",
+  "/api/track-referral",
 ]);
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
-  const { pathname } = req.nextUrl;
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
 
-  // Skip auth check for public routes
-  if (PUBLIC_ROUTES.has(pathname)) {
-    return res;
-  }
-
-  // Skip auth check for public dynamic routes
-  if (PUBLIC_DYNAMIC_ROUTES.some(route => pathname.startsWith(route))) {
-    return res;
-  }
-
-  // Skip auth check for public API routes
-  if (PUBLIC_API_ROUTES.has(pathname)) {
-    return res;
-  }
+  const pathname = request.nextUrl.pathname;
 
   // Skip auth check for static files and Next.js internals
   if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/favicon') ||
-    pathname.includes('.')
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/favicon") ||
+    pathname.includes(".")
   ) {
-    return res;
+    return response;
   }
 
-  const supabase = createMiddlewareClient({ req, res });
-  const { data: { session } } = await supabase.auth.getSession();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            request.cookies.set(name, value)
+          );
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Handle public accessibility
+  const isPublic =
+    PUBLIC_ROUTES.has(pathname) ||
+    PUBLIC_DYNAMIC_ROUTES.some((route) => pathname.startsWith(route)) ||
+    PUBLIC_API_ROUTES.has(pathname);
+
+  // Redirect unauthenticated users
+  if (!user && !isPublic) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // Redirect authenticated users away from auth pages
+  if (user && (pathname === "/login" || pathname === "/signup")) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
 
   // Admin IP Allowlist Check
-  if (pathname.startsWith('/admin')) {
-    const allowedIps = (process.env.ALLOWED_ADMIN_IP || '').split(',').map(ip => ip.trim()).filter(Boolean);
+  if (pathname.startsWith("/admin")) {
+    const allowedIps = (process.env.ALLOWED_ADMIN_IP || "")
+      .split(",")
+      .map((ip) => ip.trim())
+      .filter(Boolean);
     const clientIp =
-      req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
-      req.headers.get('x-real-ip') ||
-      (req as any).ip;
+      request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+      request.headers.get("x-real-ip");
 
-    // If allowlist is set, check if client IP is in it
     if (allowedIps.length > 0) {
       if (!clientIp || !allowedIps.includes(clientIp)) {
-        console.warn(`Blocked unauthorized admin access attempt from IP: ${clientIp || 'Unknown'}`);
+        console.warn(`Blocked unauthorized admin from IP: ${clientIp}`);
         return new NextResponse(
-          JSON.stringify({ error: 'Access Denied: IP not allowed' }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } }
+          JSON.stringify({ error: "Access Denied" }),
+          { status: 403, headers: { "Content-Type": "application/json" } }
         );
       }
     }
   }
 
-  // Redirect unauthenticated users to login
-  if (!session) {
-    // For API routes, return 401 instead of redirect
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const loginUrl = new URL('/login', req.url);
-    loginUrl.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  // Redirect authenticated users away from auth pages
-  if (session && (pathname === '/login' || pathname === '/signup')) {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
-  }
-
-  return res;
+  return response;
 }
 
 export const config = {
-  matcher: [
-    '/dashboard/:path*',
-    '/admin/:path*',
-    '/api/:path*',
-  ],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/api/:path*"],
 };

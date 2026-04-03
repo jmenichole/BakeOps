@@ -1,11 +1,13 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
 
 // For Client Components
-export const createBrowserClient = () => createClientComponentClient();
+export const createBrowserClientInstance = () => {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+};
 
-// Generic client (if needed)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Backwards compatibility for existing imports
+export const createBrowserClientSub = createBrowserClientInstance;
+export { createBrowserClientInstance as createBrowserClient };

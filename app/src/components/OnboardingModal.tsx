@@ -26,6 +26,12 @@ export function OnboardingModal() {
 
   useEffect(() => {
     async function checkOnboarding() {
+      // First check local storage for immediate dismissal
+      if (localStorage.getItem('bb_onboarding_dismissed')) {
+        setHasSeenOnboarding(true);
+        return;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         setHasSeenOnboarding(true); // Don't show to non-auth
@@ -45,6 +51,9 @@ export function OnboardingModal() {
 
   const handleDismiss = async () => {
     setIsUpdating(true);
+    localStorage.setItem('bb_onboarding_dismissed', 'true');
+    setHasSeenOnboarding(true);
+    
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -53,11 +62,8 @@ export function OnboardingModal() {
           .update({ onboarding_completed: true })
           .eq('id', user.id);
       }
-      setHasSeenOnboarding(true);
     } catch (err) {
       console.error('Failed to update onboarding status:', err);
-      // Fallback to local state if DB fails
-      setHasSeenOnboarding(true);
     } finally {
       setIsUpdating(false);
     }
