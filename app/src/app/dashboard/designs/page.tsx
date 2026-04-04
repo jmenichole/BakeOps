@@ -187,6 +187,7 @@ export default function DesignListPage() {
                       alt={design.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       fill
+                      unoptimized={design.image_url.startsWith('data:')}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-200">

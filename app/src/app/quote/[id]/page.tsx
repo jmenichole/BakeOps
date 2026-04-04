@@ -127,6 +127,7 @@ export default function PublicQuotePage() {
                   alt="Cake Mockup" 
                   className="w-full h-full object-cover rounded-[2.5rem] transition-transform duration-700 group-hover:scale-105"
                   fill
+                  unoptimized={design.image_url.startsWith('data:')}
                 />
                 <div className="absolute top-8 right-8 bg-white/90 backdrop-blur font-bold text-[10px] uppercase tracking-widest text-primary px-4 py-2 rounded-full shadow-lg border border-pink-50">
                     AI Visual Concept

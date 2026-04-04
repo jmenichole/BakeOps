@@ -157,6 +157,7 @@ export function DesignDetailModal({ design, isOpen, onClose }: DesignDetailModal
               alt={design.title || 'Design image'} 
               className="w-full h-full object-cover absolute inset-0"
               fill
+              unoptimized={design.image_url.startsWith('data:')}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">
