@@ -1016,7 +1016,7 @@ function EditableQuoteDetail({
           <input
             type="number"
             min={0}
-            step={1}
+            step={0.01}
             value={value}
             onChange={(e) => onChange(Math.max(0, parseFloat(e.target.value) || 0))}
             className="w-20 text-right p-1 rounded-lg border border-primary/30 bg-pink-50 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/20"

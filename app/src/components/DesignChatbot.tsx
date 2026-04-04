@@ -94,9 +94,9 @@ export function DesignChatbot({ onPromptReady, onClose }: DesignChatbotProps) {
     setMessages([]);
     setRefinedPrompt(null);
     setError(null);
+    // Mark as not greeted so the greeting fires once on next render
     hasGreeted.current = false;
     setTimeout(() => {
-      hasGreeted.current = false;
       sendMessage('Hello! I need help designing a cake.');
     }, 0);
   };
