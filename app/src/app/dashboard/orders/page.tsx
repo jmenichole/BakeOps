@@ -135,7 +135,7 @@ export default function OrdersPage() {
               {/* Design Image */}
               <div className="relative w-20 h-20 bg-gray-50 rounded-2xl overflow-hidden flex-shrink-0">
                 {order.cake_designs?.image_url ? (
-                  <Image src={order.cake_designs.image_url} alt={order.cake_designs.title || "Cake Design"} className="w-full h-full object-cover" fill />
+                  <Image src={order.cake_designs.image_url} alt={order.cake_designs.title || "Cake Design"} className="w-full h-full object-cover" fill unoptimized={order.cake_designs.image_url.startsWith('data:')} />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-2xl">🎂</div>
                 )}

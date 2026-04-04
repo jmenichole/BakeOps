@@ -518,6 +518,7 @@ export default function NewDesignPage() {
                       alt={`Ref ${idx}`}
                       className="w-full h-full object-cover"
                       fill
+                      unoptimized
                     />
                     <button
                       onClick={() => removeReference(idx)}
@@ -565,7 +566,7 @@ export default function NewDesignPage() {
           <div className="bg-[#111] p-4 rounded-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] aspect-square flex flex-col items-center justify-center relative overflow-hidden ring-1 ring-inset ring-white/5">
             {currentDesign ? (
               <>
-                <Image src={currentDesign} alt="Cake Mockup" className="w-full h-full object-cover rounded-2xl shadow-inner" fill />
+                <Image src={currentDesign} alt="Cake Mockup" className="w-full h-full object-cover rounded-2xl shadow-inner" fill unoptimized />
                 <div className="absolute top-6 right-6 bg-black/60 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-black text-white border border-white/20 shadow-lg flex items-center gap-2">
                   <Sparkles className="w-3 h-3 text-primary animate-pulse" /> AI GENERATED
                 </div>
