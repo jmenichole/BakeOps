@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Sparkles, Save, Info, Palette, Send, Mail, Phone, Copy, X, Image as ImageIcon, Star, CheckCircle2, Plus } from 'lucide-react';
+import { ArrowLeft, Sparkles, Save, Info, Palette, Send, Mail, Phone, Copy, X, Image as ImageIcon, Star, CheckCircle2, Plus, MessageSquare, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createBrowserClient } from '@/lib/supabase';
 import { toast } from '@/hooks/useToast';
-import { calculateQuote } from '@/lib/pricing';
+import { DesignChatbot } from '@/components/DesignChatbot';
+import { calculateQuote, QuoteBreakdown } from '@/lib/pricing';
 
 interface FileData {
   mimeType: string;
@@ -45,6 +46,13 @@ export default function NewDesignPage() {
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
   const [refinementText, setRefinementText] = useState('');
+  const [showChatbot, setShowChatbot] = useState(false);
+  const [editedQuoteItems, setEditedQuoteItems] = useState<Partial<QuoteBreakdown>>({});
+  const [isEditingQuote, setIsEditingQuote] = useState(false);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [customerName, setCustomerName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
 
   // Fetch baker info for pricing context
   useEffect(() => {
@@ -61,13 +69,14 @@ export default function NewDesignPage() {
     }
     fetchBakerInfo();
   }, [supabase]);
-  const [quote, setQuote] = useState({
+  const [quote, setQuote] = useState<QuoteBreakdown>({
     base: 65,
     decor: 0,
     filling: 15,
     addOns: 0,
     marketAdjustment: 12,
-    total: 92
+    serviceFee: 25,
+    total: 117
   });
 
   // Dynamic pricing calculation via Engine
@@ -228,6 +237,50 @@ export default function NewDesignPage() {
     }
   };
 
+  // Upload a base64 data URL to Supabase Storage; falls back to the data URL on failure
+  const uploadImageToStorage = async (dataUrl: string, userId: string): Promise<string> => {
+    try {
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const ext = blob.type.split('/')[1] || 'jpg';
+      const filename = `${userId}/${Date.now()}.${ext}`;
+
+      const { data, error } = await supabase.storage
+        .from('design-images')
+        .upload(filename, blob, { contentType: blob.type, upsert: true });
+
+      if (error) {
+        console.warn('Storage upload failed, using data URL fallback:', error.message);
+        return dataUrl;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('design-images')
+        .getPublicUrl(data.path);
+
+      return publicUrl;
+    } catch (err) {
+      console.warn('Storage upload error, using data URL fallback:', err);
+      return dataUrl;
+    }
+  };
+
+  // Compute the effective quote (with any per-line edits applied)
+  const effectiveQuote: QuoteBreakdown = {
+    base: editedQuoteItems.base ?? quote.base,
+    decor: editedQuoteItems.decor ?? quote.decor,
+    filling: editedQuoteItems.filling ?? quote.filling,
+    addOns: editedQuoteItems.addOns ?? quote.addOns,
+    marketAdjustment: editedQuoteItems.marketAdjustment ?? quote.marketAdjustment,
+    serviceFee: editedQuoteItems.serviceFee ?? quote.serviceFee,
+    total: (editedQuoteItems.base ?? quote.base) +
+           (editedQuoteItems.decor ?? quote.decor) +
+           (editedQuoteItems.filling ?? quote.filling) +
+           (editedQuoteItems.addOns ?? quote.addOns) +
+           (editedQuoteItems.marketAdjustment ?? quote.marketAdjustment) +
+           (editedQuoteItems.serviceFee ?? quote.serviceFee),
+  };
+
   const handleSave = async (isFinal = false) => {
     setIsSaving(true);
     try {
@@ -237,7 +290,12 @@ export default function NewDesignPage() {
         return;
       }
 
-      const finalPrice = useAiPricing ? quote.total : (parseFloat(manualPrice as string) || 0);
+      const finalPrice = useAiPricing ? effectiveQuote.total : (parseFloat(manualPrice as string) || 0);
+
+      // Upload image to storage so we don't store large data URLs in the DB
+      const imageUrl = currentDesign
+        ? await uploadImageToStorage(currentDesign, user.id)
+        : null;
 
       const { data: design, error: designError } = await supabase
         .from('cake_designs')
@@ -245,7 +303,7 @@ export default function NewDesignPage() {
           baker_id: user.id,
           title: `${config.productType.toUpperCase()}: ${config.theme.slice(0, 20)}...` || 'Custom Design',
           description: config.theme,
-          image_url: currentDesign,
+          image_url: imageUrl,
           configuration_data: config,
           estimated_price: finalPrice,
           is_public: false
@@ -256,33 +314,14 @@ export default function NewDesignPage() {
       if (designError) throw designError;
 
       if (isFinal) {
-        // Create a pending order as well
-        const { error: orderError } = await supabase
-          .from('orders')
-          .insert({
-            baker_id: user.id,
-            design_id: design.id,
-            customer_email: 'pending@example.com', // Would be from a form
-            customer_name: 'New Client',
-            status: 'pending',
-            total_price: finalPrice,
-            delivery_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // Default 1 week out
-          });
-
-        if (orderError) throw orderError;
-
-        // Set up share modal
+        // Open the customer details modal to collect name / email before creating the order
+        setSavedDesignId(design.id);
         const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/quote/${design.id}`;
         setShareLink(link);
-        setSavedDesignId(design.id);
-        setShowShareModal(true);
+        setShowCustomerModal(true);
       } else {
         toast.success('Draft saved!');
-      }
-
-      // Don't redirect yet if we're showing share modal
-      if (!isFinal) {
-        router.push('/dashboard');
+        router.push('/dashboard/designs');
       }
     } catch (err: unknown) {
       console.error(err);
@@ -292,13 +331,48 @@ export default function NewDesignPage() {
     }
   };
 
+  // Create order with real customer info, then show the share modal
+  const handleConfirmSend = async () => {
+    if (!savedDesignId || !customerEmail.trim()) return;
+    setIsSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not logged in');
+
+      const finalPrice = useAiPricing ? effectiveQuote.total : (parseFloat(manualPrice as string) || 0);
+
+      const { error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          baker_id: user.id,
+          design_id: savedDesignId,
+          customer_email: customerEmail.trim(),
+          customer_name: customerName.trim() || 'Customer',
+          customer_phone: customerPhone.trim() || null,
+          status: 'pending',
+          total_price: finalPrice,
+          delivery_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        });
+
+      if (orderError) throw orderError;
+
+      setShowCustomerModal(false);
+      setShowShareModal(true);
+    } catch (err) {
+      toast.error('Error creating order: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // Handle sending via email
   const handleSendViaEmail = () => {
-    const subject = encodeURIComponent(`Your Cake Quote - $${quote.total.toFixed(2)}`);
+    const total = useAiPricing ? effectiveQuote.total : (parseFloat(manualPrice as string) || 0);
+    const subject = encodeURIComponent(`Your Cake Quote - $${total.toFixed(2)}`);
     const body = encodeURIComponent(
       `Hi! Here's your custom cake quote:\n\n` +
       `Design: ${config.theme}\n` +
-      `Price: $${quote.total.toFixed(2)}\n\n` +
+      `Price: $${total.toFixed(2)}\n\n` +
       `View your quote here: ${shareLink}\n\n` +
       `Would you like to create a customer account for easy scheduling and payments? ` +
       `It's optional - you can also just message your baker directly!\n\n` +
@@ -309,8 +383,9 @@ export default function NewDesignPage() {
 
   // Handle sending via SMS
   const handleSendViaSMS = () => {
+    const total = useAiPricing ? effectiveQuote.total : (parseFloat(manualPrice as string) || 0);
     const message = encodeURIComponent(
-      `Here's your cake quote: $${quote.total.toFixed(2)} - View: ${shareLink}\n\n` +
+      `Here's your cake quote: $${total.toFixed(2)} - View: ${shareLink}\n\n` +
       `Want to create an account for easy scheduling? Optional! Just message your baker directly.`
     );
     window.location.href = `sms:?body=${message}`;
@@ -339,7 +414,10 @@ export default function NewDesignPage() {
         return;
       }
 
-      const finalPrice = useAiPricing ? quote.total : (parseFloat(manualPrice as string) || 0);
+      const finalPrice = useAiPricing ? effectiveQuote.total : (parseFloat(manualPrice as string) || 0);
+
+      // Upload image to storage
+      const imageUrl = await uploadImageToStorage(currentDesign, user.id);
 
       const { data: design, error: designError } = await supabase
         .from('cake_designs')
@@ -347,7 +425,7 @@ export default function NewDesignPage() {
           baker_id: user.id,
           title: `${config.productType.toUpperCase()}: ${config.theme.slice(0, 20)}...` || 'Custom Design',
           description: config.theme,
-          image_url: currentDesign,
+          image_url: imageUrl,
           configuration_data: config,
           estimated_price: finalPrice,
           is_public: false,
@@ -358,8 +436,6 @@ export default function NewDesignPage() {
 
       if (designError) throw designError;
       if (!design) throw new Error('Design was not created.');
-
-
 
       // Download the mockup image
       const response = await fetch(currentDesign);
@@ -375,7 +451,7 @@ export default function NewDesignPage() {
       URL.revokeObjectURL(url);
 
       toast.success('Draft saved! Image downloaded.');
-      router.push('/dashboard');
+      router.push('/dashboard/designs');
     } catch (err: unknown) {
       console.error(err);
       toast.error('Error: ' + (err instanceof Error ? err.message : 'Unknown error'));
@@ -494,7 +570,27 @@ export default function NewDesignPage() {
               </div>
 
               <div>
-                <label htmlFor="theme" className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 ml-1">Theme / Description</label>
+                <div className="flex items-center justify-between mb-2 ml-1">
+                  <label htmlFor="theme" className="block text-xs font-bold uppercase tracking-widest text-gray-400">Theme / Description</label>
+                  <button
+                    type="button"
+                    onClick={() => setShowChatbot(prev => !prev)}
+                    className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border transition-all ${showChatbot ? 'bg-primary border-primary text-white' : 'border-gray-200 text-gray-400 hover:border-primary hover:text-primary'}`}
+                  >
+                    <MessageSquare className="w-3 h-3" /> Chat to Design
+                  </button>
+                </div>
+                {showChatbot && (
+                  <div className="mb-3">
+                    <DesignChatbot
+                      onPromptReady={(prompt) => {
+                        setConfig(prev => ({ ...prev, theme: prompt }));
+                        setShowChatbot(false);
+                      }}
+                      onClose={() => setShowChatbot(false)}
+                    />
+                  </div>
+                )}
                 <textarea
                   id="theme"
                   className="w-full p-4 rounded-xl border border-gray-100 bg-gray-50 outline-none focus:ring-4 focus:ring-primary/10 min-h-[100px] transition-all"
@@ -660,7 +756,7 @@ export default function NewDesignPage() {
                   <p className="text-sm text-gray-500">Suggested by AI + Manual Override</p>
                 </div>
                 <div className="text-2xl font-black text-secondary">
-                  ${useAiPricing ? quote.total.toFixed(2) : (parseFloat(manualPrice as string) || 0).toFixed(2)}
+                  ${useAiPricing ? effectiveQuote.total.toFixed(2) : (parseFloat(manualPrice as string) || 0).toFixed(2)}
                 </div>
               </div>
 
@@ -682,12 +778,58 @@ export default function NewDesignPage() {
 
                 {useAiPricing ? (
                   <div className="space-y-2 px-1">
-                    <QuoteDetail label={`${config.productType === 'cake' ? `${config.tiers} Tier Cake` : `${config.quantity} ${config.productType}`} Base`} value={`$${quote.base.toFixed(2)}`} />
-                    <QuoteDetail label="Theme & Decoration" value={`$${quote.decor.toFixed(2)}`} />
-                    <QuoteDetail label="Fillings & Flavor" value={`$${quote.filling.toFixed(2)}`} />
-                    <QuoteDetail label="Premium Add-ons" value={`$${quote.addOns.toFixed(2)}`} />
-                    <QuoteDetail label="Market Adjustment (Area)" value={`$${quote.marketAdjustment.toFixed(2)}`} />
-                    <QuoteDetail label="Service Fee" value="$25.00" />
+                    <div className="flex justify-end mb-1">
+                      <button
+                        onClick={() => {
+                          if (isEditingQuote) setEditedQuoteItems({});
+                          setIsEditingQuote(prev => !prev);
+                        }}
+                        className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-primary transition-colors"
+                      >
+                        <Pencil className="w-3 h-3" />
+                        {isEditingQuote ? 'Reset Edits' : 'Edit Line Items'}
+                      </button>
+                    </div>
+                    <EditableQuoteDetail
+                      label={`${config.productType === 'cake' ? `${config.tiers} Tier Cake` : `${config.quantity} ${config.productType}`} Base`}
+                      value={effectiveQuote.base}
+                      isEditing={isEditingQuote}
+                      onChange={(v) => setEditedQuoteItems(prev => ({ ...prev, base: v }))}
+                    />
+                    <EditableQuoteDetail
+                      label="Theme & Decoration"
+                      value={effectiveQuote.decor}
+                      isEditing={isEditingQuote}
+                      onChange={(v) => setEditedQuoteItems(prev => ({ ...prev, decor: v }))}
+                    />
+                    <EditableQuoteDetail
+                      label="Fillings & Flavor"
+                      value={effectiveQuote.filling}
+                      isEditing={isEditingQuote}
+                      onChange={(v) => setEditedQuoteItems(prev => ({ ...prev, filling: v }))}
+                    />
+                    <EditableQuoteDetail
+                      label="Premium Add-ons"
+                      value={effectiveQuote.addOns}
+                      isEditing={isEditingQuote}
+                      onChange={(v) => setEditedQuoteItems(prev => ({ ...prev, addOns: v }))}
+                    />
+                    <EditableQuoteDetail
+                      label="Market Adjustment (Area)"
+                      value={effectiveQuote.marketAdjustment}
+                      isEditing={isEditingQuote}
+                      onChange={(v) => setEditedQuoteItems(prev => ({ ...prev, marketAdjustment: v }))}
+                    />
+                    <EditableQuoteDetail
+                      label="Service Fee"
+                      value={effectiveQuote.serviceFee}
+                      isEditing={isEditingQuote}
+                      onChange={(v) => setEditedQuoteItems(prev => ({ ...prev, serviceFee: v }))}
+                    />
+                    <div className="flex justify-between text-sm font-black border-t border-gray-100 pt-2 mt-2">
+                      <span className="text-gray-700">Total</span>
+                      <span className="text-primary">${effectiveQuote.total.toFixed(2)}</span>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-2 px-1">
@@ -724,6 +866,75 @@ export default function NewDesignPage() {
           )}
         </div>
       </div>
+
+      {/* Customer Details Modal */}
+      {showCustomerModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl animate-in fade-in zoom-in-95">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <Send className="w-5 h-5 text-primary" />
+                Customer Details
+              </h2>
+              <button
+                onClick={() => setShowCustomerModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 mb-5">Add your customer&apos;s info so you can send them this quote.</p>
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Customer Name</label>
+                <input
+                  type="text"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="Jane Smith"
+                  className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 outline-none focus:ring-2 focus:ring-primary/20 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Email Address <span className="text-red-400">*</span></label>
+                <input
+                  type="email"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder="jane@example.com"
+                  className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 outline-none focus:ring-2 focus:ring-primary/20 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Phone (optional)</label>
+                <input
+                  type="tel"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  placeholder="+1 (555) 000-0000"
+                  className="w-full p-3 rounded-xl border border-gray-200 bg-gray-50 outline-none focus:ring-2 focus:ring-primary/20 text-sm"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowCustomerModal(false)}
+                className="flex-1 btn btn-secondary py-3"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmSend}
+                disabled={isSaving || !customerEmail.trim()}
+                className="flex-1 btn btn-primary py-3 flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <Send className="w-4 h-4" />
+                {isSaving ? 'Creating...' : 'Create & Send Quote'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Share Modal */}
       {showShareModal && (
@@ -785,11 +996,35 @@ export default function NewDesignPage() {
   );
 }
 
-function QuoteDetail({ label, value }: { label: string, value: string }) {
+function EditableQuoteDetail({
+  label,
+  value,
+  isEditing,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  isEditing: boolean;
+  onChange: (v: number) => void;
+}) {
   return (
-    <div className="flex justify-between text-sm">
+    <div className="flex justify-between items-center text-sm">
       <span className="text-gray-500">{label}</span>
-      <span className="font-semibold">{value}</span>
+      {isEditing ? (
+        <div className="flex items-center gap-1">
+          <span className="text-gray-400 text-xs">$</span>
+          <input
+            type="number"
+            min={0}
+            step={0.01}
+            value={value}
+            onChange={(e) => onChange(Math.max(0, parseFloat(e.target.value) || 0))}
+            className="w-20 text-right p-1 rounded-lg border border-primary/30 bg-pink-50 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/20"
+          />
+        </div>
+      ) : (
+        <span className="font-semibold">${value.toFixed(2)}</span>
+      )}
     </div>
   );
 }
