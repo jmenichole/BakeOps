@@ -11,7 +11,7 @@
     "lint:app": "npm run lint -w app",
     "lint": "npm run lint:app",
     "install:all": "npm install",
-    "prepare": "husky"
+    "prepare": "node -e \"if (process.env.CI || process.env.VERCEL) { process.exit(0); } else { require('child_process').execSync('husky', {stdio: 'inherit'}); }\""
   },
   "dependencies": {
     "@vercel/analytics": "^1.6.1"

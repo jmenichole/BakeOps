@@ -1,29 +1,9 @@
 import Link from 'next/link';
 import { SiteFooter } from '@/components/SiteFooter';
 import { AuthButton } from '@/components/AuthButton';
-import { ArrowRight, Zap, Palette, Calendar, Calculator, ShieldCheck, Star, Clock, Users, TrendingUp, ChevronRight } from 'lucide-react';
-import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { ArrowRight, Zap, Palette, Calendar, Calculator, ShieldCheck, Clock, ChevronRight } from 'lucide-react';
 
-export default async function Home() {
-  const supabase = await createSupabaseServerClient();
-  
-  const [{ count: bakersCount }, { count: designsCount }, { data: orders }] = await Promise.all([
-    supabase.from('bakers').select('*', { count: 'exact', head: true }),
-    supabase.from('cake_designs').select('*', { count: 'exact', head: true }),
-    supabase.from('orders').select('total_price')
-  ]);
-
-  const rawBakers = bakersCount || 0;
-  const rawDesigns = designsCount || 0;
-  
-  // Real stats calculation
-  const totalRevenue = orders?.reduce((acc, order) => acc + (order.total_price || 0), 0) || 0;
-  
-  // Provide honest fallback formats
-  const displayBakers = rawBakers > 5 ? `${rawBakers}` : '< 10';
-  const displayDesigns = rawDesigns > 20 ? `${rawDesigns}` : '< 50';
-  const displayRevenue = totalRevenue > 0 ? `$${Math.floor(totalRevenue).toLocaleString()}` : '$0';
-
+export default function Home() {
   return (
     <main className="min-h-screen bg-white selection:bg-pink-100">
       {/* STICKY NAV */}
@@ -58,12 +38,12 @@ export default async function Home() {
             </div>
 
             <h1 className="text-5xl sm:text-6xl md:text-[5.5rem] font-serif font-black text-secondary mb-8 leading-[1.05] tracking-tight">
-              Your bakery, <br className="hidden sm:block" />
-              <span className="text-primary">automated.</span>
+              Stop losing hours <br className="hidden sm:block" />
+              to <span className="text-primary">admin work.</span>
             </h1>
 
             <p className="text-lg md:text-xl text-gray-400 mb-14 max-w-xl mx-auto leading-relaxed font-medium">
-              AI-generated cake mockups, instant quotes, and production schedules &mdash; so you spend less time on admin and more time creating.
+              Bake Ops handles your quotes, cake mockups, and production schedules &mdash; so you can focus on what you actually love: baking.
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
@@ -71,8 +51,8 @@ export default async function Home() {
                 Start Free Trial
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <Link href="/dashboard" className="btn btn-secondary py-4 px-10 text-base flex items-center gap-3">
-                See It In Action
+              <Link href="/pricing" className="btn btn-secondary py-4 px-10 text-base flex items-center gap-3">
+                See Pricing
               </Link>
             </div>
 
@@ -83,14 +63,14 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* SOCIAL PROOF BAR */}
+      {/* TRUST BAR */}
       <section className="border-y border-gray-100 py-10 bg-gray-50/50">
         <div className="container px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
-            <ProofStat icon={<Users className="w-5 h-5" />} value={displayBakers} label="Bakers in beta" />
-            <ProofStat icon={<Palette className="w-5 h-5" />} value={displayDesigns} label="Designs generated" />
-            <ProofStat icon={<TrendingUp className="w-5 h-5" />} value={displayRevenue} label="Revenue quoted" />
-            <ProofStat icon={<ShieldCheck className="w-5 h-5" />} value="100%" label="Secure & Encrypted" />
+            <ProofStat icon={<Zap className="w-5 h-5" />} value="60 sec" label="Quote turnaround" />
+            <ProofStat icon={<Palette className="w-5 h-5" />} value="AI mockups" label="On demand" />
+            <ProofStat icon={<Clock className="w-5 h-5" />} value="5+ hrs" label="Saved per week" />
+            <ProofStat icon={<ShieldCheck className="w-5 h-5" />} value="100%" label="Secure & encrypted" />
           </div>
         </div>
       </section>
@@ -109,19 +89,19 @@ export default async function Home() {
             <StepCard
               step="01"
               title="Describe the vision"
-              description="Type in the customer&apos;s request &mdash; flavors, tiers, theme, add-ons. Upload reference photos if you have them."
+              description="Type the customer&apos;s request &mdash; flavors, tiers, theme, add-ons. Upload a reference photo if you have one."
               accent="bg-pink-50 text-primary"
             />
             <StepCard
               step="02"
-              title="Generate & price"
-              description="Our AI creates a photorealistic mockup and calculates a quote based on your ingredient costs, labor, and local market."
+              title="Get a mockup & price"
+              description="AI generates a photorealistic cake mockup and calculates a quote based on your real ingredient costs, labor rate, and complexity."
               accent="bg-blue-50 text-blue-600"
             />
             <StepCard
               step="03"
-              title="Send & schedule"
-              description="Share the quote with your customer via email or text. Once confirmed, a prep schedule is built automatically."
+              title="Send, confirm & schedule"
+              description="Share the quote with your customer. Once they confirm and pay a deposit, your full prep schedule is built automatically."
               accent="bg-orange-50 text-orange-600"
             />
           </div>
@@ -147,22 +127,22 @@ export default async function Home() {
             <FeatureCard
               icon={<Palette className="w-6 h-6" />}
               title="AI Design Studio"
-              description="Turn text descriptions into realistic cake mockups that match your decorating style."
+              description="Generate realistic cake mockups from a text description in seconds. Show clients exactly what they&apos;re getting before you bake a crumb."
             />
             <FeatureCard
               icon={<Calculator className="w-6 h-6" />}
               title="Smart Pricing"
-              description="Instant, accurate quotes factoring in ingredients, labor, complexity, and your local market."
+              description="Stop guessing. Get instant, accurate quotes built from your real ingredient costs, labor rate, and complexity &mdash; never undersell again."
             />
             <FeatureCard
               icon={<Calendar className="w-6 h-6" />}
               title="Prep Planner"
-              description="Multi-day production schedules automatically broken down by task &mdash; bake, fill, decorate, deliver."
+              description="Automatically break down every order into a multi-day schedule: bake, fill, decorate, deliver. No more mental math the night before."
             />
             <FeatureCard
               icon={<Zap className="w-6 h-6" />}
               title="Instant Booking"
-              description="Send payment links and lock in deposits without back-and-forth DMs."
+              description="Send a branded quote and payment link in one tap. Clients confirm and pay deposits without a single back-and-forth DM."
             />
           </div>
         </div>
@@ -175,10 +155,10 @@ export default async function Home() {
             <div>
               <p className="text-primary text-xs font-bold uppercase tracking-[0.2em] mb-4">Beta program</p>
               <h2 className="text-4xl md:text-5xl font-serif font-black text-secondary mb-8 leading-tight">
-                Shape the platform with us
+                Help us build exactly what you need
               </h2>
               <p className="text-gray-400 text-lg leading-relaxed mb-10">
-                We&apos;re building Bake Ops alongside the bakers who use it. Join the beta and get exclusive access while helping us build exactly what you need.
+                Bake Ops is being built alongside the bakers who use it every day. Join the beta and get full access while shaping what we build next.
               </p>
 
               <ul className="space-y-6 mb-10">
@@ -247,7 +227,7 @@ export default async function Home() {
               Ready to run your bakery smarter?
             </h2>
             <p className="text-lg text-gray-400 mb-12 leading-relaxed">
-              Join hundreds of bakers already using Bake Ops to save hours every week. Limited beta spots remaining.
+              Join bakers in our beta program and reclaim hours every week. Limited spots &mdash; and beta members lock in 50% off forever.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link href="/signup" className="btn btn-primary py-5 px-12 text-lg shadow-2xl shadow-pink-200/50 group flex items-center gap-3">
