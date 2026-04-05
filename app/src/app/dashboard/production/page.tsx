@@ -14,7 +14,8 @@ import {
   Save,
   Calendar,
   AlertCircle,
-  Truck
+  Truck,
+  ShoppingCart
 } from 'lucide-react';
 import { createBrowserClient } from '@/lib/supabase';
 import { toast } from '@/hooks/useToast';
@@ -36,6 +37,66 @@ const QUICK_ADD_TASKS = [
   { title: 'Box Cake', category: 'Packaging' },
   { title: 'Prepare Delivery', category: 'Delivery' },
 ];
+
+interface ShoppingItem {
+  name: string;
+  amount: string;
+  aisle: 'Dairy' | 'Dry Goods' | 'Produce' | 'Other';
+}
+
+/** Estimates weekly grocery needs based on upcoming orders. */
+function buildShoppingList(orders: Order[]): ShoppingItem[] {
+  let butter = 0;       // sticks
+  let powderedSugar = 0; // cups
+  let flour = 0;        // cups
+  let sugar = 0;        // cups
+  let eggs = 0;         // count
+  let heavyCream = 0;   // cups
+
+  for (const order of orders) {
+    const cfg = order.cake_designs?.configuration_data;
+    const productType = cfg?.productType ?? 'cake';
+    const tiers = cfg?.tiers ?? 1;
+    const qty = cfg?.quantity ?? 12;
+    const units = productType === 'cake' ? tiers : Math.max(1, qty / 12);
+
+    if (productType === 'cake') {
+      // Per tier: ~2 sticks butter (cake) + 2 sticks (buttercream), 2 cups flour,
+      // 1.5 cups sugar, 3 eggs, 0.5 cups heavy cream
+      butter += units * 4;
+      powderedSugar += units * 2;
+      flour += units * 2;
+      sugar += units * 1.5;
+      eggs += units * 3;
+      heavyCream += units * 0.5;
+    } else if (productType === 'cupcakes') {
+      // Per dozen: 1 stick butter (cake) + 1.5 sticks (buttercream), 1.5 cups flour,
+      // 1 cup sugar, 2 eggs
+      butter += units * 2.5;
+      powderedSugar += units * 1.5;
+      flour += units * 1.5;
+      sugar += units * 1;
+      eggs += units * 2;
+    } else {
+      // Cookies / cake pops per dozen: 0.5 sticks, 1.5 cups flour, 0.75 cups sugar, 1 egg
+      butter += units * 0.5;
+      flour += units * 1.5;
+      sugar += units * 0.75;
+      eggs += units * 1;
+    }
+  }
+
+  if (orders.length === 0) return [];
+
+  return [
+    { name: 'Unsalted Butter', amount: `${butter} sticks`, aisle: 'Dairy' as const },
+    { name: 'Heavy Cream', amount: heavyCream > 0 ? `${heavyCream} cups` : '—', aisle: 'Dairy' as const },
+    { name: 'Eggs (large)', amount: `${eggs} eggs`, aisle: 'Dairy' as const },
+    { name: 'All-Purpose Flour', amount: `${flour} cups`, aisle: 'Dry Goods' as const },
+    { name: 'Granulated Sugar', amount: `${sugar} cups`, aisle: 'Dry Goods' as const },
+    { name: 'Powdered Sugar', amount: powderedSugar > 0 ? `${powderedSugar} cups` : '—', aisle: 'Dry Goods' as const },
+  ].filter(i => i.amount !== '—');
+}
 
 export default function ProductionPage() {
   const [selectedDay, setSelectedDay] = useState(new Date());
@@ -92,7 +153,7 @@ export default function ProductionPage() {
 
       const { data } = await supabase
         .from('orders')
-        .select('*, cake_designs(title)')
+        .select('*, cake_designs(title, configuration_data)')
         .eq('baker_id', user.id)
         .in('status', ['confirmed', 'preparing', 'ready'])
         .gte('delivery_date', new Date().toISOString())
@@ -301,13 +362,58 @@ export default function ProductionPage() {
             </div>
             <h3 className="text-xl font-bold mb-6">Ingredient Batches</h3>
             <div className="space-y-4">
-              <p className="text-xs text-white/50 italic leading-relaxed">
-                Connect your orders to automatically calculate ingredient totals for the week.
-              </p>
-              <BatchItem label="Vanilla Buttercream" amount="0 lbs" />
-              <BatchItem label="Standard Cake Batter" amount="0 batches" />
+              {orders.length === 0 ? (
+                <p className="text-xs text-white/50 italic leading-relaxed">
+                  Connect your orders to automatically calculate ingredient totals for the week.
+                </p>
+              ) : (
+                <>
+                  {(() => {
+                    // Aggregate buttercream and batter across upcoming orders
+                    let butterSticks = 0;
+                    let batches = 0;
+                    for (const o of orders) {
+                      const cfg = o.cake_designs?.configuration_data;
+                      const tiers = cfg?.tiers ?? 1;
+                      const qty = cfg?.quantity ?? 12;
+                      const type = cfg?.productType ?? 'cake';
+                      const units = type === 'cake' ? tiers : Math.max(1, qty / 12);
+                      butterSticks += type === 'cake' ? units * 2 : units * 1.5;
+                      batches += type === 'cake' ? tiers : Math.ceil(qty / 24);
+                    }
+                    return (
+                      <>
+                        <BatchItem label="Vanilla Buttercream" amount={`${butterSticks} sticks butter`} />
+                        <BatchItem label="Standard Cake Batter" amount={`${batches} batch${batches !== 1 ? 'es' : ''}`} />
+                      </>
+                    );
+                  })()}
+                </>
+              )}
             </div>
           </div>
+
+          {/* Weekly Shopping List */}
+          {orders.length > 0 && (
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+              <h3 className="text-base font-bold mb-4 flex items-center gap-2">
+                <ShoppingCart className="w-4 h-4 text-primary" />
+                Weekly Shopping List
+              </h3>
+              <div className="space-y-2">
+                {buildShoppingList(orders).map((item) => (
+                  <div key={item.name} className="flex justify-between items-center text-sm py-1.5 border-b border-gray-50 last:border-0">
+                    <div>
+                      <span className="font-medium text-gray-800">{item.name}</span>
+                      <span className="ml-2 text-[10px] font-bold uppercase tracking-wider text-gray-300">{item.aisle}</span>
+                    </div>
+                    <span className="font-bold text-gray-500 text-xs">{item.amount}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[10px] text-gray-400 mt-3 italic">Estimates based on {orders.length} upcoming order{orders.length !== 1 ? 's' : ''}.</p>
+            </div>
+          )}
 
           <div className="bg-pink-50 p-6 rounded-3xl border border-pink-100">
             <h4 className="font-bold text-pink-900 mb-2 flex items-center gap-2">
