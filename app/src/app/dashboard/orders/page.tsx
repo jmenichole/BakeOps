@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
 import { Plus, Search, Filter, MoreVertical, ExternalLink, Trash2, Mail, Phone, Calendar, CreditCard, ClipboardPlus, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
@@ -19,7 +19,7 @@ export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
-  const supabase = createBrowserClient();
+  const supabase = useMemo(() => createBrowserClient(), []);
 
   const fetchOrders = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -34,13 +34,34 @@ export default function OrdersPage() {
       .eq('baker_id', user.id)
       .order('created_at', { ascending: false });
 
-    setOrders((data as any) || []);
+    setOrders((data as Order[]) || []);
     setLoading(false);
   }, [supabase]);
 
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  // Realtime: re-fetch when any order for this baker changes
+  useEffect(() => {
+    let userId: string | null = null;
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      userId = user.id;
+
+      const channel = supabase
+        .channel('orders-realtime')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'orders', filter: `baker_id=eq.${userId}` },
+          () => { fetchOrders(); }
+        )
+        .subscribe();
+
+      return () => { supabase.removeChannel(channel); };
+    });
+  }, [supabase, fetchOrders]);
 
   const filteredOrders = orders.filter(order => {
     const searchString = searchQuery.toLowerCase();

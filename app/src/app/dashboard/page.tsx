@@ -34,6 +34,7 @@ export default function DashboardPage() {
   });
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [onboarding, setOnboarding] = useState({ hasDesign: false, hasSentOrder: false, hasProfile: false });
 
   const supabase = useMemo(() => createBrowserClient(), []);
 
@@ -50,10 +51,11 @@ export default function DashboardPage() {
       }
 
       // Fetch Stats
-      const [ordersRes, designsRes, leadsRes] = await Promise.all([
+      const [ordersRes, designsRes, leadsRes, bakerRes] = await Promise.all([
         supabase.from('orders').select('*').eq('baker_id', user.id),
         supabase.from('cake_designs').select('*').eq('baker_id', user.id),
         supabase.from('referrals').select('id', { count: 'exact', head: true }).eq('referrer_id', user.id),
+        supabase.from('bakers').select('business_name').eq('id', user.id).single(),
       ]);
 
       const active = ordersRes.data?.filter(o => !['delivered', 'cancelled'].includes(o.status)).length || 0;
@@ -64,6 +66,12 @@ export default function DashboardPage() {
         pendingQuotes: designsRes.data?.length || 0,
         revenue: rev,
         newLeads: leadsRes.count || 0
+      });
+
+      setOnboarding({
+        hasDesign: (designsRes.data?.length || 0) > 0,
+        hasSentOrder: (ordersRes.data?.filter(o => o.status !== 'pending').length || 0) > 0,
+        hasProfile: !!(bakerRes.data?.business_name),
       });
 
       // Fetch Recent Orders
@@ -80,7 +88,7 @@ export default function DashboardPage() {
         .order('delivery_date', { ascending: true })
         .limit(3);
 
-      setRecentOrders((orders as any) || []);
+      setRecentOrders((orders as unknown as RecentOrder[]) || []);
       setLoading(false);
     }
 
@@ -186,11 +194,25 @@ export default function DashboardPage() {
           </div>
 
           <div className="card-bake">
-            <h3 className="text-xl font-bold mb-8 text-secondary">Beta Progress</h3>
-            <div className="space-y-8">
-              <ProgressItem label="Active Orders Achievement" progress={stats.activeOrders > 0 ? 100 : 0} color="bg-green-500" />
+            <h3 className="text-xl font-bold mb-6 text-secondary">Getting Started</h3>
+            <div className="space-y-4">
+              <OnboardingItem
+                done={onboarding.hasProfile}
+                label="Complete your profile"
+                href="/dashboard/settings"
+              />
+              <OnboardingItem
+                done={onboarding.hasDesign}
+                label="Create your first design"
+                href="/dashboard/designs/new"
+              />
+              <OnboardingItem
+                done={onboarding.hasSentOrder}
+                label="Send your first quote"
+                href="/dashboard/designs/new"
+              />
             </div>
-            <div className="mt-10 pt-8 border-t border-gray-50">
+            <div className="mt-8 pt-6 border-t border-gray-50">
               <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-4">Support</p>
               <a href="mailto:jmenichole007@outlook.com" className="text-sm font-bold text-secondary hover:text-primary transition-colors flex items-center gap-2">
                 Contact Founder <Plus className="w-4 h-4 rotate-45" />
@@ -236,19 +258,16 @@ function OrderRow({ customer, cake, date, status }: { customer: string, cake: st
   );
 }
 
-function ProgressItem({ label, progress, color }: { label: string, progress: number, color: string }) {
+function OnboardingItem({ done, label, href }: { done: boolean; label: string; href: string }) {
   return (
-    <div>
-      <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2.5">
-        <span>{label}</span>
-        <span>{progress}%</span>
+    <Link
+      href={done ? '#' : href}
+      className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${done ? 'border-green-100 bg-green-50/50 cursor-default' : 'border-gray-100 hover:border-pink-100 hover:bg-pink-50/30'}`}
+    >
+      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${done ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+        {done ? <Sparkles className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
       </div>
-      <div className="w-full h-3 bg-gray-50 rounded-full overflow-hidden p-0.5 border border-gray-100">
-        <div
-          className={`h-full ${color} rounded-full transition-all duration-1000 shadow-sm`}
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-    </div>
+      <span className={`text-sm font-bold ${done ? 'text-green-700 line-through' : 'text-secondary'}`}>{label}</span>
+    </Link>
   );
 }
