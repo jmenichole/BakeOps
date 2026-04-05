@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { toast } from '@/hooks/useToast';
 
 interface Design {
   id: string;
@@ -68,6 +69,7 @@ export function DesignDetailModal({ design, isOpen, onClose }: DesignDetailModal
 
       if (insertError) throw insertError;
 
+      toast.success('Order created — open it in the Orders page to add customer details.');
       // Navigate to orders list so the baker can fill in customer details
       router.push('/dashboard/orders');
     } catch (err) {
