@@ -368,6 +368,23 @@ export default function NewDesignPage() {
 
       if (orderError) throw orderError;
 
+      // Send quote email to customer via Resend (best-effort: failure doesn't block flow)
+      try {
+        await fetch('/api/send-quote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customerEmail: customerEmail.trim(),
+            customerName: customerName.trim() || 'Customer',
+            quoteLink: shareLink,
+            total: finalPrice,
+            designTitle: `${config.productType.toUpperCase()}: ${config.theme.slice(0, 40)}`,
+          }),
+        });
+      } catch (emailErr) {
+        console.warn('Quote email send failed (non-blocking):', emailErr);
+      }
+
       setShowCustomerModal(false);
       setShowShareModal(true);
     } catch (err) {

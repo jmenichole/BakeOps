@@ -3,6 +3,15 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { AuthButton } from '@/components/AuthButton';
 import { ArrowRight, Zap, Palette, Calendar, Calculator, ShieldCheck, Clock, ChevronRight, Medal, DollarSign, Sparkles } from 'lucide-react';
 
+// Update these values weekly to reflect real development progress
+const PROGRESS_CONFIG = [
+  { label: 'AI Design',        progress: 75 },
+  { label: 'Pricing Engine',   progress: 90 },
+  { label: 'Scheduling',       progress: 60 },
+  { label: 'Customer Portal',  progress: 45 },
+  { label: 'Payments',         progress: 30 },
+] as const;
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-white selection:bg-pink-100">
@@ -70,7 +79,7 @@ export default function Home() {
             <ProofStat icon={<Zap className="w-5 h-5" />} value="60 sec" label="Quote turnaround" />
             <ProofStat icon={<Sparkles className="w-5 h-5" />} value="AI mockups" label="On demand" />
             <ProofStat icon={<Clock className="w-5 h-5" />} value="5+ hrs" label="Saved per week" />
-            <ProofStat icon={<ShieldCheck className="w-5 h-5" />} value="500+" label="Beta bakers" />
+            <ProofStat icon={<ShieldCheck className="w-5 h-5" />} value="14 days" label="Free trial" />
           </div>
         </div>
       </section>
@@ -184,11 +193,9 @@ export default function Home() {
             <div className="bg-gray-50 p-8 md:p-10 rounded-[2rem] border border-gray-100">
               <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-8">Development Progress</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 place-items-center mb-2">
-                <SemiGauge label="AI Design" progress={75} />
-                <SemiGauge label="Pricing Engine" progress={90} />
-                <SemiGauge label="Scheduling" progress={60} />
-                <SemiGauge label="Customer Portal" progress={45} />
-                <SemiGauge label="Payments" progress={30} />
+                {PROGRESS_CONFIG.map(({ label, progress }) => (
+                  <SemiGauge key={label} label={label} progress={progress} />
+                ))}
               </div>
               <div className="mt-8 pt-6 border-t border-gray-200 flex items-center justify-between">
                 <span className="text-xs text-gray-400 font-medium">Updated weekly</span>

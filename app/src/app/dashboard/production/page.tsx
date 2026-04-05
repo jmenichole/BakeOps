@@ -15,7 +15,8 @@ import {
   Calendar,
   AlertCircle,
   Truck,
-  ShoppingCart
+  ShoppingCart,
+  Download
 } from 'lucide-react';
 import { createBrowserClient } from '@/lib/supabase';
 import { toast } from '@/hooks/useToast';
@@ -37,6 +38,52 @@ const QUICK_ADD_TASKS = [
   { title: 'Box Cake', category: 'Packaging' },
   { title: 'Prepare Delivery', category: 'Delivery' },
 ];
+
+/** Formats a Date as a compact UTC timestamp for iCal (YYYYMMDDTHHmmssZ). */
+function toICalDate(date: Date): string {
+  return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+}
+
+/** Downloads a .ics file containing all tasks in the given list. */
+function exportToICal(tasks: PrepTask[], label: string): void {
+  if (tasks.length === 0) return;
+
+  const lines: string[] = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//BakeOps//Production Planner//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+  ];
+
+  for (const task of tasks) {
+    const start = new Date(task.scheduled_for);
+    const end = new Date(start.getTime() + (task.estimated_minutes ?? 30) * 60_000);
+    lines.push(
+      'BEGIN:VEVENT',
+      `UID:bakeops-task-${task.id}`,
+      `DTSTAMP:${toICalDate(new Date())}`,
+      `DTSTART:${toICalDate(start)}`,
+      `DTEND:${toICalDate(end)}`,
+      `SUMMARY:${task.title}`,
+      `DESCRIPTION:Category: ${task.category}${task.order_id ? `\nOrder: ${task.order_id.slice(0, 8)}` : ''}`,
+      `STATUS:${task.status === 'completed' ? 'COMPLETED' : 'CONFIRMED'}`,
+      'END:VEVENT',
+    );
+  }
+
+  lines.push('END:VCALENDAR');
+
+  const blob = new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `bakeops-schedule-${label}.ics`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 interface ShoppingItem {
   name: string;
@@ -242,29 +289,39 @@ export default function ProductionPage() {
           <h1 className="text-3xl font-bold">Production Planner</h1>
           <p className="text-gray-500 mt-1">Manage your weekly prep and baking schedule.</p>
         </div>
-        <div className="flex items-center gap-2 bg-white p-2 rounded-xl border border-gray-100 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-white p-2 rounded-xl border border-gray-100 shadow-sm">
+            <button
+              onClick={() => {
+                const d = new Date(selectedDay);
+                d.setDate(d.getDate() - 7);
+                setSelectedDay(d);
+              }}
+              className="p-2 hover:bg-gray-50 rounded-lg"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="text-sm font-bold px-4 text-center min-w-[180px]">
+              {weekDays[0].toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - {weekDays[6].toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+            </span>
+            <button
+              onClick={() => {
+                const d = new Date(selectedDay);
+                d.setDate(d.getDate() + 7);
+                setSelectedDay(d);
+              }}
+              className="p-2 hover:bg-gray-50 rounded-lg"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
           <button
-            onClick={() => {
-              const d = new Date(selectedDay);
-              d.setDate(d.getDate() - 7);
-              setSelectedDay(d);
-            }}
-            className="p-2 hover:bg-gray-50 rounded-lg"
+            onClick={() => exportToICal(tasks, selectedDay.toISOString().slice(0, 10))}
+            disabled={tasks.length === 0}
+            title={`Export tasks for ${selectedDay.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} to calendar`}
+            className="flex items-center gap-2 px-4 py-3 bg-white border border-gray-100 rounded-xl shadow-sm text-sm font-bold text-gray-500 hover:text-primary hover:border-pink-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <span className="text-sm font-bold px-4 text-center min-w-[180px]">
-            {weekDays[0].toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - {weekDays[6].toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-          </span>
-          <button
-            onClick={() => {
-              const d = new Date(selectedDay);
-              d.setDate(d.getDate() + 7);
-              setSelectedDay(d);
-            }}
-            className="p-2 hover:bg-gray-50 rounded-lg"
-          >
-            <ChevronRight className="w-4 h-4" />
+            <Download className="w-4 h-4" /> Export .ics
           </button>
         </div>
       </div>
@@ -302,8 +359,16 @@ export default function ProductionPage() {
                 <ClipboardList className="w-5 h-5 text-primary" />
                 Tasks for {selectedDay.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
               </h2>
-              <div className="text-xs font-bold text-gray-400 bg-gray-50 px-3 py-1 rounded-full uppercase tracking-tighter">
-                {tasks.filter(t => t.status === 'completed').length}/{tasks.length} Completed
+              <div className="flex items-center gap-3">
+                <div className="text-xs font-bold text-gray-400 bg-gray-50 px-3 py-1 rounded-full uppercase tracking-tighter">
+                  {tasks.filter(t => t.status === 'completed').length}/{tasks.length} Completed
+                </div>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="flex items-center gap-1.5 text-xs font-bold text-primary bg-pink-50 hover:bg-pink-100 px-3 py-2 rounded-full transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Add Task
+                </button>
               </div>
             </div>
 
