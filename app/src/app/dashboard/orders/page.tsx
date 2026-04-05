@@ -44,23 +44,24 @@ export default function OrdersPage() {
 
   // Realtime: re-fetch when any order for this baker changes
   useEffect(() => {
-    let userId: string | null = null;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return;
-      userId = user.id;
 
-      const channel = supabase
+      channel = supabase
         .channel('orders-realtime')
         .on(
           'postgres_changes',
-          { event: '*', schema: 'public', table: 'orders', filter: `baker_id=eq.${userId}` },
+          { event: '*', schema: 'public', table: 'orders', filter: `baker_id=eq.${user.id}` },
           () => { fetchOrders(); }
         )
         .subscribe();
-
-      return () => { supabase.removeChannel(channel); };
     });
+
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [supabase, fetchOrders]);
 
   const filteredOrders = orders.filter(order => {

@@ -209,7 +209,7 @@ export default function DashboardPage() {
               <OnboardingItem
                 done={onboarding.hasSentOrder}
                 label="Send your first quote"
-                href="/dashboard/designs/new"
+                href="/dashboard/orders"
               />
             </div>
             <div className="mt-8 pt-6 border-t border-gray-50">

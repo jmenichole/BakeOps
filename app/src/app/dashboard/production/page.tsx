@@ -66,7 +66,7 @@ function exportToICal(tasks: PrepTask[], label: string): void {
       `DTSTART:${toICalDate(start)}`,
       `DTEND:${toICalDate(end)}`,
       `SUMMARY:${task.title}`,
-      `DESCRIPTION:Category: ${task.category}${task.order_id ? `\\nOrder: ${task.order_id.slice(0, 8)}` : ''}`,
+      `DESCRIPTION:Category: ${task.category}${task.order_id ? `\nOrder: ${task.order_id.slice(0, 8)}` : ''}`,
       `STATUS:${task.status === 'completed' ? 'COMPLETED' : 'CONFIRMED'}`,
       'END:VEVENT',
     );
@@ -318,7 +318,7 @@ export default function ProductionPage() {
           <button
             onClick={() => exportToICal(tasks, selectedDay.toISOString().slice(0, 10))}
             disabled={tasks.length === 0}
-            title="Export today's tasks to calendar"
+            title={`Export tasks for ${selectedDay.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} to calendar`}
             className="flex items-center gap-2 px-4 py-3 bg-white border border-gray-100 rounded-xl shadow-sm text-sm font-bold text-gray-500 hover:text-primary hover:border-pink-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Download className="w-4 h-4" /> Export .ics

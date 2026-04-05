@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     const resend = new Resend(resendKey);
 
     await resend.emails.send({
-      from: 'Bake Ops <quotes@resend.dev>',
+      from: process.env.RESEND_FROM_EMAIL ?? 'Bake Ops <quotes@resend.dev>',
       to: [customerEmail],
       replyTo: user.email ?? undefined,
       subject: `Your custom cake quote is ready — $${total.toFixed(2)}`,
