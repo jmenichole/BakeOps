@@ -87,12 +87,19 @@ export function calculateQuote(config: PricingConfig): QuoteBreakdown {
     addOnsPrice += addonPricing[opt] || 20;
   });
 
+  /** Complexity threshold above which the surcharge activates (0–1 scale). */
+  const COMPLEXITY_TAX_THRESHOLD = 0.6;
+  /** Fraction of decoration cost charged as the complexity surcharge. */
+  const COMPLEXITY_TAX_RATE = 0.12;
+
   // 4. Overhead buffer (utilities, rent per order)
   const overhead = config.overheadBuffer ?? 15;
 
-  // 5. Complexity tax: 12% surcharge on decoration for highly intricate designs
+  // 5. Complexity tax: surcharge on decoration for highly intricate designs
   //    (intricate piping, sugar flowers, hand-sculpted elements)
-  const complexityTax = themeComplexity > 0.6 ? Math.round(decorCost * 0.12) : 0;
+  const complexityTax = themeComplexity > COMPLEXITY_TAX_THRESHOLD
+    ? Math.round(decorCost * COMPLEXITY_TAX_RATE)
+    : 0;
 
   // 6. Market Adjustment (Labor + Area)
   const marketAdjustment = Math.floor((decorCost + addOnsPrice) * (marketMultiplier - 1));
@@ -112,6 +119,13 @@ export function calculateQuote(config: PricingConfig): QuoteBreakdown {
   };
 }
 
+/** Multiplier applied to themeComplexity for the "Good" tier (simpler design). */
+const GOOD_TIER_COMPLEXITY_SCALE = 0.5;
+/** Maximum themeComplexity allowed for the "Good" tier. */
+const GOOD_TIER_COMPLEXITY_CAP = 0.3;
+/** Amount added to themeComplexity for the "Best" tier (more intricate design). */
+const BEST_TIER_COMPLEXITY_BOOST = 0.3;
+
 /**
  * Generates a "Good, Better, Best" tiered quote for a single order config.
  * - Good:   Simple buttercream finish, no premium add-ons
@@ -122,7 +136,7 @@ export function calculateTieredQuotes(config: PricingConfig): TieredQuotes {
   const goodConfig: PricingConfig = {
     ...config,
     addOns: [],
-    themeComplexity: Math.min(config.themeComplexity * 0.5, 0.3),
+    themeComplexity: Math.min(config.themeComplexity * GOOD_TIER_COMPLEXITY_SCALE, GOOD_TIER_COMPLEXITY_CAP),
   };
 
   const betterConfig: PricingConfig = { ...config };
@@ -131,7 +145,7 @@ export function calculateTieredQuotes(config: PricingConfig): TieredQuotes {
   const bestConfig: PricingConfig = {
     ...config,
     addOns: premiumAddOns,
-    themeComplexity: Math.min(config.themeComplexity + 0.3, 1.0),
+    themeComplexity: Math.min(config.themeComplexity + BEST_TIER_COMPLEXITY_BOOST, 1.0),
   };
 
   return {

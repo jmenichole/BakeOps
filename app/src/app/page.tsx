@@ -328,8 +328,11 @@ function SemiGauge({ label, progress }: { label: string; progress: number }) {
   const r = 34;
   const cx = 50;
   const cy = 48;
+  // Total length of a semi-circular arc (half circumference: π × r)
   const arcLength = Math.PI * r;
   const filled = (progress / 100) * arcLength;
+  // SVG arc path: draws a semi-circle from (cx-r, cy) to (cx+r, cy) left→right
+  const arcPath = `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`;
 
   return (
     <div className="flex flex-col items-center gap-1">
@@ -337,15 +340,15 @@ function SemiGauge({ label, progress }: { label: string; progress: number }) {
         <svg viewBox="0 0 100 54" className="w-20 h-[42px]" aria-hidden="true">
           {/* Background track */}
           <path
-            d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+            d={arcPath}
             fill="none"
             stroke="#e5e7eb"
             strokeWidth="7"
             strokeLinecap="round"
           />
-          {/* Progress fill */}
+          {/* Progress fill — strokeDashoffset controls how much of the arc is drawn */}
           <path
-            d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+            d={arcPath}
             fill="none"
             stroke="#f472b6"
             strokeWidth="7"

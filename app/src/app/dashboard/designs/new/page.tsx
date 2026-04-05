@@ -49,6 +49,7 @@ export default function NewDesignPage() {
   const [showChatbot, setShowChatbot] = useState(false);
   const [editedQuoteItems, setEditedQuoteItems] = useState<Partial<QuoteBreakdown>>({});
   const [isEditingQuote, setIsEditingQuote] = useState(false);
+  const [selectedTier, setSelectedTier] = useState<'good' | 'better' | 'best' | null>(null);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
@@ -97,6 +98,8 @@ export default function NewDesignPage() {
     const breakdown = calculateQuote(pricingConfig);
     setQuote(breakdown);
     setTieredQuotes(calculateTieredQuotes(pricingConfig));
+    setSelectedTier(null);
+    setEditedQuoteItems({});
   }, [config, bakerZip]);
 
   const productTypes = [
@@ -794,12 +797,13 @@ export default function NewDesignPage() {
                         <div className="grid grid-cols-3 gap-2">
                           {(['good', 'better', 'best'] as const).map((tier) => {
                             const tq = tieredQuotes[tier];
-                            const isSelected = tq.total === effectiveQuote.total && Object.keys(editedQuoteItems).length === 0;
+                            const isSelected = selectedTier === tier;
                             return (
                               <button
                                 key={tier}
                                 onClick={() => {
                                   setEditedQuoteItems({});
+                                  setSelectedTier(tier);
                                   setQuote(tieredQuotes[tier]);
                                 }}
                                 className={`p-2 rounded-lg border-2 text-center transition-all ${isSelected ? 'border-primary bg-white shadow-sm' : 'border-transparent bg-white/60 hover:border-pink-200'}`}
@@ -816,7 +820,10 @@ export default function NewDesignPage() {
                     <div className="flex justify-end mb-1">
                       <button
                         onClick={() => {
-                          if (isEditingQuote) setEditedQuoteItems({});
+                          if (isEditingQuote) {
+                            setEditedQuoteItems({});
+                            setSelectedTier(null);
+                          }
                           setIsEditingQuote(prev => !prev);
                         }}
                         className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-primary transition-colors"
