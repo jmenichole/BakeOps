@@ -318,6 +318,7 @@ export default function NewDesignPage() {
           image_url: imageUrl,
           configuration_data: config,
           estimated_price: finalPrice,
+          is_draft: !isFinal,
           is_public: false
         })
         .select()

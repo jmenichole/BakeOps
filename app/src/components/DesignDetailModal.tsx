@@ -5,13 +5,14 @@ import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { toast } from '@/hooks/useToast';
 
 interface Design {
   id: string;
   title: string;
   description: string | null;
   image_url: string | null;
-  configuration: Record<string, unknown> | null;
+  configuration_data: Record<string, unknown> | null;
   estimated_price: number | null;
   created_at: string;
   baker_id: string;
@@ -55,27 +56,22 @@ export function DesignDetailModal({ design, isOpen, onClose }: DesignDetailModal
         throw new Error('You must be logged in to create an order');
       }
 
-      const { data, error: insertError } = await supabase
+      const { error: insertError } = await supabase
         .from('orders')
         .insert({
           baker_id: user.id,
-          status: 'draft',
+          design_id: design.id,
+          status: 'pending',
           total_price: design.estimated_price || 0,
-          cake_details: {
-            design_id: design.id,
-            title: design.title,
-            description: design.description,
-            configuration: design.configuration,
-            image_url: design.image_url,
-          },
-        })
-        .select()
-        .single();
+          customer_email: '',
+          customer_name: '',
+        });
 
       if (insertError) throw insertError;
 
-      // Navigate to the new order
-      router.push(`/dashboard/orders/${data.id}`);
+      toast.success('Order created — open it in the Orders page to add customer details.');
+      // Navigate to orders list so the baker can fill in customer details
+      router.push('/dashboard/orders');
     } catch (err) {
       console.error('Error creating order:', err);
       setError(err instanceof Error ? err.message : 'Failed to create order');
@@ -212,11 +208,11 @@ export function DesignDetailModal({ design, isOpen, onClose }: DesignDetailModal
               </p>
             </div>
 
-            {design.configuration && typeof design.configuration === 'object' && (
+            {design.configuration_data && typeof design.configuration_data === 'object' && (
               <div>
                 <h3 className="text-sm font-bold text-gray-900 mb-3">Specifications</h3>
                 <div className="grid grid-cols-2 gap-3">
-                  {Object.entries(design.configuration).map(([key, value]) => (
+                  {Object.entries(design.configuration_data).map(([key, value]) => (
                     <div key={key} className="bg-gray-50 p-3 rounded-xl border border-gray-100">
                       <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
                         {key.replace(/_/g, ' ')}

@@ -13,7 +13,7 @@ interface Design {
   title: string;
   description: string | null;
   image_url: string | null;
-  configuration: Record<string, unknown> | null;
+  configuration_data: Record<string, unknown> | null;
   estimated_price: number;
   baker_id: string;
   created_at: string;

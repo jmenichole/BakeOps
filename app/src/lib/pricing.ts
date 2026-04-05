@@ -49,12 +49,12 @@ export function calculateQuote(config: PricingConfig): QuoteBreakdown {
   let fillingCost = 0;
   let decorCost = 0;
   let addOnsPrice = 0;
-  const serviceFee = 25;
+  const serviceFee = 10;
 
   // 1. High-Cost Area Multiplier (Premium Audit Aesthetics)
   const premiumZips = ['100', '902', '941', '606', '331', '752']; // NYC, Beverly Hills, SF, Chicago, Miami, Dallas
   const isHighCostArea = zipCode ? premiumZips.some(prefix => zipCode.startsWith(prefix)) : false;
-  const marketMultiplier = isHighCostArea ? 1.45 : 1.15;
+  const marketMultiplier = isHighCostArea ? 1.40 : 1.10;
 
   // 2. Base Product Pricing
   if (productType === 'cake') {
