@@ -12,6 +12,8 @@ export interface PricingConfig {
   addOns: string[];
   themeComplexity: number; // 0-1 range
   zipCode?: string | null;
+  /** Monthly overhead (utilities, rent) allocated per order. Defaults to $15. */
+  overheadBuffer?: number;
 }
 
 export interface QuoteBreakdown {
@@ -19,9 +21,25 @@ export interface QuoteBreakdown {
   decor: number;
   filling: number;
   addOns: number;
+  /** Overhead/utility buffer allocated to this order */
+  overhead: number;
+  /** Complexity surcharge for intricate piping, sugar flowers, etc. */
+  complexityTax: number;
   marketAdjustment: number;
   serviceFee: number;
   total: number;
+}
+
+export interface TieredQuote extends QuoteBreakdown {
+  tier: 'good' | 'better' | 'best';
+  label: string;
+  description: string;
+}
+
+export interface TieredQuotes {
+  good: TieredQuote;
+  better: TieredQuote;
+  best: TieredQuote;
 }
 
 export function calculateQuote(config: PricingConfig): QuoteBreakdown {
@@ -69,18 +87,85 @@ export function calculateQuote(config: PricingConfig): QuoteBreakdown {
     addOnsPrice += addonPricing[opt] || 20;
   });
 
-  // 4. Market Adjustment (Labor + Area)
+  /** Complexity threshold above which the surcharge activates (0–1 scale). */
+  const COMPLEXITY_TAX_THRESHOLD = 0.6;
+  /** Fraction of decoration cost charged as the complexity surcharge. */
+  const COMPLEXITY_TAX_RATE = 0.12;
+
+  // 4. Overhead buffer (utilities, rent per order)
+  const overhead = config.overheadBuffer ?? 15;
+
+  // 5. Complexity tax: surcharge on decoration for highly intricate designs
+  //    (intricate piping, sugar flowers, hand-sculpted elements)
+  const complexityTax = themeComplexity > COMPLEXITY_TAX_THRESHOLD
+    ? Math.round(decorCost * COMPLEXITY_TAX_RATE)
+    : 0;
+
+  // 6. Market Adjustment (Labor + Area)
   const marketAdjustment = Math.floor((decorCost + addOnsPrice) * (marketMultiplier - 1));
 
-  const total = base + decorCost + fillingCost + addOnsPrice + marketAdjustment + serviceFee;
+  const total = base + decorCost + fillingCost + addOnsPrice + overhead + complexityTax + marketAdjustment + serviceFee;
 
   return {
     base,
     decor: decorCost,
     filling: fillingCost,
     addOns: addOnsPrice,
+    overhead,
+    complexityTax,
     marketAdjustment,
     serviceFee,
     total: Math.ceil(total),
+  };
+}
+
+/** Multiplier applied to themeComplexity for the "Good" tier (simpler design). */
+const GOOD_TIER_COMPLEXITY_SCALE = 0.5;
+/** Maximum themeComplexity allowed for the "Good" tier. */
+const GOOD_TIER_COMPLEXITY_CAP = 0.3;
+/** Amount added to themeComplexity for the "Best" tier (more intricate design). */
+const BEST_TIER_COMPLEXITY_BOOST = 0.3;
+
+/**
+ * Generates a "Good, Better, Best" tiered quote for a single order config.
+ * - Good:   Simple buttercream finish, no premium add-ons
+ * - Better: The design as described by the baker
+ * - Best:   Full fondant upgrade + premium add-ons
+ */
+export function calculateTieredQuotes(config: PricingConfig): TieredQuotes {
+  const goodConfig: PricingConfig = {
+    ...config,
+    addOns: [],
+    themeComplexity: Math.min(config.themeComplexity * GOOD_TIER_COMPLEXITY_SCALE, GOOD_TIER_COMPLEXITY_CAP),
+  };
+
+  const betterConfig: PricingConfig = { ...config };
+
+  const premiumAddOns = Array.from(new Set([...config.addOns, 'Fondant Work', 'Acrylic Topper']));
+  const bestConfig: PricingConfig = {
+    ...config,
+    addOns: premiumAddOns,
+    themeComplexity: Math.min(config.themeComplexity + BEST_TIER_COMPLEXITY_BOOST, 1.0),
+  };
+
+  return {
+    good: {
+      ...calculateQuote(goodConfig),
+      tier: 'good',
+      label: 'Good',
+      description: 'Simple buttercream finish',
+    },
+    better: {
+      ...calculateQuote(betterConfig),
+      tier: 'better',
+      label: 'Better',
+      description: 'Your design as described',
+    },
+    best: {
+      ...calculateQuote(bestConfig),
+      tier: 'best',
+      label: 'Best',
+      description: 'Full fondant with premium upgrades',
+    },
   };
 }

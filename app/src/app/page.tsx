@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { SiteFooter } from '@/components/SiteFooter';
 import { AuthButton } from '@/components/AuthButton';
-import { ArrowRight, Zap, Palette, Calendar, Calculator, ShieldCheck, Clock, ChevronRight } from 'lucide-react';
+import { ArrowRight, Zap, Palette, Calendar, Calculator, ShieldCheck, Clock, ChevronRight, Medal, DollarSign, Sparkles } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -68,9 +68,9 @@ export default function Home() {
         <div className="container px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
             <ProofStat icon={<Zap className="w-5 h-5" />} value="60 sec" label="Quote turnaround" />
-            <ProofStat icon={<Palette className="w-5 h-5" />} value="AI mockups" label="On demand" />
+            <ProofStat icon={<Sparkles className="w-5 h-5" />} value="AI mockups" label="On demand" />
             <ProofStat icon={<Clock className="w-5 h-5" />} value="5+ hrs" label="Saved per week" />
-            <ProofStat icon={<ShieldCheck className="w-5 h-5" />} value="100%" label="Secure & encrypted" />
+            <ProofStat icon={<ShieldCheck className="w-5 h-5" />} value="500+" label="Beta bakers" />
           </div>
         </div>
       </section>
@@ -125,19 +125,19 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             <FeatureCard
-              icon={<Palette className="w-6 h-6" />}
+              icon={<Sparkles className="w-6 h-6" />}
               title="AI Design Studio"
-              description="Generate realistic cake mockups from a text description in seconds. Show clients exactly what they&apos;re getting before you bake a crumb."
+              description="Generate realistic cake mockups from a text description in seconds. Upload your own past work as style references so every mockup matches your skill level and aesthetic."
             />
             <FeatureCard
-              icon={<Calculator className="w-6 h-6" />}
+              icon={<DollarSign className="w-6 h-6" />}
               title="Smart Pricing"
-              description="Stop guessing. Get instant, accurate quotes built from your real ingredient costs, labor rate, and complexity &mdash; never undersell again."
+              description="Stop guessing. Instant quotes cover ingredients, overhead, complexity surcharges, and market rates &mdash; with a Good&thinsp;/&thinsp;Better&thinsp;/&thinsp;Best tier for every order."
             />
             <FeatureCard
               icon={<Calendar className="w-6 h-6" />}
               title="Prep Planner"
-              description="Automatically break down every order into a multi-day schedule: bake, fill, decorate, deliver. No more mental math the night before."
+              description="Automatically break down every order into a multi-day schedule. Batch totals across all orders so you know exactly how much buttercream to make on Thursday."
             />
             <FeatureCard
               icon={<Zap className="w-6 h-6" />}
@@ -161,14 +161,10 @@ export default function Home() {
                 Bake Ops is being built alongside the bakers who use it every day. Join the beta and get full access while shaping what we build next.
               </p>
 
-              <ul className="space-y-6 mb-10">
+              <ul className="space-y-6 mb-8">
                 <BetaPerk
                   title="14 days full access, free"
                   description="Every feature, zero restrictions, no credit card."
-                />
-                <BetaPerk
-                  title="Lifetime founder pricing"
-                  description="Lock in 50% off forever when we launch publicly."
                 />
                 <BetaPerk
                   title="Direct line to the team"
@@ -176,7 +172,10 @@ export default function Home() {
                 />
               </ul>
 
-              <Link href="/signup" className="btn btn-primary py-4 px-10 text-base shadow-xl shadow-pink-200/40 group inline-flex items-center gap-3">
+              {/* Founder pricing highlight card */}
+              <FounderCard />
+
+              <Link href="/signup" className="btn btn-primary py-4 px-10 text-base shadow-xl shadow-pink-200/40 group inline-flex items-center gap-3 mt-8">
                 Apply for Beta Access
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
@@ -184,12 +183,12 @@ export default function Home() {
 
             <div className="bg-gray-50 p-8 md:p-10 rounded-[2rem] border border-gray-100">
               <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-8">Development Progress</h3>
-              <div className="space-y-6">
-                <ProgressBar label="AI Design Accuracy" progress={75} />
-                <ProgressBar label="Pricing Engine" progress={90} />
-                <ProgressBar label="Multi-day Scheduling" progress={60} />
-                <ProgressBar label="Customer Portal" progress={45} />
-                <ProgressBar label="Payment Integration" progress={30} />
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 place-items-center mb-2">
+                <SemiGauge label="AI Design" progress={75} />
+                <SemiGauge label="Pricing Engine" progress={90} />
+                <SemiGauge label="Scheduling" progress={60} />
+                <SemiGauge label="Customer Portal" progress={45} />
+                <SemiGauge label="Payments" progress={30} />
               </div>
               <div className="mt-8 pt-6 border-t border-gray-200 flex items-center justify-between">
                 <span className="text-xs text-gray-400 font-medium">Updated weekly</span>
@@ -306,19 +305,63 @@ function BetaPerk({ title, description }: { title: string; description: string }
   );
 }
 
-function ProgressBar({ label, progress }: { label: string; progress: number }) {
+function FounderCard() {
   return (
-    <div>
-      <div className="flex justify-between text-xs font-bold mb-2">
-        <span className="text-secondary">{label}</span>
-        <span className="text-gray-400">{progress}%</span>
+    <div className="relative bg-gradient-to-br from-secondary to-secondary/80 text-white p-6 rounded-2xl overflow-hidden">
+      <div className="absolute top-4 right-4 opacity-20">
+        <Medal className="w-16 h-16" />
       </div>
-      <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-primary rounded-full transition-all duration-1000"
-          style={{ width: `${progress}%` }}
-        />
+      <div className="flex items-center gap-3 mb-3 relative z-10">
+        <div className="w-8 h-8 bg-yellow-400/20 border border-yellow-400/40 rounded-full flex items-center justify-center">
+          <Medal className="w-4 h-4 text-yellow-300" />
+        </div>
+        <span className="text-xs font-black uppercase tracking-widest text-yellow-300">Lifetime Founder Pricing</span>
       </div>
+      <p className="text-white/90 text-sm leading-relaxed relative z-10">
+        Beta members lock in <strong className="text-yellow-300">50% off forever</strong> when we launch publicly. No renewals, no price hikes — ever.
+      </p>
+    </div>
+  );
+}
+
+function SemiGauge({ label, progress }: { label: string; progress: number }) {
+  const r = 34;
+  const cx = 50;
+  const cy = 48;
+  // Total length of a semi-circular arc (half circumference: π × r)
+  const arcLength = Math.PI * r;
+  const filled = (progress / 100) * arcLength;
+  // SVG arc path: draws a semi-circle from (cx-r, cy) to (cx+r, cy) left→right
+  const arcPath = `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`;
+
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div className="relative">
+        <svg viewBox="0 0 100 54" className="w-20 h-[42px]" aria-hidden="true">
+          {/* Background track */}
+          <path
+            d={arcPath}
+            fill="none"
+            stroke="#e5e7eb"
+            strokeWidth="7"
+            strokeLinecap="round"
+          />
+          {/* Progress fill — strokeDashoffset controls how much of the arc is drawn */}
+          <path
+            d={arcPath}
+            fill="none"
+            stroke="#f472b6"
+            strokeWidth="7"
+            strokeLinecap="round"
+            strokeDasharray={`${arcLength}`}
+            strokeDashoffset={`${arcLength - filled}`}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-end justify-center pb-0.5">
+          <span className="text-xs font-black text-secondary leading-none">{progress}%</span>
+        </div>
+      </div>
+      <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider text-center leading-tight max-w-[72px]">{label}</span>
     </div>
   );
 }

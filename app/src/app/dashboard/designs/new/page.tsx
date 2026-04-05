@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { createBrowserClient } from '@/lib/supabase';
 import { toast } from '@/hooks/useToast';
 import { DesignChatbot } from '@/components/DesignChatbot';
-import { calculateQuote, QuoteBreakdown } from '@/lib/pricing';
+import { calculateQuote, calculateTieredQuotes, QuoteBreakdown, TieredQuotes } from '@/lib/pricing';
 
 interface FileData {
   mimeType: string;
@@ -49,6 +49,7 @@ export default function NewDesignPage() {
   const [showChatbot, setShowChatbot] = useState(false);
   const [editedQuoteItems, setEditedQuoteItems] = useState<Partial<QuoteBreakdown>>({});
   const [isEditingQuote, setIsEditingQuote] = useState(false);
+  const [selectedTier, setSelectedTier] = useState<'good' | 'better' | 'best' | null>(null);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
@@ -74,14 +75,17 @@ export default function NewDesignPage() {
     decor: 0,
     filling: 15,
     addOns: 0,
+    overhead: 15,
+    complexityTax: 0,
     marketAdjustment: 12,
     serviceFee: 25,
-    total: 117
+    total: 132
   });
+  const [tieredQuotes, setTieredQuotes] = useState<TieredQuotes | null>(null);
 
   // Dynamic pricing calculation via Engine
   useEffect(() => {
-    const breakdown = calculateQuote({
+    const pricingConfig = {
       productType: config.productType,
       tiers: config.tiers,
       quantity: config.quantity,
@@ -90,8 +94,12 @@ export default function NewDesignPage() {
       addOns: config.addOns,
       themeComplexity: Math.min(config.theme.length / 200, 1),
       zipCode: bakerZip
-    });
+    };
+    const breakdown = calculateQuote(pricingConfig);
     setQuote(breakdown);
+    setTieredQuotes(calculateTieredQuotes(pricingConfig));
+    setSelectedTier(null);
+    setEditedQuoteItems({});
   }, [config, bakerZip]);
 
   const productTypes = [
@@ -271,12 +279,16 @@ export default function NewDesignPage() {
     decor: editedQuoteItems.decor ?? quote.decor,
     filling: editedQuoteItems.filling ?? quote.filling,
     addOns: editedQuoteItems.addOns ?? quote.addOns,
+    overhead: editedQuoteItems.overhead ?? quote.overhead,
+    complexityTax: editedQuoteItems.complexityTax ?? quote.complexityTax,
     marketAdjustment: editedQuoteItems.marketAdjustment ?? quote.marketAdjustment,
     serviceFee: editedQuoteItems.serviceFee ?? quote.serviceFee,
     total: (editedQuoteItems.base ?? quote.base) +
            (editedQuoteItems.decor ?? quote.decor) +
            (editedQuoteItems.filling ?? quote.filling) +
            (editedQuoteItems.addOns ?? quote.addOns) +
+           (editedQuoteItems.overhead ?? quote.overhead) +
+           (editedQuoteItems.complexityTax ?? quote.complexityTax) +
            (editedQuoteItems.marketAdjustment ?? quote.marketAdjustment) +
            (editedQuoteItems.serviceFee ?? quote.serviceFee),
   };
@@ -778,10 +790,40 @@ export default function NewDesignPage() {
 
                 {useAiPricing ? (
                   <div className="space-y-2 px-1">
+                    {/* Tiered quotes selector */}
+                    {tieredQuotes && (
+                      <div className="mb-4 p-3 bg-pink-50 rounded-xl border border-pink-100">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Choose a Quote Tier</p>
+                        <div className="grid grid-cols-3 gap-2">
+                          {(['good', 'better', 'best'] as const).map((tier) => {
+                            const tq = tieredQuotes[tier];
+                            const isSelected = selectedTier === tier;
+                            return (
+                              <button
+                                key={tier}
+                                onClick={() => {
+                                  setEditedQuoteItems({});
+                                  setSelectedTier(tier);
+                                  setQuote(tieredQuotes[tier]);
+                                }}
+                                className={`p-2 rounded-lg border-2 text-center transition-all ${isSelected ? 'border-primary bg-white shadow-sm' : 'border-transparent bg-white/60 hover:border-pink-200'}`}
+                              >
+                                <div className="text-[10px] font-black uppercase tracking-wider text-gray-400">{tq.label}</div>
+                                <div className="text-sm font-black text-secondary">${tq.total}</div>
+                                <div className="text-[9px] text-gray-400 leading-tight mt-0.5">{tq.description}</div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                     <div className="flex justify-end mb-1">
                       <button
                         onClick={() => {
-                          if (isEditingQuote) setEditedQuoteItems({});
+                          if (isEditingQuote) {
+                            setEditedQuoteItems({});
+                            setSelectedTier(null);
+                          }
                           setIsEditingQuote(prev => !prev);
                         }}
                         className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-primary transition-colors"
@@ -802,6 +844,14 @@ export default function NewDesignPage() {
                       isEditing={isEditingQuote}
                       onChange={(v) => setEditedQuoteItems(prev => ({ ...prev, decor: v }))}
                     />
+                    {effectiveQuote.complexityTax > 0 && (
+                      <EditableQuoteDetail
+                        label="Complexity Surcharge"
+                        value={effectiveQuote.complexityTax}
+                        isEditing={isEditingQuote}
+                        onChange={(v) => setEditedQuoteItems(prev => ({ ...prev, complexityTax: v }))}
+                      />
+                    )}
                     <EditableQuoteDetail
                       label="Fillings & Flavor"
                       value={effectiveQuote.filling}
@@ -813,6 +863,12 @@ export default function NewDesignPage() {
                       value={effectiveQuote.addOns}
                       isEditing={isEditingQuote}
                       onChange={(v) => setEditedQuoteItems(prev => ({ ...prev, addOns: v }))}
+                    />
+                    <EditableQuoteDetail
+                      label="Overhead & Utilities"
+                      value={effectiveQuote.overhead}
+                      isEditing={isEditingQuote}
+                      onChange={(v) => setEditedQuoteItems(prev => ({ ...prev, overhead: v }))}
                     />
                     <EditableQuoteDetail
                       label="Market Adjustment (Area)"
