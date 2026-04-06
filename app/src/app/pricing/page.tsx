@@ -1,5 +1,21 @@
 import Link from 'next/link';
 import { Check, Sparkles } from 'lucide-react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Pricing – Bake Ops | AI-Powered Cake Design Platform',
+  description: 'Simple, transparent pricing for professional bakers. Start with a 14-day free beta trial. No credit card required.',
+  openGraph: {
+    title: 'Pricing – Bake Ops',
+    description: 'Simple, transparent pricing for professional bakers. Start with a 14-day free beta trial.',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Pricing – Bake Ops',
+    description: 'Simple, transparent pricing for professional bakers. Start with a 14-day free beta trial.',
+  },
+};
 
 export default function PricingPage() {
   return (

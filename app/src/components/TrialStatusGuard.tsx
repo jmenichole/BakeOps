@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { createBrowserClient } from '@/lib/supabase';
 import { getTrialStatus, TrialStatus } from '@/lib/trial';
@@ -8,40 +8,45 @@ import { getTrialStatus, TrialStatus } from '@/lib/trial';
 export function TrialStatusGuard({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<TrialStatus | null>(null);
-  const supabase = createBrowserClient();
+  const supabase = useMemo(() => createBrowserClient(), []);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     async function checkTrial() {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        router.push('/login');
-        return;
-      }
-
-      const { data: baker } = await supabase
-        .from('bakers')
-        .select('trial_ends_at, is_premium')
-        .eq('id', user.id)
-        .single();
-
-      if (baker) {
-        if (baker.is_premium) {
-          setLoading(false);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          router.push('/login');
           return;
         }
 
-        const trialStatus = getTrialStatus(baker.trial_ends_at);
-        setStatus(trialStatus);
+        const { data: baker } = await supabase
+          .from('bakers')
+          .select('trial_ends_at, is_premium')
+          .eq('id', user.id)
+          .single();
 
-        if (trialStatus.isExpired && pathname !== '/trial-expired') {
-          router.push('/trial-expired');
+        if (baker) {
+          if (baker.is_premium) {
+            setLoading(false);
+            return;
+          }
+
+          const trialStatus = getTrialStatus(baker.trial_ends_at);
+          setStatus(trialStatus);
+
+          if (trialStatus.isExpired && pathname !== '/trial-expired') {
+            router.push('/trial-expired');
+          }
         }
+        
+        setLoading(false);
+      } catch (err) {
+        console.error('TrialStatusGuard error:', err);
+        setLoading(false);
       }
-      
-      setLoading(false);
     }
 
     checkTrial();

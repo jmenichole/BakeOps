@@ -14,7 +14,9 @@ import {
   ShieldCheck, 
   ChevronRight,
   Printer,
-  Info
+  Info,
+  X,
+  Send
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -39,6 +41,12 @@ export default function PublicQuotePage() {
   const [design, setDesign] = useState<Design | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [bookingName, setBookingName] = useState('');
+  const [bookingEmail, setBookingEmail] = useState('');
+  const [bookingPhone, setBookingPhone] = useState('');
+  const [bookingMessage, setBookingMessage] = useState('');
+  const [bookingSuccess, setBookingSuccess] = useState(false);
   const supabase = createBrowserClient();
 
   useEffect(() => {
@@ -67,7 +75,7 @@ export default function PublicQuotePage() {
         console.error('Error fetching quote:', fetchError);
         setError(true);
       } else {
-        setDesign(data as any);
+        setDesign(data as unknown as Design);
       }
       setLoading(false);
     }
@@ -195,9 +203,12 @@ export default function PublicQuotePage() {
                             ${design.estimated_price?.toFixed(2)}
                         </h2>
                     </div>
-                    <Link href={`mailto:${design.bakers?.email}`} className="btn btn-primary py-4 px-6 shadow-none flex items-center gap-2">
-                        Approve <ArrowRight className="w-4 h-4" />
-                    </Link>
+                    <button
+                      onClick={() => setShowBookingForm(true)}
+                      className="btn btn-primary py-4 px-6 shadow-none flex items-center gap-2"
+                    >
+                        Request to Book <ArrowRight className="w-4 h-4" />
+                    </button>
                 </div>
             </div>
 
@@ -230,10 +241,114 @@ export default function PublicQuotePage() {
 
       {/* FLOATING CTAS FOR MOBILE */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-xl border-t border-gray-100 z-50">
-          <Link href={`mailto:${design.bakers?.email}`} className="btn btn-primary w-full py-5 text-lg shadow-2xl flex items-center justify-center gap-3">
-              Approve Design <ChevronRight className="w-5 h-5" />
-          </Link>
+          <button
+            onClick={() => setShowBookingForm(true)}
+            className="btn btn-primary w-full py-5 text-lg shadow-2xl flex items-center justify-center gap-3"
+          >
+              Request to Book <ChevronRight className="w-5 h-5" />
+          </button>
       </div>
+
+      {/* BOOKING MODAL */}
+      {showBookingForm && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
+          onClick={() => setShowBookingForm(false)}
+        >
+          <div
+            className="bg-white rounded-[2rem] max-w-md w-full p-8 shadow-2xl animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {bookingSuccess ? (
+              <div className="text-center py-6">
+                <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle2 className="w-8 h-8 text-green-500" />
+                </div>
+                <h3 className="text-xl font-bold text-secondary mb-2">Request Sent!</h3>
+                <p className="text-sm text-gray-500 mb-6">Your baker will be in touch shortly to confirm details.</p>
+                <button
+                  onClick={() => { setShowBookingForm(false); setBookingSuccess(false); }}
+                  className="btn btn-primary px-8"
+                >
+                  Close
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-secondary">Request to Book</h3>
+                  <button
+                    onClick={() => setShowBookingForm(false)}
+                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    aria-label="Close"
+                  >
+                    <X className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+                <p className="text-sm text-gray-500 mb-6">Fill in your details and your baker will confirm availability and finalise the order.</p>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const subject = encodeURIComponent(`Booking Request: ${design.title}`);
+                    const body = encodeURIComponent(
+                      `Hi,\n\nI would like to book this custom cake design.\n\nName: ${bookingName}\nEmail: ${bookingEmail}\nPhone: ${bookingPhone || 'Not provided'}\n\nMessage: ${bookingMessage || 'None'}\n\nQuote ID: ${design.id}\nEstimated Price: $${design.estimated_price?.toFixed(2)}`
+                    );
+                    window.open(`mailto:${design.bakers?.email}?subject=${subject}&body=${body}`, '_blank');
+                    setBookingSuccess(true);
+                  }}
+                  className="space-y-4"
+                >
+                  <div>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1 block">Your Name *</label>
+                    <input
+                      required
+                      type="text"
+                      value={bookingName}
+                      onChange={e => setBookingName(e.target.value)}
+                      className="w-full p-3 rounded-xl border border-gray-200 text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all"
+                      placeholder="Jane Smith"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1 block">Email *</label>
+                    <input
+                      required
+                      type="email"
+                      value={bookingEmail}
+                      onChange={e => setBookingEmail(e.target.value)}
+                      className="w-full p-3 rounded-xl border border-gray-200 text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all"
+                      placeholder="jane@example.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1 block">Phone</label>
+                    <input
+                      type="tel"
+                      value={bookingPhone}
+                      onChange={e => setBookingPhone(e.target.value)}
+                      className="w-full p-3 rounded-xl border border-gray-200 text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all"
+                      placeholder="(555) 000-0000"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1 block">Message</label>
+                    <textarea
+                      value={bookingMessage}
+                      onChange={e => setBookingMessage(e.target.value)}
+                      className="w-full p-3 rounded-xl border border-gray-200 text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all min-h-[80px] resize-none"
+                      placeholder="Any special requests or questions?"
+                    />
+                  </div>
+                  <button type="submit" className="w-full btn btn-primary py-4 flex items-center justify-center gap-2">
+                    <Send className="w-4 h-4" />
+                    Send Booking Request
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
     </main>
   );

@@ -117,8 +117,6 @@ export default function SettingsPage() {
       setNewPassword('');
       setConfirmPassword('');
       setShowPasswordForm(false);
-      setConfirmPassword('');
-      setShowPasswordForm(false);
     } catch (error: unknown) {
       console.error('Error changing password:', error);
       const message = error instanceof Error ? error.message : 'Failed to change password.';
@@ -133,15 +131,19 @@ export default function SettingsPage() {
 
     setDeleteLoading(true);
     try {
-      // Delete baker profile data first
       if (user) {
+        // Delete all user data in dependency order before removing the profile
+        await supabase.from('prep_tasks').delete().eq('baker_id', user.id);
+        await supabase.from('orders').delete().eq('baker_id', user.id);
+        await supabase.from('cake_designs').delete().eq('baker_id', user.id);
+        await supabase.from('survey_responses').delete().eq('user_id', user.id);
+        await supabase.from('feedback').delete().eq('user_id', user.id);
+        await supabase.from('referrals').delete().eq('referrer_id', user.id);
         await supabase.from('bakers').delete().eq('id', user.id);
       }
 
-      // Sign out the user (full account deletion requires a server-side admin call)
+      // Sign out the user (full auth record deletion requires a server-side admin call)
       await supabase.auth.signOut();
-      router.push('/');
-      router.refresh();
       router.push('/');
       router.refresh();
     } catch (error: unknown) {

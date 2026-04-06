@@ -16,10 +16,12 @@ import {
   MoreVertical
 } from 'lucide-react';
 import { createBrowserClient } from '@/lib/supabase';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 export function OnboardingModal() {
   const [step, setStep] = useState(1);
   const totalSteps = 4;
+  const [onboardingDismissed, setOnboardingDismissed] = useLocalStorage<boolean>('bb_onboarding_dismissed', false);
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const supabase = createBrowserClient();
@@ -27,7 +29,7 @@ export function OnboardingModal() {
   useEffect(() => {
     async function checkOnboarding() {
       // First check local storage for immediate dismissal
-      if (localStorage.getItem('bb_onboarding_dismissed')) {
+      if (onboardingDismissed) {
         setHasSeenOnboarding(true);
         return;
       }
@@ -47,11 +49,11 @@ export function OnboardingModal() {
       setHasSeenOnboarding(baker?.onboarding_completed ?? false);
     }
     checkOnboarding();
-  }, [supabase]);
+  }, [supabase, onboardingDismissed]);
 
   const handleDismiss = async () => {
     setIsUpdating(true);
-    localStorage.setItem('bb_onboarding_dismissed', 'true');
+    setOnboardingDismissed(true);
     setHasSeenOnboarding(true);
     
     try {

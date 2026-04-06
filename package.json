@@ -11,7 +11,8 @@
     "lint:app": "npm run lint -w app",
     "lint": "npm run lint:app",
     "install:all": "npm install",
-    "prepare": "node -e \"if (process.env.CI || process.env.VERCEL) { process.exit(0); } else { require('child_process').execSync('husky', {stdio: 'inherit'}); }\""
+    "prepare": "node -e \"if (process.env.CI || process.env.VERCEL) { process.exit(0); } else { require('child_process').execSync('husky', {stdio: 'inherit'}); }\"",
+    "test": "jest"
   },
   "dependencies": {
     "@vercel/analytics": "^1.6.1"
@@ -19,5 +20,16 @@
   "devDependencies": {
     "husky": "^9.1.7",
     "supabase": "^2.84.8"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    },
+    "testMatch": [
+      "**/*.test.ts",
+      "**/*.test.tsx"
+    ]
   }
 }

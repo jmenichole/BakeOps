@@ -4,6 +4,7 @@ import { X, Calendar, Download, Share2, ShoppingBag } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/hooks/useToast';
 
@@ -22,14 +23,15 @@ interface DesignDetailModalProps {
   design: Design | null;
   isOpen: boolean;
   onClose: () => void;
+  supabase?: SupabaseClient;
 }
 
-export function DesignDetailModal({ design, isOpen, onClose }: DesignDetailModalProps) {
+export function DesignDetailModal({ design, isOpen, onClose, supabase: supabaseProp }: DesignDetailModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
   const router = useRouter();
-  const supabase = createBrowserClient();
+  const supabase = supabaseProp ?? createBrowserClient();
 
   // Handle escape key to close modal
   const handleKeyDown = useCallback((e: KeyboardEvent) => {

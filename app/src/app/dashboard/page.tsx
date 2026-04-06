@@ -35,6 +35,8 @@ export default function DashboardPage() {
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [onboarding, setOnboarding] = useState({ hasDesign: false, hasSentOrder: false, hasProfile: false });
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [referralCopied, setReferralCopied] = useState(false);
 
   const supabase = useMemo(() => createBrowserClient(), []);
 
@@ -55,7 +57,7 @@ export default function DashboardPage() {
         supabase.from('orders').select('*').eq('baker_id', user.id),
         supabase.from('cake_designs').select('*').eq('baker_id', user.id),
         supabase.from('referrals').select('id', { count: 'exact', head: true }).eq('referrer_id', user.id),
-        supabase.from('bakers').select('business_name').eq('id', user.id).single(),
+        supabase.from('bakers').select('business_name, referral_code').eq('id', user.id).single(),
       ]);
 
       const active = ordersRes.data?.filter(o => !['delivered', 'cancelled'].includes(o.status)).length || 0;
@@ -73,6 +75,7 @@ export default function DashboardPage() {
         hasSentOrder: (ordersRes.data?.filter(o => o.status !== 'pending').length || 0) > 0,
         hasProfile: !!(bakerRes.data?.business_name),
       });
+      setReferralCode(bakerRes.data?.referral_code ?? null);
 
       // Fetch Recent Orders
       const { data: orders } = await supabase
@@ -219,6 +222,31 @@ export default function DashboardPage() {
               </a>
             </div>
           </div>
+
+          {referralCode && (
+            <div className="card-bake">
+              <h3 className="text-sm font-bold text-secondary mb-1 flex items-center gap-2">
+                <Plus className="w-4 h-4 text-primary" /> Your Referral Link
+              </h3>
+              <p className="text-xs text-gray-400 mb-3">Share this link to invite other bakers and earn rewards.</p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 text-xs bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 font-mono text-gray-600 truncate">
+                  {typeof window !== 'undefined' ? window.location.origin : 'https://bakeops.vercel.app'}/signup?ref={referralCode}
+                </code>
+                <button
+                  onClick={() => {
+                    const link = `${window.location.origin}/signup?ref=${referralCode}`;
+                    navigator.clipboard.writeText(link);
+                    setReferralCopied(true);
+                    setTimeout(() => setReferralCopied(false), 2000);
+                  }}
+                  className="px-3 py-2 bg-primary text-white text-xs font-bold rounded-lg hover:bg-pink-600 transition-colors whitespace-nowrap"
+                >
+                  {referralCopied ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
