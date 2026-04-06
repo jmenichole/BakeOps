@@ -3,15 +3,6 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { AuthButton } from '@/components/AuthButton';
 import { ArrowRight, Zap, Palette, Calendar, Calculator, ShieldCheck, Clock, ChevronRight, Medal, DollarSign, Sparkles } from 'lucide-react';
 
-// Update these values weekly to reflect real development progress
-const PROGRESS_CONFIG = [
-  { label: 'AI Design',        progress: 75 },
-  { label: 'Pricing Engine',   progress: 90 },
-  { label: 'Scheduling',       progress: 60 },
-  { label: 'Customer Portal',  progress: 45 },
-  { label: 'Payments',         progress: 30 },
-] as const;
-
 export default function Home() {
   return (
     <main className="min-h-screen bg-white selection:bg-pink-100">
@@ -160,7 +151,7 @@ export default function Home() {
       {/* BETA PROGRAM */}
       <section className="py-28">
         <div className="container px-4">
-          <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+          <div className="max-w-2xl mx-auto">
             <div>
               <p className="text-primary text-xs font-bold uppercase tracking-[0.2em] mb-4">Beta program</p>
               <h2 className="text-4xl md:text-5xl font-serif font-black text-secondary mb-8 leading-tight">
@@ -190,20 +181,6 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="bg-gray-50 p-8 md:p-10 rounded-[2rem] border border-gray-100">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-8">Development Progress</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 place-items-center mb-2">
-                {PROGRESS_CONFIG.map(({ label, progress }) => (
-                  <SemiGauge key={label} label={label} progress={progress} />
-                ))}
-              </div>
-              <div className="mt-8 pt-6 border-t border-gray-200 flex items-center justify-between">
-                <span className="text-xs text-gray-400 font-medium">Updated weekly</span>
-                <Link href="/signup" className="text-primary text-sm font-bold hover:underline flex items-center gap-1">
-                  Get early access <ChevronRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -327,48 +304,6 @@ function FounderCard() {
       <p className="text-white/90 text-sm leading-relaxed relative z-10">
         Beta members lock in <strong className="text-yellow-300">50% off forever</strong> when we launch publicly. No renewals, no price hikes — ever.
       </p>
-    </div>
-  );
-}
-
-function SemiGauge({ label, progress }: { label: string; progress: number }) {
-  const r = 34;
-  const cx = 50;
-  const cy = 48;
-  // Total length of a semi-circular arc (half circumference: π × r)
-  const arcLength = Math.PI * r;
-  const filled = (progress / 100) * arcLength;
-  // SVG arc path: draws a semi-circle from (cx-r, cy) to (cx+r, cy) left→right
-  const arcPath = `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`;
-
-  return (
-    <div className="flex flex-col items-center gap-1">
-      <div className="relative">
-        <svg viewBox="0 0 100 54" className="w-20 h-[42px]" aria-hidden="true">
-          {/* Background track */}
-          <path
-            d={arcPath}
-            fill="none"
-            stroke="#e5e7eb"
-            strokeWidth="7"
-            strokeLinecap="round"
-          />
-          {/* Progress fill — strokeDashoffset controls how much of the arc is drawn */}
-          <path
-            d={arcPath}
-            fill="none"
-            stroke="#f472b6"
-            strokeWidth="7"
-            strokeLinecap="round"
-            strokeDasharray={`${arcLength}`}
-            strokeDashoffset={`${arcLength - filled}`}
-          />
-        </svg>
-        <div className="absolute inset-0 flex items-end justify-center pb-0.5">
-          <span className="text-xs font-black text-secondary leading-none">{progress}%</span>
-        </div>
-      </div>
-      <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider text-center leading-tight max-w-[72px]">{label}</span>
     </div>
   );
 }
