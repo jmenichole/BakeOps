@@ -24,6 +24,7 @@ export default function NewDesignPage() {
   const [savedDesignId, setSavedDesignId] = useState<string | null>(null);
   const [shareLink, setShareLink] = useState('');
   const [referenceImages, setReferenceImages] = useState<FileData[]>([]);
+  const [styleImages, setStyleImages] = useState<FileData[]>([]);
   const [bakerZip, setBakerZip] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const quoteRef = useRef<HTMLDivElement>(null);
@@ -55,17 +56,41 @@ export default function NewDesignPage() {
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
 
-  // Fetch baker info for pricing context
   useEffect(() => {
     async function fetchBakerInfo() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: baker } = await supabase
           .from('bakers')
-          .select('zip_code')
+          .select('zip_code, style_reference_images')
           .eq('id', user.id)
           .single();
         if (baker?.zip_code) setBakerZip(baker.zip_code);
+
+        // Pre-load the baker's first saved style image as base64 so it can be used as a
+        // reference when generating. The generate API accepts one reference image at a time,
+        // so only the first style image is used.
+        const styleUrls: string[] = baker?.style_reference_images ?? [];
+        if (styleUrls.length > 0) {
+          try {
+            const res = await fetch(styleUrls[0]);
+            const blob = await res.blob();
+            const fileData = await new Promise<FileData>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                const result = reader.result as string;
+                const matches = result.match(/^data:(.+);base64,(.+)$/);
+                if (matches) resolve({ mimeType: matches[1], data: matches[2] });
+                else reject(new Error('Failed to parse base64'));
+              };
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            });
+            setStyleImages([fileData]);
+          } catch (err) {
+            console.warn('Could not load style reference image:', err);
+          }
+        }
       }
     }
     fetchBakerInfo();
@@ -163,7 +188,7 @@ export default function NewDesignPage() {
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, negative_prompt, referenceImages })
+        body: JSON.stringify({ prompt, negative_prompt, referenceImages: referenceImages.length > 0 ? referenceImages : styleImages })
       });
 
       const data = await response.json();
@@ -196,7 +221,7 @@ export default function NewDesignPage() {
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, referenceImages })
+        body: JSON.stringify({ prompt, referenceImages: referenceImages.length > 0 ? referenceImages : styleImages })
       });
 
       const data = await response.json();
@@ -665,6 +690,11 @@ export default function NewDesignPage() {
                 )}
               </div>
               <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple onChange={handleFileChange} />
+              {referenceImages.length === 0 && styleImages.length > 0 && (
+                <p className="text-[10px] text-primary font-bold uppercase tracking-widest ml-1 mt-1 flex items-center gap-1.5">
+                  <Palette className="w-3 h-3" /> Your saved style is being applied
+                </p>
+              )}
             </div>
           </div>
 

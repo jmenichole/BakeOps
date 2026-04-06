@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@/lib/supabase';
 import { User as SupabaseUser } from '@supabase/supabase-js';
-import { User, Bell, Shield, Palette, Save, CheckCircle2, AlertCircle, LogOut, KeyRound, Trash2 } from 'lucide-react';
+import Image from 'next/image';
+import { User, Bell, Shield, Palette, Save, CheckCircle2, AlertCircle, LogOut, KeyRound, Trash2, Upload, Loader2, X } from 'lucide-react';
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
@@ -26,6 +27,11 @@ export default function SettingsPage() {
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  // AI style images state
+  const [styleImages, setStyleImages] = useState<string[]>([]);
+  const [uploadingStyle, setUploadingStyle] = useState(false);
+  const styleFileRef = useRef<HTMLInputElement>(null);
+
   const supabase = createBrowserClient();
   const router = useRouter();
 
@@ -46,6 +52,7 @@ export default function SettingsPage() {
           setZipCode(baker.zip_code || '');
           setEmailLeads(baker.email_leads ?? true);
           setOrderUpdates(baker.order_updates ?? true);
+          setStyleImages(baker.style_reference_images ?? []);
         }
       }
     }
@@ -55,6 +62,70 @@ export default function SettingsPage() {
   const showMessage = (type: 'success' | 'error', text: string) => {
     setSaveMessage({ type, text });
     setTimeout(() => setSaveMessage(null), 4000);
+  };
+
+  const handleStyleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (styleImages.length >= 3) {
+      showMessage('error', 'You can upload up to 3 style images.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showMessage('error', 'Image is too large. Maximum size is 5 MB.');
+      return;
+    }
+
+    setUploadingStyle(true);
+    try {
+      const ext = file.type.split('/')[1] || file.name.split('.').pop() || 'jpg';
+      const path = `${user.id}/style-images/${Date.now()}.${ext}`;
+      const { data, error } = await supabase.storage
+        .from('design-images')
+        .upload(path, file, { contentType: file.type, upsert: true });
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('design-images')
+        .getPublicUrl(data.path);
+
+      const updatedImages = [...styleImages, publicUrl];
+      await supabase.from('bakers').upsert(
+        { id: user.id, style_reference_images: updatedImages, updated_at: new Date().toISOString() },
+        { onConflict: 'id' }
+      );
+
+      setStyleImages(updatedImages);
+    } catch (err) {
+      console.error('Style image upload error:', err);
+      showMessage('error', 'Failed to upload image. Please try again.');
+    } finally {
+      setUploadingStyle(false);
+      if (styleFileRef.current) styleFileRef.current.value = '';
+    }
+  };
+
+  const handleDeleteStyleImage = async (url: string, index: number) => {
+    if (!user) return;
+    try {
+      const pathMatch = url.match(/\/storage\/v1\/object\/public\/design-images\/(.+)$/);
+      if (pathMatch) {
+        await supabase.storage.from('design-images').remove([decodeURIComponent(pathMatch[1])]);
+      }
+
+      const updatedImages = styleImages.filter((_, i) => i !== index);
+      await supabase.from('bakers').upsert(
+        { id: user.id, style_reference_images: updatedImages, updated_at: new Date().toISOString() },
+        { onConflict: 'id' }
+      );
+
+      setStyleImages(updatedImages);
+    } catch (err) {
+      console.error('Delete style image error:', err);
+      showMessage('error', 'Failed to delete image. Please try again.');
+    }
   };
 
   const handleSave = async () => {
@@ -202,12 +273,45 @@ export default function SettingsPage() {
             <Palette className="w-5 h-5 text-primary" /> AI Design Style
           </h2>
           <p className="text-sm text-gray-500 mb-6 leading-relaxed">
-            Configure how the AI generates mockups. You can upload reference images of your past work to train a custom style (Coming Soon).
+            Configure how the AI generates mockups. Upload reference images of your past work to help the AI match your signature style.
           </p>
-          <div className="p-8 border-2 border-dashed border-pink-50 rounded-2xl bg-pink-50/20 text-center">
-            <p className="text-xs text-pink-800 font-bold uppercase tracking-widest mb-2">Beta Feature</p>
-            <p className="text-sm text-gray-500">Custom style training will be available in the next release.</p>
-          </div>
+
+          {styleImages.length > 0 && (
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              {styleImages.map((url, idx) => (
+                <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-gray-100 group">
+                  <Image src={url} alt={`Style reference ${idx + 1}`} fill className="object-cover" unoptimized />
+                  <button
+                    onClick={() => handleDeleteStyleImage(url, idx)}
+                    className="absolute top-1 right-1 bg-white/80 text-gray-700 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-600"
+                    aria-label={`Remove style image ${idx + 1}`}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {styleImages.length < 3 && (
+            <button
+              onClick={() => styleFileRef.current?.click()}
+              disabled={uploadingStyle}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-dashed border-gray-200 text-sm text-gray-500 hover:border-primary hover:text-primary transition-all disabled:opacity-50"
+            >
+              {uploadingStyle ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+              {uploadingStyle ? 'Uploading...' : 'Upload Style Image'}
+            </button>
+          )}
+
+          <input
+            type="file"
+            ref={styleFileRef}
+            className="hidden"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleStyleImageUpload}
+          />
+          <p className="text-xs text-gray-400 mt-3">Up to 3 images · JPG, PNG, WebP · 5 MB max</p>
         </div>
 
         {/* Notifications */}
