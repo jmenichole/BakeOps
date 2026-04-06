@@ -30,7 +30,7 @@ export default function DesignListPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const PAGE_SIZE = 9;
+  const PAGE_SIZE = 20;
 
   // Memoize the Supabase client to prevent recreation on every render
   const supabase = useMemo(() => createBrowserClient(), []);
@@ -54,10 +54,14 @@ export default function DesignListPage() {
       const from = currentPage * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
 
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
       const { data, error: fetchError } = await supabase
         .from('cake_designs')
         .select('*')
         .eq('baker_id', user.id)
+        .gte('created_at', thirtyDaysAgo.toISOString())
         .order('created_at', { ascending: false })
         .range(from, to);
 
@@ -177,6 +181,7 @@ export default function DesignListPage() {
         </div>
       ) : filteredDesigns.length > 0 ? (
         <>
+          <p className="text-xs text-gray-400 mb-4">Showing designs from the last 30 days.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredDesigns.map((design) => (
               <div key={design.id} className="card-bake group overflow-hidden p-0">
@@ -247,6 +252,7 @@ export default function DesignListPage() {
         isOpen={!!selectedDesign}
         design={selectedDesign}
         onClose={() => setSelectedDesign(null)}
+        supabase={supabase}
       />
     </div>
   );

@@ -477,6 +477,13 @@ export default function ProductionPage() {
                 ))}
               </div>
               <p className="text-[10px] text-gray-400 mt-3 italic">Estimates based on {orders.length} upcoming order{orders.length !== 1 ? 's' : ''}.</p>
+              <button
+                onClick={() => window.print()}
+                className="mt-4 flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-primary transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Print Shopping List
+              </button>
             </div>
           )}
 

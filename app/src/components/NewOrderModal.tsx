@@ -66,6 +66,26 @@ export function NewOrderModal({ isOpen, onClose, onCreated }: NewOrderModalProps
 
       if (error) throw error;
 
+      // Non-blocking notification to baker about the new order
+      try {
+        const bakerRes = await supabase.from('bakers').select('email').eq('id', user.id).single();
+        if (bakerRes.data?.email) {
+          await fetch('/api/send-quote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              customerEmail: bakerRes.data.email,
+              customerName: 'You',
+              quoteLink: `${window.location.origin}/dashboard/orders`,
+              total: parseFloat(form.totalPrice),
+              designTitle: `New Order: ${form.customerName.trim()}`,
+            }),
+          });
+        }
+      } catch {
+        // Non-critical — don't block the order creation flow
+      }
+
       setForm({
         customerName: '',
         customerEmail: '',

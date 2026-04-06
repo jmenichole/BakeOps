@@ -58,7 +58,7 @@ export async function middleware(request: NextRequest) {
             },
           });
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options as any)
+            response.cookies.set(name, value, options)
           );
         },
       },
@@ -91,24 +91,40 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  // Admin IP Allowlist Check
+  // Admin access: require role=admin AND IP allowlist (deny-by-default)
   if (pathname.startsWith("/admin")) {
-    const allowedIps = (process.env.ALLOWED_ADMIN_IP || "")
-      .split(",")
-      .map((ip) => ip.trim())
-      .filter(Boolean);
-    const clientIp =
-      request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
-      request.headers.get("x-real-ip");
-
-    if (allowedIps.length > 0) {
-      if (!clientIp || !allowedIps.includes(clientIp)) {
-        console.warn(`Blocked unauthorized admin from IP: ${clientIp}`);
+    // Role check — only users with role='admin' in the bakers table may proceed
+    if (user) {
+      const { data: baker } = await supabase
+        .from("bakers")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      if (baker?.role !== "admin") {
         return new NextResponse(
           JSON.stringify({ error: "Access Denied" }),
           { status: 403, headers: { "Content-Type": "application/json" } }
         );
       }
+    }
+
+    // IP Allowlist: deny-by-default when ALLOWED_ADMIN_IP is unset or empty
+    const allowedIps = (process.env.ALLOWED_ADMIN_IP || "")
+      .split(",")
+      .map((ip) => ip.trim())
+      .filter(Boolean);
+    if (allowedIps.length === 0) {
+      console.warn("ALLOWED_ADMIN_IP is not configured — blocking all admin access");
+    }
+    const clientIp =
+      request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+      request.headers.get("x-real-ip");
+    if (allowedIps.length === 0 || !clientIp || !allowedIps.includes(clientIp)) {
+      console.warn(`Blocked unauthorized admin from IP: ${clientIp}`);
+      return new NextResponse(
+        JSON.stringify({ error: "Access Denied" }),
+        { status: 403, headers: { "Content-Type": "application/json" } }
+      );
     }
   }
 

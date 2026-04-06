@@ -13,8 +13,17 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
+interface DeadClickEvent {
+  id: string;
+  element_tag: string | null;
+  page_path: string | null;
+  x_pos: number | null;
+  y_pos: number | null;
+  created_at: string;
+}
+
 export default function AdminBrokenClicks() {
-    const [events, setEvents] = useState<any[]>([]);
+    const [events, setEvents] = useState<DeadClickEvent[]>([]);
     const [loading, setLoading] = useState(true);
     const supabase = createBrowserClient();
 
