@@ -38,8 +38,16 @@ export function OnboardingModal() {
 
   useEffect(() => {
     async function checkOnboarding() {
-      // If already dismissed in localStorage, skip the Supabase check
-      if (onboardingDismissed) {
+      // Check localStorage directly first — the useLocalStorage hook initialises
+      // asynchronously (via its own useEffect), so `onboardingDismissed` may still
+      // be `false` on the first render even if the stored value is `true`.
+      // Reading window.localStorage synchronously here closes that race window.
+      const alreadyDismissedLocally =
+        onboardingDismissed ||
+        (typeof window !== 'undefined' &&
+          window.localStorage.getItem('bb_onboarding_dismissed') === 'true');
+
+      if (alreadyDismissedLocally) {
         setHasSeenOnboarding(true);
         return;
       }

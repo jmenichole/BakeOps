@@ -202,6 +202,34 @@ export default function NewDesignPage() {
       setAccuracyRating(null);
       setFeedbackComment('');
       setFeedbackSubmitted(false);
+
+      // Auto-save a draft so the design is never lost if the user navigates away
+      try {
+        const { data: { user: authedUser } } = await supabase.auth.getUser();
+        if (authedUser) {
+          const storedUrl = await uploadImageToStorage(data.imageUrl, authedUser.id);
+          const { data: draftDesign } = await supabase
+            .from('cake_designs')
+            .insert({
+              baker_id: authedUser.id,
+              title: `${config.productType.toUpperCase()}: ${config.theme.slice(0, 20)}...` || 'Custom Design',
+              description: config.theme,
+              image_url: storedUrl,
+              configuration_data: config,
+              estimated_price: quote.total,
+              is_draft: true,
+              is_public: false,
+            })
+            .select('id')
+            .single();
+          if (draftDesign) {
+            setSavedDesignId(draftDesign.id);
+          }
+        }
+      } catch (autoSaveErr) {
+        // Non-blocking — the user can still save manually
+        console.warn('Auto-save after generation failed:', autoSaveErr);
+      }
     } catch (err: unknown) {
       console.error(err);
       toast.error('AI Generation failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
@@ -334,22 +362,50 @@ export default function NewDesignPage() {
         ? await uploadImageToStorage(currentDesign, user.id)
         : null;
 
-      const { data: design, error: designError } = await supabase
-        .from('cake_designs')
-        .insert({
-          baker_id: user.id,
-          title: `${config.productType.toUpperCase()}: ${config.theme.slice(0, 20)}...` || 'Custom Design',
-          description: config.theme,
-          image_url: imageUrl,
-          configuration_data: config,
-          estimated_price: finalPrice,
-          is_draft: !isFinal,
-          is_public: false
-        })
-        .select()
-        .single();
+      let design: { id: string } | null = null;
+      let designError: { message: string } | null = null;
+
+      if (savedDesignId) {
+        // A draft was already created by the auto-save after generation — update it
+        const { data: updated, error: updateError } = await supabase
+          .from('cake_designs')
+          .update({
+            title: `${config.productType.toUpperCase()}: ${config.theme.slice(0, 20)}...` || 'Custom Design',
+            description: config.theme,
+            image_url: imageUrl,
+            configuration_data: config,
+            estimated_price: finalPrice,
+            is_draft: !isFinal,
+            is_public: false,
+          })
+          .eq('id', savedDesignId)
+          .eq('baker_id', user.id)
+          .select('id')
+          .single();
+        design = updated;
+        designError = updateError;
+      } else {
+        // No auto-saved draft yet — insert a new record
+        const { data: inserted, error: insertError } = await supabase
+          .from('cake_designs')
+          .insert({
+            baker_id: user.id,
+            title: `${config.productType.toUpperCase()}: ${config.theme.slice(0, 20)}...` || 'Custom Design',
+            description: config.theme,
+            image_url: imageUrl,
+            configuration_data: config,
+            estimated_price: finalPrice,
+            is_draft: !isFinal,
+            is_public: false,
+          })
+          .select('id')
+          .single();
+        design = inserted;
+        designError = insertError;
+      }
 
       if (designError) throw designError;
+      if (!design) throw new Error('Design was not saved.');
 
       if (isFinal) {
         // Open the customer details modal to collect name / email before creating the order
