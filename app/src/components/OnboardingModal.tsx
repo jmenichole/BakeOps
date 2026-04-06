@@ -22,10 +22,12 @@ export function OnboardingModal() {
   const [step, setStep] = useState(1);
   const totalSteps = 4;
   const [onboardingDismissed, setOnboardingDismissed] = useLocalStorage<boolean>('bb_onboarding_dismissed', false);
-  // Initialize directly from localStorage to avoid race condition with async Supabase fetch
+  // Initialize directly from localStorage to avoid race condition with async Supabase fetch.
+  // Returns `true` (skip modal) if already dismissed, or `null` (check Supabase) otherwise.
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(() => {
     if (typeof window === 'undefined') return null;
     try {
+      // Only `true` means definitively dismissed — null triggers the Supabase check
       return window.localStorage.getItem('bb_onboarding_dismissed') === 'true' ? true : null;
     } catch {
       return null;

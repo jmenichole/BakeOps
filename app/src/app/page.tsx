@@ -302,7 +302,7 @@ function HeroMockup() {
         <div className="bg-white/5 border border-white/10 rounded-xl p-3 mb-3">
           <div className="text-[8px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Theme / Description</div>
           <div className="text-[11px] text-gray-300 leading-relaxed">
-            3-tier vanilla cake, ocean waves, surfboard topper, hula dancer, gold lettering ✨
+            3-tier vanilla cake, ocean waves, surfboard topper, Hula dancer, gold lettering ✨
           </div>
         </div>
 
