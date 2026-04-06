@@ -12,6 +12,8 @@ const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfa
 export const metadata: Metadata = {
   title: "Bake Ops | AI-Powered Cake Design Platform",
   description: "AI-Powered Cake Quotes & Designs — Turn customer ideas into instant cake mockups, accurate quotes, and auto-bookings.",
+  manifest: "/manifest.json",
+  themeColor: "#f43f8c",
 };
 
 export default function RootLayout({

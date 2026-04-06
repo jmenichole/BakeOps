@@ -15,12 +15,15 @@ const PUBLIC_ROUTES = new Set([
   "/auth/callback",
 ]);
 
-const PUBLIC_DYNAMIC_ROUTES = ["/quote/"];
+const PUBLIC_DYNAMIC_ROUTES = ["/quote/", "/order/"];
 
 const PUBLIC_API_ROUTES = new Set([
   "/api/traction-report",
   "/api/track-referral",
+  "/api/order-action",
 ]);
+
+const PUBLIC_DYNAMIC_API_ROUTES = ["/api/order-tracking/"];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -73,7 +76,8 @@ export async function middleware(request: NextRequest) {
   const isPublic =
     PUBLIC_ROUTES.has(pathname) ||
     PUBLIC_DYNAMIC_ROUTES.some((route) => pathname.startsWith(route)) ||
-    PUBLIC_API_ROUTES.has(pathname);
+    PUBLIC_API_ROUTES.has(pathname) ||
+    PUBLIC_DYNAMIC_API_ROUTES.some((route) => pathname.startsWith(route));
 
   // Redirect unauthenticated users
   if (!user && !isPublic) {

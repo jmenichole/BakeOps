@@ -10,6 +10,7 @@ export function DailySurveyModal() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [hasCompletedToday, setHasCompletedToday] = useState(false);
   const [formData, setFormData] = useState({
     rating: 0,
@@ -78,6 +79,7 @@ export function DailySurveyModal() {
 
   const handleSubmit = async () => {
     setLoading(true);
+    setSubmitError(null);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -101,6 +103,7 @@ export function DailySurveyModal() {
       setSubmitted(true);
     } catch (err) {
       console.error(err);
+      setSubmitError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -232,6 +235,9 @@ export function DailySurveyModal() {
                       {loading ? 'Sending...' : <><Send className="w-5 h-5" /> Submit Feedback</>}
                     </button>
                   </div>
+                  {submitError && (
+                    <p className="text-sm text-red-500 text-center mt-2">{submitError}</p>
+                  )}
                 </div>
               )}
             </>

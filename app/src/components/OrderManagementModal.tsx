@@ -27,6 +27,7 @@ export function OrderManagementModal({ order, isOpen, onClose, onUpdate }: Order
     if (!editedOrder) return;
 
     setLoading(true);
+    const statusChanged = editedOrder.status !== order.status;
     try {
       const { error } = await supabase
         .from('orders')
@@ -42,6 +43,15 @@ export function OrderManagementModal({ order, isOpen, onClose, onUpdate }: Order
         .eq('id', editedOrder.id);
 
       if (error) throw error;
+
+      // Non-blocking status update email to customer
+      if (statusChanged) {
+        fetch('/api/order-status-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: editedOrder.id, event: editedOrder.status }),
+        }).catch((err) => console.error('order-status-email failed:', err));
+      }
 
       setIsEditing(false);
       onUpdate();
