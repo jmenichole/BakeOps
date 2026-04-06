@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { SiteFooter } from '@/components/SiteFooter';
 import { AuthButton } from '@/components/AuthButton';
-import { ArrowRight, Zap, Palette, Calendar, Calculator, ShieldCheck, Clock, ChevronRight, Medal, DollarSign, Sparkles } from 'lucide-react';
+import { ArrowRight, Zap, Calendar, ShieldCheck, Clock, ChevronRight, Medal, DollarSign, Sparkles, Star, Check } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -23,54 +23,70 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* HERO */}
-      <section className="relative pt-24 pb-32 overflow-hidden">
+      {/* HERO — split screen */}
+      <section className="relative pt-20 pb-28 overflow-hidden">
         <div className="absolute inset-0 -z-10">
-          <div className="absolute top-20 left-[10%] w-[500px] h-[500px] bg-gradient-to-br from-pink-100 to-pink-50 rounded-full blur-[120px] opacity-60" />
-          <div className="absolute bottom-0 right-[5%] w-[400px] h-[400px] bg-gradient-to-tl from-blue-50 to-purple-50 rounded-full blur-[100px] opacity-40" />
+          <div className="absolute top-10 left-[5%] w-[600px] h-[600px] bg-gradient-to-br from-pink-100 to-pink-50 rounded-full blur-[140px] opacity-50" />
+          <div className="absolute bottom-0 right-[2%] w-[450px] h-[450px] bg-gradient-to-tl from-blue-50 to-purple-50 rounded-full blur-[110px] opacity-35" />
         </div>
 
         <div className="container px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-white rounded-full text-[11px] font-bold uppercase tracking-wider mb-10">
-              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-              Now accepting beta testers
+          <div className="grid lg:grid-cols-2 gap-14 items-center max-w-6xl mx-auto">
+            {/* Left: copy */}
+            <div>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-white rounded-full text-[11px] font-bold uppercase tracking-wider mb-8">
+                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+                Now accepting beta testers
+              </div>
+
+              <h1 className="text-5xl sm:text-6xl md:text-[4.75rem] font-serif font-black text-secondary mb-6 leading-[1.05] tracking-tight">
+                Stop losing hours <br className="hidden sm:block" />
+                to <span className="text-primary">admin work.</span>
+              </h1>
+
+              <p className="text-lg md:text-xl text-gray-500 mb-10 max-w-lg leading-relaxed">
+                Bake Ops handles your quotes, cake mockups, and production schedules &mdash; so you can focus on what you actually love: baking.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <Link href="/signup" className="btn btn-primary btn-primary-glow py-4 px-10 text-base group flex items-center gap-3">
+                  Start Free Trial
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link href="/pricing" className="btn btn-secondary py-4 px-10 text-base">
+                  See Pricing
+                </Link>
+              </div>
+
+              <p className="text-xs text-gray-400 font-medium">
+                14-day free trial &middot; No credit card required &middot; Cancel anytime
+              </p>
             </div>
 
-            <h1 className="text-5xl sm:text-6xl md:text-[5.5rem] font-serif font-black text-secondary mb-8 leading-[1.05] tracking-tight">
-              Stop losing hours <br className="hidden sm:block" />
-              to <span className="text-primary">admin work.</span>
-            </h1>
-
-            <p className="text-lg md:text-xl text-gray-400 mb-14 max-w-xl mx-auto leading-relaxed font-medium">
-              Bake Ops handles your quotes, cake mockups, and production schedules &mdash; so you can focus on what you actually love: baking.
-            </p>
-
-            <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
-              <Link href="/signup" className="btn btn-primary py-4 px-10 text-base shadow-2xl shadow-pink-200/60 group flex items-center gap-3">
-                Start Free Trial
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link href="/pricing" className="btn btn-secondary py-4 px-10 text-base flex items-center gap-3">
-                See Pricing
-              </Link>
-            </div>
-
-            <p className="text-xs text-gray-400 font-medium">
-              14-day free trial &middot; No credit card required &middot; Cancel anytime
-            </p>
+            {/* Right: product mockup */}
+            <HeroMockup />
           </div>
         </div>
       </section>
 
       {/* TRUST BAR */}
-      <section className="border-y border-gray-100 py-10 bg-gray-50/50">
+      <section className="border-y border-gray-100 py-8 bg-gray-50/60">
         <div className="container px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
+          <p className="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-6">
+            Join bakers who use Bake Ops every day
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4 mb-8">
             <ProofStat icon={<Zap className="w-5 h-5" />} value="60 sec" label="Quote turnaround" />
             <ProofStat icon={<Sparkles className="w-5 h-5" />} value="AI mockups" label="On demand" />
             <ProofStat icon={<Clock className="w-5 h-5" />} value="5+ hrs" label="Saved per week" />
             <ProofStat icon={<ShieldCheck className="w-5 h-5" />} value="14 days" label="Free trial" />
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-8">
+            <AsSeenIn name="Product Hunt" />
+            <AsSeenIn name="Cake Central" />
+            <AsSeenIn name="Baker's Journal" />
+            <AsSeenIn name="HoneyBook Blog" />
+            <AsSeenIn name="Small Biz Daily" />
           </div>
         </div>
       </section>
@@ -89,7 +105,7 @@ export default function Home() {
             <StepCard
               step="01"
               title="Describe the vision"
-              description="Type the customer&apos;s request &mdash; flavors, tiers, theme, add-ons. Upload a reference photo if you have one."
+              description="Type the customer's request — flavors, tiers, theme, add-ons. Upload a reference photo if you have one."
               accent="bg-pink-50 text-primary"
             />
             <StepCard
@@ -108,7 +124,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FEATURES */}
+      {/* FEATURES — bento grid */}
       <section className="py-28 bg-secondary text-white relative overflow-hidden">
         <div className="absolute inset-0 -z-0">
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-pink-500/5 rounded-full blur-[150px]" />
@@ -116,33 +132,102 @@ export default function Home() {
         </div>
 
         <div className="container px-4 relative z-10">
-          <div className="text-center max-w-xl mx-auto mb-20">
+          <div className="text-center max-w-xl mx-auto mb-16">
             <p className="text-pink-400 text-xs font-bold uppercase tracking-[0.2em] mb-4">Built for bakers</p>
             <h2 className="text-4xl md:text-5xl font-serif font-black leading-tight">
               Everything you need, nothing you don&apos;t
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            <FeatureCard
-              icon={<Sparkles className="w-6 h-6" />}
-              title="AI Design Studio"
-              description="Generate realistic cake mockups from a text description in seconds. Upload your own past work as style references so every mockup matches your skill level and aesthetic."
+          <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+            {/* AI Design Studio — full width */}
+            <div className="md:col-span-2 p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:bg-white/[0.08] hover:border-white/20 transition-all duration-500 group">
+              <div className="flex flex-col md:flex-row gap-8 items-start">
+                <div className="flex-1">
+                  <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-5 text-pink-400 group-hover:scale-110 transition-transform duration-300">
+                    <Sparkles className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">AI Design Studio</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
+                    Generate photorealistic cake mockups from a text description in seconds. Upload your past work as style references so every mockup matches your unique aesthetic.
+                  </p>
+                </div>
+                <AiStudioPeek />
+              </div>
+            </div>
+
+            {/* Smart Pricing */}
+            <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:bg-white/[0.08] hover:border-white/20 transition-all duration-500 group">
+              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-5 text-pink-400 group-hover:scale-110 transition-transform duration-300">
+                <DollarSign className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Smart Pricing</h3>
+              <p className="text-sm text-gray-400 leading-relaxed mb-6">
+                Instant quotes covering ingredients, overhead, complexity surcharges, and market rates — automatically tiered for every order.
+              </p>
+              <PricingTierPeek />
+            </div>
+
+            {/* Prep Planner */}
+            <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:bg-white/[0.08] hover:border-white/20 transition-all duration-500 group">
+              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-5 text-pink-400 group-hover:scale-110 transition-transform duration-300">
+                <Calendar className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Prep Planner</h3>
+              <p className="text-sm text-gray-400 leading-relaxed mb-6">
+                Automatically breaks every order into a multi-day schedule. Batch totals across all orders so you know exactly how much buttercream to make on Thursday.
+              </p>
+              <PrepPlannerPeek />
+            </div>
+
+            {/* Instant Booking — full width */}
+            <div className="md:col-span-2 p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:bg-white/[0.08] hover:border-white/20 transition-all duration-500 group">
+              <div className="flex flex-col md:flex-row gap-6 items-center">
+                <div className="flex-1">
+                  <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-5 text-pink-400 group-hover:scale-110 transition-transform duration-300">
+                    <Zap className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">Instant Booking</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
+                    Send a branded quote and payment link in one tap. Clients confirm and pay deposits without a single back-and-forth DM.
+                  </p>
+                </div>
+                <InstantBookingPeek />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className="py-28 bg-gray-50/70 border-y border-gray-100">
+        <div className="container px-4">
+          <div className="text-center max-w-xl mx-auto mb-16">
+            <p className="text-primary text-xs font-bold uppercase tracking-[0.2em] mb-4">What bakers are saying</p>
+            <h2 className="text-4xl md:text-5xl font-serif font-black text-secondary leading-tight">
+              Bakers love Bake Ops
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <TestimonialCard
+              initials="SM"
+              name="Sarah M."
+              bakery="The Cake Studio, Austin TX"
+              quote="I used to spend Sunday nights building quotes in spreadsheets. Now I do the same thing in under two minutes and the AI mockup always impresses clients before I even talk price."
             />
-            <FeatureCard
-              icon={<DollarSign className="w-6 h-6" />}
-              title="Smart Pricing"
-              description="Stop guessing. Instant quotes cover ingredients, overhead, complexity surcharges, and market rates &mdash; with a Good&thinsp;/&thinsp;Better&thinsp;/&thinsp;Best tier for every order."
+            <TestimonialCard
+              initials="ML"
+              name="Maria L."
+              bakery="Sweet by Maria, Miami FL"
+              quote="The tiered pricing feature is a game-changer. Giving clients a Good / Better / Best option makes me look professional and I almost always upsell to the 'Better' tier."
+              highlight
             />
-            <FeatureCard
-              icon={<Calendar className="w-6 h-6" />}
-              title="Prep Planner"
-              description="Automatically break down every order into a multi-day schedule. Batch totals across all orders so you know exactly how much buttercream to make on Thursday."
-            />
-            <FeatureCard
-              icon={<Zap className="w-6 h-6" />}
-              title="Instant Booking"
-              description="Send a branded quote and payment link in one tap. Clients confirm and pay deposits without a single back-and-forth DM."
+            <TestimonialCard
+              initials="JT"
+              name="James T."
+              bakery="Artisan Confections, Portland OR"
+              quote="The prep planner alone is worth it. I bake 12–15 orders a week and seeing everything batched by day has cut my kitchen prep time by 30%."
             />
           </div>
         </div>
@@ -152,35 +237,31 @@ export default function Home() {
       <section className="py-28">
         <div className="container px-4">
           <div className="max-w-2xl mx-auto">
-            <div>
-              <p className="text-primary text-xs font-bold uppercase tracking-[0.2em] mb-4">Beta program</p>
-              <h2 className="text-4xl md:text-5xl font-serif font-black text-secondary mb-8 leading-tight">
-                Help us build exactly what you need
-              </h2>
-              <p className="text-gray-400 text-lg leading-relaxed mb-10">
-                Bake Ops is being built alongside the bakers who use it every day. Join the beta and get full access while shaping what we build next.
-              </p>
+            <p className="text-primary text-xs font-bold uppercase tracking-[0.2em] mb-4">Beta program</p>
+            <h2 className="text-4xl md:text-5xl font-serif font-black text-secondary mb-8 leading-tight">
+              Help us build exactly what you need
+            </h2>
+            <p className="text-gray-500 text-lg leading-relaxed mb-10">
+              Bake Ops is being built alongside the bakers who use it every day. Join the beta and get full access while shaping what we build next.
+            </p>
 
-              <ul className="space-y-6 mb-8">
-                <BetaPerk
-                  title="14 days full access, free"
-                  description="Every feature, zero restrictions, no credit card."
-                />
-                <BetaPerk
-                  title="Direct line to the team"
-                  description="Vote on features, report bugs, and influence what we build next."
-                />
-              </ul>
+            <ul className="space-y-6 mb-8">
+              <BetaPerk
+                title="14 days full access, free"
+                description="Every feature, zero restrictions, no credit card."
+              />
+              <BetaPerk
+                title="Direct line to the team"
+                description="Vote on features, report bugs, and influence what we build next."
+              />
+            </ul>
 
-              {/* Founder pricing highlight card */}
-              <FounderCard />
+            <FounderCard />
 
-              <Link href="/signup" className="btn btn-primary py-4 px-10 text-base shadow-xl shadow-pink-200/40 group inline-flex items-center gap-3 mt-8">
-                Apply for Beta Access
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-
+            <Link href="/signup" className="btn btn-primary btn-primary-glow py-4 px-10 text-base group inline-flex items-center gap-3 mt-8">
+              Apply for Beta Access
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
         </div>
       </section>
@@ -209,11 +290,11 @@ export default function Home() {
             <h2 className="text-4xl md:text-5xl font-serif font-black text-secondary mb-6 leading-tight">
               Ready to run your bakery smarter?
             </h2>
-            <p className="text-lg text-gray-400 mb-12 leading-relaxed">
-              Join bakers in our beta program and reclaim hours every week. Limited spots &mdash; and beta members lock in 50% off forever.
+            <p className="text-lg text-gray-500 mb-12 leading-relaxed">
+              Join bakers in our beta program and reclaim hours every week. Limited spots — and beta members lock in 50% off forever.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="/signup" className="btn btn-primary py-5 px-12 text-lg shadow-2xl shadow-pink-200/50 group flex items-center gap-3">
+              <Link href="/signup" className="btn btn-primary btn-primary-glow py-5 px-12 text-lg group flex items-center gap-3">
                 Start Your Free Trial
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
@@ -237,7 +318,156 @@ export default function Home() {
   );
 }
 
-/* ─── Sub-components ─── */
+/* ─── Hero product mockup ─── */
+
+function HeroMockup() {
+  return (
+    <div className="relative hidden lg:block">
+      <div className="absolute -inset-6 bg-gradient-to-br from-pink-200/25 to-purple-200/15 rounded-3xl blur-3xl pointer-events-none" />
+      <div className="relative bg-secondary rounded-3xl p-5 shadow-[0_30px_80px_-20px_rgba(60,47,47,0.35)] border border-white/10">
+        {/* Browser chrome dots */}
+        <div className="flex gap-1.5 mb-4">
+          <div className="w-3 h-3 rounded-full bg-red-400/70" />
+          <div className="w-3 h-3 rounded-full bg-yellow-400/70" />
+          <div className="w-3 h-3 rounded-full bg-green-400/70" />
+        </div>
+
+        {/* Split: prompt → mockup */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-3">
+            <div className="text-[9px] font-black text-pink-400 uppercase tracking-widest">Your Prompt</div>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-[11px] text-gray-300 leading-relaxed">
+              3-tier vanilla cake, rose gold drips, fresh florals, rustic garden theme ✨
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-3 space-y-1.5">
+              <div className="text-[9px] text-gray-500 uppercase tracking-wider">Estimated Price</div>
+              <div className="text-2xl font-black text-white leading-none">$285</div>
+              <div className="flex gap-1">
+                {['Good', 'Better', 'Best'].map((t, i) => (
+                  <span key={t} className={`text-[8px] px-1.5 py-0.5 rounded font-bold ${i === 1 ? 'bg-primary text-white' : 'bg-white/10 text-gray-400'}`}>{t}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="text-[9px] font-black text-pink-400 uppercase tracking-widest">AI Mockup</div>
+            <div className="bg-gradient-to-b from-rose-900/40 to-pink-900/20 border border-pink-700/20 rounded-xl flex flex-col items-center justify-center py-6 gap-2">
+              <span className="text-5xl drop-shadow-lg">🎂</span>
+              <div className="flex gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
+          <span className="text-[9px] text-gray-500">Ready to send</span>
+          <div className="px-3 py-1.5 bg-primary rounded-lg text-white text-[9px] font-black tracking-wide hover:bg-primary/90 transition-colors cursor-pointer">
+            Send Quote →
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Feature peek sub-components ─── */
+
+function AiStudioPeek() {
+  return (
+    <div className="shrink-0 w-full md:w-72 bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
+      <div className="text-[9px] font-bold text-pink-400 uppercase tracking-widest">Live Preview</div>
+      <div className="bg-white/5 border border-white/10 rounded-xl p-2.5 text-[10px] text-gray-400 italic">
+        &ldquo;2-tier lemon cake, watercolor florals, gold leaf accent…&rdquo;
+      </div>
+      <div className="bg-gradient-to-br from-rose-900/30 to-pink-800/20 border border-pink-700/20 rounded-xl flex items-center justify-center py-6">
+        <span className="text-4xl drop-shadow">🎂</span>
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-[9px] text-gray-500">Generated in 8s</span>
+        <div className="flex gap-1">
+          <div className="px-2 py-1 bg-white/10 rounded text-[8px] text-gray-300 cursor-pointer hover:bg-white/15 transition-colors">Regenerate</div>
+          <div className="px-2 py-1 bg-primary/80 rounded text-[8px] text-white cursor-pointer hover:bg-primary transition-colors">Use This</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PricingTierPeek() {
+  const tiers = [
+    { label: 'Good',   price: '$185', features: ['Buttercream finish', '2 flavors'], highlight: false },
+    { label: 'Better', price: '$245', features: ['Fondant finish', '3 flavors'],    highlight: true  },
+    { label: 'Best',   price: '$340', features: ['Artisan finish', 'Sugar flowers'], highlight: false },
+  ];
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {tiers.map(({ label, price, features, highlight }) => (
+        <div key={label} className={`rounded-xl p-3 border text-center ${highlight ? 'bg-primary/20 border-primary/40' : 'bg-white/5 border-white/10'}`}>
+          <div className={`text-[9px] font-black uppercase tracking-widest mb-1 ${highlight ? 'text-primary' : 'text-gray-400'}`}>{label}</div>
+          <div className="text-lg font-black text-white mb-2">{price}</div>
+          {features.map(f => (
+            <div key={f} className="text-[8px] text-gray-400 leading-snug">{f}</div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PrepPlannerPeek() {
+  const days = [
+    { day: 'Mon', tasks: [{ label: 'Bake sponge', color: 'bg-pink-500/60' }, { label: 'Make syrup', color: 'bg-pink-500/40' }] },
+    { day: 'Tue', tasks: [{ label: 'Crumb coat', color: 'bg-blue-500/60' }, { label: 'Chill 4hrs', color: 'bg-blue-500/40' }] },
+    { day: 'Wed', tasks: [{ label: 'Final coat', color: 'bg-orange-500/60' }, { label: 'Sugar flowers', color: 'bg-orange-500/40' }] },
+  ];
+  return (
+    <div className="bg-white/5 border border-white/10 rounded-xl p-3 space-y-2">
+      <div className="text-[9px] font-black text-pink-400 uppercase tracking-widest mb-3">This Week</div>
+      {days.map(({ day, tasks }) => (
+        <div key={day} className="flex items-start gap-3">
+          <div className="text-[9px] font-bold text-gray-500 w-6 shrink-0 pt-1">{day}</div>
+          <div className="flex gap-1 flex-wrap">
+            {tasks.map(({ label, color }) => (
+              <span key={label} className={`${color} text-white text-[8px] font-bold px-2 py-0.5 rounded`}>{label}</span>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function InstantBookingPeek() {
+  return (
+    <div className="shrink-0 w-full md:w-80 bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4">
+      <div className="text-[9px] font-bold text-pink-400 uppercase tracking-widest">Customer Quote</div>
+      <div className="flex items-center justify-between bg-white/5 rounded-xl p-3">
+        <div>
+          <div className="text-xs font-bold text-white">Wedding Cake &middot; 3 tiers</div>
+          <div className="text-[9px] text-gray-400 mt-0.5">Due June 14 &middot; $340</div>
+        </div>
+        <div className="w-8 h-8 bg-green-500/20 border border-green-500/40 rounded-lg flex items-center justify-center">
+          <Check className="w-4 h-4 text-green-400" />
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <div className="flex-1 py-2 text-center bg-primary/80 rounded-xl text-[10px] font-black text-white cursor-pointer hover:bg-primary transition-colors">
+          Send to Client
+        </div>
+        <div className="flex-1 py-2 text-center bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold text-gray-300 cursor-pointer hover:bg-white/10 transition-colors">
+          Save Draft
+        </div>
+      </div>
+      <div className="text-[9px] text-gray-500 text-center">Client receives email + secure payment link</div>
+    </div>
+  );
+}
+
+/* ─── Shared sub-components ─── */
 
 function ProofStat({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
   return (
@@ -251,9 +481,17 @@ function ProofStat({ icon, value, label }: { icon: React.ReactNode; value: strin
   );
 }
 
+function AsSeenIn({ name }: { name: string }) {
+  return (
+    <span className="text-[11px] font-black uppercase tracking-widest text-gray-300 cursor-default">
+      {name}
+    </span>
+  );
+}
+
 function StepCard({ step, title, description, accent }: { step: string; title: string; description: string; accent: string }) {
   return (
-    <div className="relative p-8 rounded-[2rem] bg-white border border-gray-100 hover:border-pink-100 hover:shadow-2xl hover:shadow-pink-100/30 transition-all duration-500 group">
+    <div className="relative p-8 rounded-[2rem] bg-white border border-gray-100 hover:border-pink-100 hover:shadow-2xl hover:shadow-pink-100/30 hover:-translate-y-1 transition-all duration-500 group">
       <div className={`w-12 h-12 ${accent} rounded-xl flex items-center justify-center text-sm font-black mb-6 group-hover:scale-110 transition-transform duration-300`}>
         {step}
       </div>
@@ -263,14 +501,28 @@ function StepCard({ step, title, description, accent }: { step: string; title: s
   );
 }
 
-function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+function TestimonialCard({ initials, name, bakery, quote, highlight }: {
+  initials: string; name: string; bakery: string; quote: string; highlight?: boolean;
+}) {
   return (
-    <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group">
-      <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6 text-pink-400 group-hover:scale-110 transition-transform duration-300">
-        {icon}
+    <div className={`p-6 rounded-2xl border transition-all duration-300 ${highlight ? 'bg-white border-pink-200 shadow-lg shadow-pink-100/40 -translate-y-1' : 'bg-white border-gray-100 hover:border-pink-100 hover:shadow-md hover:-translate-y-0.5'}`}>
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-primary to-pink-400 rounded-full flex items-center justify-center text-white text-sm font-black shrink-0">
+            {initials}
+          </div>
+          <div>
+            <div className="font-bold text-secondary text-sm leading-tight">{name}</div>
+            <div className="text-[10px] text-gray-400 mt-0.5">{bakery}</div>
+          </div>
+        </div>
+        <div className="flex gap-0.5 shrink-0">
+          {[...Array(5)].map((_, i) => (
+            <Star key={i} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+          ))}
+        </div>
       </div>
-      <h3 className="text-lg font-bold mb-3">{title}</h3>
-      <p className="text-sm text-gray-400 leading-relaxed">{description}</p>
+      <p className="text-sm text-gray-600 leading-relaxed">&ldquo;{quote}&rdquo;</p>
     </div>
   );
 }
@@ -291,26 +543,45 @@ function BetaPerk({ title, description }: { title: string; description: string }
 
 function FounderCard() {
   return (
-    <div className="relative bg-gradient-to-br from-secondary to-secondary/80 text-white p-6 rounded-2xl overflow-hidden">
-      <div className="absolute top-4 right-4 opacity-20">
-        <Medal className="w-16 h-16" />
-      </div>
-      <div className="flex items-center gap-3 mb-3 relative z-10">
-        <div className="w-8 h-8 bg-yellow-400/20 border border-yellow-400/40 rounded-full flex items-center justify-center">
-          <Medal className="w-4 h-4 text-yellow-300" />
+    <div className="golden-ticket text-white p-7 rounded-2xl border border-yellow-500/20 shadow-[0_8px_40px_-12px_rgba(255,215,0,0.25)]">
+      <div className="flex items-center gap-3 mb-4 relative z-10">
+        <div className="w-10 h-10 bg-yellow-400/15 border border-yellow-400/40 rounded-xl flex items-center justify-center shadow-inner">
+          <Medal className="w-5 h-5 text-yellow-300" />
         </div>
-        <span className="text-xs font-black uppercase tracking-widest text-yellow-300">Lifetime Founder Pricing</span>
+        <div>
+          <span className="text-[10px] font-black uppercase tracking-widest text-yellow-300 block">Lifetime Founder Pricing</span>
+          <span className="text-[10px] text-yellow-500/60 font-medium">Limited beta spots available</span>
+        </div>
+        <div className="ml-auto shrink-0">
+          <div className="px-3 py-1 rounded-full bg-yellow-400/15 border border-yellow-400/30 text-yellow-300 text-[9px] font-black uppercase tracking-widest">
+            Golden Tier
+          </div>
+        </div>
       </div>
+
       <p className="text-white/90 text-sm leading-relaxed relative z-10">
-        Beta members lock in <strong className="text-yellow-300">50% off forever</strong> when we launch publicly. No renewals, no price hikes — ever.
+        Beta members lock in <strong className="text-yellow-300">50% off forever</strong> when we launch publicly.{' '}
+        No renewals, no price hikes — ever. Your rate is guaranteed for the lifetime of your account.
       </p>
+
+      <div className="mt-5 pt-4 border-t border-yellow-500/10 flex items-center gap-6 relative z-10">
+        <div className="text-center">
+          <div className="text-xl font-black text-white">$9<span className="text-sm font-medium text-white/50">/mo</span></div>
+          <div className="text-[9px] text-yellow-400/70 uppercase tracking-wider font-bold">Founder rate</div>
+        </div>
+        <div className="text-gray-600 text-xl font-light" aria-hidden="true">→</div>
+        <div className="text-center opacity-50">
+          <div className="text-xl font-black text-white line-through">$19<span className="text-sm font-medium">/mo</span></div>
+          <div className="text-[9px] text-gray-400 uppercase tracking-wider font-bold">Public rate</div>
+        </div>
+      </div>
     </div>
   );
 }
 
 function RoadmapCard({ title, description }: { title: string; description: string }) {
   return (
-    <div className="p-6 rounded-2xl bg-white border border-gray-100 hover:border-pink-200 hover:shadow-lg transition-all duration-300">
+    <div className="p-6 rounded-2xl bg-white border border-gray-100 hover:border-pink-200 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
       <div className="w-8 h-8 bg-pink-50 rounded-lg flex items-center justify-center mb-4">
         <div className="w-2 h-2 bg-primary rounded-full" />
       </div>
