@@ -27,8 +27,9 @@ export interface Order {
     deposit_paid: number;
     delivery_date: string | null;
     notes: string | null;
-    status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+    status: 'pending' | 'confirmed' | 'paid' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
     is_paid?: boolean;
+    tracking_token?: string | null;
     cake_designs?: CakeDesign | null;
 }
 

@@ -53,18 +53,31 @@ export function NewOrderModal({ isOpen, onClose, onCreated }: NewOrderModalProps
         return;
       }
 
-      const { error } = await supabase.from('orders').insert({
-        baker_id: user.id,
-        customer_name: form.customerName.trim(),
-        customer_email: form.customerEmail.trim(),
-        customer_phone: form.customerPhone.trim() || null,
-        total_price: parseFloat(form.totalPrice),
-        delivery_date: form.deliveryDate ? new Date(form.deliveryDate).toISOString() : null,
-        notes: form.notes.trim() || null,
-        status: form.status,
-      });
+      const { data: newOrder, error } = await supabase
+        .from('orders')
+        .insert({
+          baker_id: user.id,
+          customer_name: form.customerName.trim(),
+          customer_email: form.customerEmail.trim(),
+          customer_phone: form.customerPhone.trim() || null,
+          total_price: parseFloat(form.totalPrice),
+          delivery_date: form.deliveryDate ? new Date(form.deliveryDate).toISOString() : null,
+          notes: form.notes.trim() || null,
+          status: form.status,
+        })
+        .select('id, tracking_token')
+        .single();
 
       if (error) throw error;
+
+      // Non-blocking: send order-received email to customer with tracking link
+      if (newOrder?.id) {
+        fetch('/api/order-status-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: newOrder.id, event: 'created' }),
+        }).catch((err) => console.error('order-status-email failed:', err));
+      }
 
       // Non-blocking notification to baker about the new order
       try {
