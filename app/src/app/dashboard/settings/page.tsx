@@ -79,7 +79,7 @@ export default function SettingsPage() {
 
     setUploadingStyle(true);
     try {
-      const ext = file.name.split('.').pop() || 'jpg';
+      const ext = file.type.split('/')[1] || file.name.split('.').pop() || 'jpg';
       const path = `${user.id}/style-images/${Date.now()}.${ext}`;
       const { data, error } = await supabase.storage
         .from('design-images')

@@ -67,8 +67,9 @@ export default function NewDesignPage() {
           .single();
         if (baker?.zip_code) setBakerZip(baker.zip_code);
 
-        // Pre-load the baker's first saved style image so it can be used as a
-        // reference when no per-design images are uploaded.
+        // Pre-load the baker's first saved style image as base64 so it can be used as a
+        // reference when generating. The generate API accepts one reference image at a time,
+        // so only the first style image is used.
         const styleUrls: string[] = baker?.style_reference_images ?? [];
         if (styleUrls.length > 0) {
           try {
@@ -87,7 +88,7 @@ export default function NewDesignPage() {
             });
             setStyleImages([fileData]);
           } catch (err) {
-            console.warn('Could not load style reference images:', err);
+            console.warn('Could not load style reference image:', err);
           }
         }
       }
