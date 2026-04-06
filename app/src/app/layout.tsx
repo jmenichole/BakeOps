@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { Toaster } from "@/components/Toaster";
 import "./globals.css";
@@ -25,6 +26,7 @@ export default function RootLayout({
         <Toaster />
         {children}
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
