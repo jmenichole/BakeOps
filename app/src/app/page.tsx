@@ -73,7 +73,7 @@ export default function Home() {
       <section className="border-y border-gray-100 py-8 bg-gray-50/60">
         <div className="container px-4">
           <p className="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-6">
-            Trusted by 200+ custom bakers across the US
+            Join bakers who use Bake Ops every day
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4 mb-8">
             <ProofStat icon={<Zap className="w-5 h-5" />} value="60 sec" label="Quote turnaround" />
@@ -483,7 +483,7 @@ function ProofStat({ icon, value, label }: { icon: React.ReactNode; value: strin
 
 function AsSeenIn({ name }: { name: string }) {
   return (
-    <span className="text-[11px] font-black uppercase tracking-widest text-gray-300 hover:text-gray-500 transition-colors cursor-default">
+    <span className="text-[11px] font-black uppercase tracking-widest text-gray-300 cursor-default">
       {name}
     </span>
   );
@@ -569,7 +569,7 @@ function FounderCard() {
           <div className="text-xl font-black text-white">$9<span className="text-sm font-medium text-white/50">/mo</span></div>
           <div className="text-[9px] text-yellow-400/70 uppercase tracking-wider font-bold">Founder rate</div>
         </div>
-        <div className="text-gray-600 text-xl font-light">→</div>
+        <div className="text-gray-600 text-xl font-light" aria-hidden="true">→</div>
         <div className="text-center opacity-50">
           <div className="text-xl font-black text-white line-through">$19<span className="text-sm font-medium">/mo</span></div>
           <div className="text-[9px] text-gray-400 uppercase tracking-wider font-bold">Public rate</div>
