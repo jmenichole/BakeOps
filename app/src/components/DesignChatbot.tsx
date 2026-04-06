@@ -63,7 +63,10 @@ export function DesignChatbot({ onPromptReady, onClose }: DesignChatbotProps) {
       const data = await res.json();
 
       if (!res.ok || data.error) {
-        throw new Error(data.error || 'Chat unavailable');
+        const msg = data.error === 'AI service not configured'
+          ? 'Chat is not available right now. Try typing a description directly in the box below.'
+          : data.error || 'Chat unavailable';
+        throw new Error(msg);
       }
 
       const modelMessage: Message = {

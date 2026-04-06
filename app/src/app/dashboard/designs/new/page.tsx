@@ -635,6 +635,38 @@ export default function NewDesignPage() {
                     <MessageSquare className="w-3 h-3" /> Chat to Design
                   </button>
                 </div>
+
+                {/* Prompt tips */}
+                <details className="mb-3 bg-pink-50/60 border border-pink-100 rounded-xl overflow-hidden">
+                  <summary className="flex items-center gap-2 px-3 py-2.5 cursor-pointer text-[10px] font-bold uppercase tracking-widest text-pink-500 select-none list-none">
+                    <Sparkles className="w-3 h-3 shrink-0" />
+                    Tips for better AI results
+                  </summary>
+                  <div className="px-3 pb-3 space-y-2">
+                    <p className="text-[10px] text-gray-500 leading-relaxed">
+                      Be specific! The more detail you include, the more accurate the mockup and quote.
+                    </p>
+                    <div className="space-y-1.5">
+                      {[
+                        '3-tier vanilla cake, ocean waves, surfboard topper, gold lettering',
+                        '2-tier lemon cake, watercolor florals, pastel pink & sage, rustic style',
+                        '1-tier birthday cake, cartoon dinosaur, jungle theme, bright greens',
+                        'Wedding cake, 4 tiers, white fondant, cascading sugar flowers, gold drips',
+                        '12 cupcakes, unicorn theme, rainbow swirl frosting, edible glitter',
+                      ].map((ex, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setConfig(prev => ({ ...prev, theme: ex }))}
+                          className="w-full text-left text-[10px] bg-white border border-pink-100 rounded-lg px-2.5 py-1.5 text-gray-600 hover:border-primary hover:text-primary transition-all leading-snug"
+                        >
+                          &ldquo;{ex}&rdquo;
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </details>
+
                 {showChatbot && (
                   <div className="mb-3">
                     <DesignChatbot

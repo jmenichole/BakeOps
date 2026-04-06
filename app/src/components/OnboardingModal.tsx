@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   X,
   Sparkles,
@@ -22,13 +22,21 @@ export function OnboardingModal() {
   const [step, setStep] = useState(1);
   const totalSteps = 4;
   const [onboardingDismissed, setOnboardingDismissed] = useLocalStorage<boolean>('bb_onboarding_dismissed', false);
-  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
+  // Initialize directly from localStorage to avoid race condition with async Supabase fetch
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      return window.localStorage.getItem('bb_onboarding_dismissed') === 'true' ? true : null;
+    } catch {
+      return null;
+    }
+  });
   const [isUpdating, setIsUpdating] = useState(false);
-  const supabase = createBrowserClient();
+  const supabase = useMemo(() => createBrowserClient(), []);
 
   useEffect(() => {
     async function checkOnboarding() {
-      // First check local storage for immediate dismissal
+      // If already dismissed in localStorage, skip the Supabase check
       if (onboardingDismissed) {
         setHasSeenOnboarding(true);
         return;
