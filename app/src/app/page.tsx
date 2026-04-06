@@ -33,7 +33,7 @@ export default function Home() {
         <div className="container px-4">
           <div className="grid lg:grid-cols-2 gap-14 items-center max-w-6xl mx-auto">
             {/* Left: copy */}
-            <div>
+            <div className="text-center lg:text-left">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-secondary text-white rounded-full text-[11px] font-bold uppercase tracking-wider mb-8">
                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
                 Now accepting beta testers
@@ -44,12 +44,12 @@ export default function Home() {
                 to <span className="text-primary">admin work.</span>
               </h1>
 
-              <p className="text-lg md:text-xl text-gray-500 mb-10 max-w-lg leading-relaxed">
+              <p className="text-lg md:text-xl text-gray-500 mb-10 max-w-lg leading-relaxed mx-auto lg:mx-0">
                 Bake Ops handles your quotes, cake mockups, and production schedules &mdash; so you can focus on what you actually love: baking.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <Link href="/signup" className="btn btn-primary btn-primary-glow py-4 px-10 text-base group flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-center lg:justify-start">
+                <Link href="/signup" className="btn btn-primary btn-primary-glow py-4 px-10 text-base group flex items-center justify-center gap-3">
                   Start Free Trial
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
@@ -199,40 +199,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="py-28 bg-gray-50/70 border-y border-gray-100">
-        <div className="container px-4">
-          <div className="text-center max-w-xl mx-auto mb-16">
-            <p className="text-primary text-xs font-bold uppercase tracking-[0.2em] mb-4">What bakers are saying</p>
-            <h2 className="text-4xl md:text-5xl font-serif font-black text-secondary leading-tight">
-              Bakers love Bake Ops
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            <TestimonialCard
-              initials="SM"
-              name="Sarah M."
-              bakery="The Cake Studio, Austin TX"
-              quote="I used to spend Sunday nights building quotes in spreadsheets. Now I do the same thing in under two minutes and the AI mockup always impresses clients before I even talk price."
-            />
-            <TestimonialCard
-              initials="ML"
-              name="Maria L."
-              bakery="Sweet by Maria, Miami FL"
-              quote="The tiered pricing feature is a game-changer. Giving clients a Good / Better / Best option makes me look professional and I almost always upsell to the 'Better' tier."
-              highlight
-            />
-            <TestimonialCard
-              initials="JT"
-              name="James T."
-              bakery="Artisan Confections, Portland OR"
-              quote="The prep planner alone is worth it. I bake 12–15 orders a week and seeing everything batched by day has cut my kitchen prep time by 30%."
-            />
-          </div>
-        </div>
-      </section>
-
       {/* BETA PROGRAM */}
       <section className="py-28">
         <div className="container px-4">
@@ -322,7 +288,7 @@ export default function Home() {
 
 function HeroMockup() {
   return (
-    <div className="relative hidden lg:block">
+    <div className="relative">
       <div className="absolute -inset-6 bg-gradient-to-br from-pink-200/25 to-purple-200/15 rounded-3xl blur-3xl pointer-events-none" />
       <div className="relative bg-secondary rounded-3xl p-5 shadow-[0_30px_80px_-20px_rgba(60,47,47,0.35)] border border-white/10">
         {/* Browser chrome dots */}
@@ -332,42 +298,59 @@ function HeroMockup() {
           <div className="w-3 h-3 rounded-full bg-green-400/70" />
         </div>
 
-        {/* Split: prompt → mockup */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-3">
-            <div className="text-[9px] font-black text-pink-400 uppercase tracking-widest">Your Prompt</div>
-            <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-[11px] text-gray-300 leading-relaxed">
-              3-tier vanilla cake, rose gold drips, fresh florals, rustic garden theme ✨
-            </div>
-            <div className="bg-white/5 border border-white/10 rounded-xl p-3 space-y-1.5">
-              <div className="text-[9px] text-gray-500 uppercase tracking-wider">Estimated Price</div>
-              <div className="text-2xl font-black text-white leading-none">$285</div>
-              <div className="flex gap-1">
-                {['Good', 'Better', 'Best'].map((t, i) => (
-                  <span key={t} className={`text-[8px] px-1.5 py-0.5 rounded font-bold ${i === 1 ? 'bg-primary text-white' : 'bg-white/10 text-gray-400'}`}>{t}</span>
-                ))}
-              </div>
-            </div>
+        {/* Top: prompt input */}
+        <div className="bg-white/5 border border-white/10 rounded-xl p-3 mb-3">
+          <div className="text-[8px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Theme / Description</div>
+          <div className="text-[11px] text-gray-300 leading-relaxed">
+            3-tier vanilla cake, ocean waves, surfboard topper, Hula dancer, gold lettering ✨
           </div>
+        </div>
 
-          <div className="space-y-3">
+        {/* Split: mockup preview + quote */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Left: AI mockup card */}
+          <div className="space-y-2">
             <div className="text-[9px] font-black text-pink-400 uppercase tracking-widest">AI Mockup</div>
-            <div className="bg-gradient-to-b from-rose-900/40 to-pink-900/20 border border-pink-700/20 rounded-xl flex flex-col items-center justify-center py-6 gap-2">
-              <span className="text-5xl drop-shadow-lg">🎂</span>
-              <div className="flex gap-0.5">
+            <div className="bg-gradient-to-b from-sky-900/40 to-teal-900/20 border border-sky-700/20 rounded-xl flex flex-col items-center justify-center py-5 gap-1.5 relative overflow-hidden">
+              {/* Decorative cake tiers */}
+              <div className="flex flex-col items-center gap-0.5">
+                <div className="w-8 h-3 bg-white/20 rounded-full border border-white/10" />
+                <div className="w-12 h-3.5 bg-white/25 rounded-full border border-white/10" />
+                <div className="w-16 h-4 bg-white/30 rounded-full border border-white/10" />
+              </div>
+              <div className="flex gap-0.5 mt-1">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />
                 ))}
               </div>
+              <div className="absolute top-1.5 right-1.5 bg-primary/80 rounded px-1.5 py-0.5 text-[7px] font-bold text-white">AI</div>
+            </div>
+            <div className="text-[8px] text-gray-500 text-center">Generated in ~8s</div>
+          </div>
+
+          {/* Right: quote */}
+          <div className="space-y-2">
+            <div className="text-[9px] font-black text-pink-400 uppercase tracking-widest">Final Quote</div>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-3 space-y-2">
+              <div>
+                <div className="text-[8px] text-gray-500 uppercase tracking-wider">AI Suggested</div>
+                <div className="text-2xl font-black text-white leading-none mt-0.5">$95</div>
+              </div>
+              <div className="flex gap-1">
+                {(['Good', 'Better', 'Best'] as const).map((t, i) => (
+                  <span key={t} className={`text-[7px] px-1.5 py-0.5 rounded font-bold leading-none ${i === 1 ? 'bg-primary text-white' : 'bg-white/10 text-gray-400'}`}>{t}</span>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-1">
+              <div className="flex-1 py-1.5 text-center bg-white/5 border border-white/10 rounded-lg text-[8px] font-bold text-gray-300">Draft</div>
+              <div className="flex-1 py-1.5 text-center bg-primary/80 rounded-lg text-[8px] font-black text-white">Send →</div>
             </div>
           </div>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
-          <span className="text-[9px] text-gray-500">Ready to send</span>
-          <div className="px-3 py-1.5 bg-primary rounded-lg text-white text-[9px] font-black tracking-wide hover:bg-primary/90 transition-colors cursor-pointer">
-            Send Quote →
-          </div>
+        <div className="mt-3 pt-3 border-t border-white/5 text-[8px] text-gray-500 text-center">
+          Powered by AI · Adjusts to your local market & supply costs
         </div>
       </div>
     </div>
@@ -399,9 +382,9 @@ function AiStudioPeek() {
 
 function PricingTierPeek() {
   const tiers = [
-    { label: 'Good',   price: '$185', features: ['Buttercream finish', '2 flavors'], highlight: false },
-    { label: 'Better', price: '$245', features: ['Fondant finish', '3 flavors'],    highlight: true  },
-    { label: 'Best',   price: '$340', features: ['Artisan finish', 'Sugar flowers'], highlight: false },
+    { label: 'Good',   price: '$65',  features: ['Buttercream finish', '2 flavors'], highlight: false },
+    { label: 'Better', price: '$85',  features: ['Fondant finish', '3 flavors'],    highlight: true  },
+    { label: 'Best',   price: '$125', features: ['Artisan finish', 'Sugar flowers'], highlight: false },
   ];
   return (
     <div className="grid grid-cols-3 gap-2">
@@ -497,32 +480,6 @@ function StepCard({ step, title, description, accent }: { step: string; title: s
       </div>
       <h3 className="text-xl font-bold text-secondary mb-3">{title}</h3>
       <p className="text-sm text-gray-400 leading-relaxed">{description}</p>
-    </div>
-  );
-}
-
-function TestimonialCard({ initials, name, bakery, quote, highlight }: {
-  initials: string; name: string; bakery: string; quote: string; highlight?: boolean;
-}) {
-  return (
-    <div className={`p-6 rounded-2xl border transition-all duration-300 ${highlight ? 'bg-white border-pink-200 shadow-lg shadow-pink-100/40 -translate-y-1' : 'bg-white border-gray-100 hover:border-pink-100 hover:shadow-md hover:-translate-y-0.5'}`}>
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary to-pink-400 rounded-full flex items-center justify-center text-white text-sm font-black shrink-0">
-            {initials}
-          </div>
-          <div>
-            <div className="font-bold text-secondary text-sm leading-tight">{name}</div>
-            <div className="text-[10px] text-gray-400 mt-0.5">{bakery}</div>
-          </div>
-        </div>
-        <div className="flex gap-0.5 shrink-0">
-          {[...Array(5)].map((_, i) => (
-            <Star key={i} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-          ))}
-        </div>
-      </div>
-      <p className="text-sm text-gray-600 leading-relaxed">&ldquo;{quote}&rdquo;</p>
     </div>
   );
 }
